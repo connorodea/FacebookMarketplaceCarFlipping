@@ -1,0 +1,6 @@
+Deal_Ratio,Condition,Deal_Quality,Listing_Price,Year,Make,Model,Mileage,Location,Facebook_URL
+0.882,Fair,Fair,15000,2015,Honda,Civic,85000,"Atlanta, GA",https://facebook.com/marketplace/item/sample1
+0.882,Poor,Fair,8500,2012,Toyota,Camry,120000,"Decatur, GA",https://facebook.com/marketplace/item/sample2
+0.84,Good,Fair,22000,2018,Ford,F-150,45000,"Sandy Springs, GA",https://facebook.com/marketplace/item/sample3
+0.84,Fair,Fair,12000,2014,Chevrolet,Malibu,95000,"Marietta, GA",https://facebook.com/marketplace/item/sample4
+0.84,Fair,Fair,18500,2016,Nissan,Altima,65000,"Roswell, GA",https://facebook.com/marketplace/item/sample5

@@ -1,0 +1,9 @@
+Deal_Ratio,Condition,Deal_Quality,Listing_Price,Year,Make,Model,Mileage,Location,Facebook_URL,Market_Prices
+0.826,Excellent,Poor,21500,2018,Ford,Fusion,45000,"Roswell, GA",https://facebook.com/marketplace/item/sample5,"$15351,$17698,$20227"
+0.79,Good,Poor,14500,2015,Honda,Civic,78000,"Atlanta, GA",https://facebook.com/marketplace/item/sample1,"$10767,$12413,$14187"
+0.79,Good,Poor,17200,2016,Mazda,Mazda3,68000,"Dunwoody, GA",https://facebook.com/marketplace/item/sample7,"$12772,$14725,$16829"
+0.76,Good,Poor,19800,2017,Nissan,Altima,62000,"Sandy Springs, GA",https://facebook.com/marketplace/item/sample3,"$14137,$16299,$18627"
+0.73,Fair,Poor,9200,2012,Toyota,Corolla,112000,"Decatur, GA",https://facebook.com/marketplace/item/sample2,"$6831,$7876,$9001"
+0.702,Fair,Poor,13200,2014,Chevrolet,Malibu,89000,"Marietta, GA",https://facebook.com/marketplace/item/sample4,"$9424,$10866,$12418"
+0.702,Fair,Poor,10800,2013,Hyundai,Elantra,95000,"Alpharetta, GA",https://facebook.com/marketplace/item/sample6,"$7711,$8890,$10160"
+0.702,Fair,Poor,12900,2014,Kia,Optima,82000,"Brookhaven, GA",https://facebook.com/marketplace/item/sample8,"$9210,$10619,$12136"

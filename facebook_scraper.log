@@ -1,0 +1,650 @@
+2025-10-26 12:11:05,606 - INFO - 🔍 Verbose logging enabled
+2025-10-26 12:11:05,607 - INFO - 🚀 Starting Facebook Marketplace Car Scraper...
+2025-10-26 12:11:05,607 - INFO - 📁 Reading preferences from: Preferences.csv
+2025-10-26 12:11:05,608 - INFO -   Line 1: Minimum Mileage = 0 (int)
+2025-10-26 12:11:05,608 - INFO -   Line 2: Maximum Mileage = 200000 (int)
+2025-10-26 12:11:05,608 - INFO -   Line 3: Minimum Price = 250 (int)
+2025-10-26 12:11:05,608 - INFO -   Line 4: Maximum Price = 55000 (int)
+2025-10-26 12:11:05,608 - INFO -   Line 5: Minimum Year = 1995 (int)
+2025-10-26 12:11:05,608 - INFO -   Line 6: Maximum Year = 2020 (int)
+2025-10-26 12:11:05,608 - INFO -   Line 7: Scroll Down Length = 10 (int)
+2025-10-26 12:11:05,609 - INFO - ✓ Successfully loaded 7 preferences
+2025-10-26 12:11:05,609 - INFO - 🔗 Building Facebook URL for location: atlanta
+2025-10-26 12:11:05,609 - INFO -   Added parameter: minPrice=250
+2025-10-26 12:11:05,609 - INFO -   Added parameter: maxPrice=55000
+2025-10-26 12:11:05,609 - INFO -   Added parameter: minMileage=0
+2025-10-26 12:11:05,609 - INFO -   Added parameter: maxMileage=200000
+2025-10-26 12:11:05,609 - INFO -   Added parameter: minYear=1995
+2025-10-26 12:11:05,609 - INFO -   Added parameter: maxYear=2020
+2025-10-26 12:11:05,609 - INFO - ✓ Built URL: https://www.facebook.com/marketplace/atlanta/vehicles?minPrice=250&maxPrice=55000&minMileage=0&maxMileage=200000&minYear=1995&maxYear=2020&exact=false
+2025-10-26 12:11:05,609 - INFO - 🕰️ Starting Facebook scraping process...
+2025-10-26 12:11:05,610 - INFO - 🔍 Attempting to scrape: https://www.facebook.com/marketplace/atlanta/vehicles?minPrice=250&maxPrice=55000&minMileage=0&maxMileage=200000&minYear=1995&maxYear=2020&exact=false
+2025-10-26 12:11:05,610 - INFO - 📊 Scroll count: 10
+2025-10-26 12:11:05,610 - INFO - 🚀 Launching browser...
+2025-10-26 12:11:09,692 - INFO - ✓ Playwright started
+2025-10-26 12:11:10,252 - INFO - ✓ Browser launched
+2025-10-26 12:11:10,270 - INFO - ✓ Browser context created
+2025-10-26 12:11:10,650 - INFO - ✓ Page created and ready
+2025-10-26 12:11:10,650 - INFO - 🌐 Loading Facebook Marketplace...
+2025-10-26 12:11:10,650 - INFO - 📱 Navigating to: https://www.facebook.com/marketplace/atlanta/vehicles?minPrice=250&maxPrice=5500...
+2025-10-26 12:11:13,113 - INFO - 📡 Response status: 200
+2025-10-26 12:11:13,115 - INFO - ✓ Page loaded successfully
+2025-10-26 12:11:13,115 - INFO - ⏳ Waiting for page to stabilize...
+2025-10-26 12:11:15,118 - INFO - 🔐 Checking for login requirements...
+2025-10-26 12:11:15,119 - WARNING - ⚠ Could not check page text: Page.inner_text() missing 1 required positional argument: 'selector'
+2025-10-26 12:11:15,119 - INFO - Continuing with scraping attempt...
+2025-10-26 12:11:15,119 - INFO - 🚗 Looking for car listings...
+2025-10-26 12:11:15,120 - INFO - 🔍 Trying selector 1/5: a[href*='/marketplace/item/']
+2025-10-26 12:11:19,943 - INFO - ✓ Found 24 links with selector: a[href*='/marketplace/item/']
+2025-10-26 12:11:19,943 - INFO - 📝 Taking first 20 links for processing
+2025-10-26 12:11:19,943 - INFO - 📝 Extracting car data from 20 links...
+2025-10-26 12:11:19,944 - INFO - 🔗 Processing link 1/20
+2025-10-26 12:11:22,714 - INFO -   📄 Text: $800
+1999 Toyota camry
+Decatur, GA
+231K miles...
+2025-10-26 12:11:22,714 - INFO -   🔗 Href: /marketplace/item/2227694814401677/?ref=category_feed&referral_code=undefined&referral_story_type=listing&tracking=%7B%22qid%22%3A%22-8077694179745683774%22%2C%22mf_story_key%22%3A%2231832123896402499%22%2C%22commerce_rank_obj%22%3A%22%7B%5C%22target_id%5C%22%3A31832123896402499%2C%5C%22target_type%5C%22%3A0%2C%5C%22primary_position%5C%22%3A8%2C%5C%22ranking_signature%5C%22%3A6924044595105555005%2C%5C%22ranking_request_id%5C%22%3A7657003630755251597%2C%5C%22commerce_channel%5C%22%3A504%2C%5C%22value%5C%22%3A0.0017482960633144%2C%5C%22candidate_retrieval_source_map%5C%22%3A%7B%5C%2231832123896402499%5C%22%3A111%7D%7D%22%7D&__tn__=!%3AD
+2025-10-26 12:11:22,715 - INFO -   ✓ Extracted: 1999 Toyota Camry - $800
+2025-10-26 12:11:22,715 - INFO - 🔗 Processing link 2/20
+2025-10-26 12:11:22,980 - INFO -   📄 Text: $20,000
+$22,000
+2014 GMC sierra 1500 crew cab SLT Pickup 4D 5 3/4 ft
+Temple, GA
+121K miles...
+2025-10-26 12:11:22,980 - INFO -   🔗 Href: /marketplace/item/1380326830298341/?ref=category_feed&referral_code=undefined&referral_story_type=listing&tracking=%7B%22qid%22%3A%22-8077694179745683774%22%2C%22mf_story_key%22%3A%2225051671191119531%22%2C%22commerce_rank_obj%22%3A%22%7B%5C%22target_id%5C%22%3A25051671191119531%2C%5C%22target_type%5C%22%3A0%2C%5C%22primary_position%5C%22%3A11%2C%5C%22ranking_signature%5C%22%3A6924044595105555005%2C%5C%22ranking_request_id%5C%22%3A7657003630755251597%2C%5C%22commerce_channel%5C%22%3A504%2C%5C%22value%5C%22%3A0.0017482930633144%2C%5C%22candidate_retrieval_source_map%5C%22%3A%7B%5C%2225051671191119531%5C%22%3A111%7D%7D%22%7D&__tn__=!%3AD
+2025-10-26 12:11:22,980 - INFO -   ❌ Could not parse car data from text
+2025-10-26 12:11:22,981 - INFO - 🔗 Processing link 3/20
+2025-10-26 12:11:23,143 - INFO -   📄 Text: $11,500
+2016 Ford transit connect cargo XLT
+Temple, GA
+131K miles...
+2025-10-26 12:11:23,144 - INFO -   🔗 Href: /marketplace/item/1121019866621627/?ref=category_feed&referral_code=undefined&referral_story_type=listing&tracking=%7B%22qid%22%3A%22-8077694179745683774%22%2C%22mf_story_key%22%3A%2225361529110115743%22%2C%22commerce_rank_obj%22%3A%22%7B%5C%22target_id%5C%22%3A25361529110115743%2C%5C%22target_type%5C%22%3A0%2C%5C%22primary_position%5C%22%3A12%2C%5C%22ranking_signature%5C%22%3A6924044595105555005%2C%5C%22ranking_request_id%5C%22%3A7657003630755251597%2C%5C%22commerce_channel%5C%22%3A504%2C%5C%22value%5C%22%3A0.0017482920633144%2C%5C%22candidate_retrieval_source_map%5C%22%3A%7B%5C%2225361529110115743%5C%22%3A111%7D%7D%22%7D&__tn__=!%3AD
+2025-10-26 12:11:23,144 - INFO -   ✓ Extracted: 2016 Ford Transit - $11500
+2025-10-26 12:11:23,146 - INFO - 🔗 Processing link 4/20
+2025-10-26 12:11:23,173 - INFO -   📄 Text: $7,000
+1999 Ford coachman 450
+Temple, GA...
+2025-10-26 12:11:23,173 - INFO -   🔗 Href: /marketplace/item/1143719997191292/?ref=category_feed&referral_code=undefined&referral_story_type=listing&tracking=%7B%22qid%22%3A%22-8077694179745683774%22%2C%22mf_story_key%22%3A%2224645662438438639%22%2C%22commerce_rank_obj%22%3A%22%7B%5C%22target_id%5C%22%3A24645662438438639%2C%5C%22target_type%5C%22%3A0%2C%5C%22primary_position%5C%22%3A13%2C%5C%22ranking_signature%5C%22%3A6924044595105555005%2C%5C%22ranking_request_id%5C%22%3A7657003630755251597%2C%5C%22commerce_channel%5C%22%3A504%2C%5C%22value%5C%22%3A0.0017482910633144%2C%5C%22candidate_retrieval_source_map%5C%22%3A%7B%5C%2224645662438438639%5C%22%3A111%7D%7D%22%7D&__tn__=!%3AD
+2025-10-26 12:11:23,173 - INFO -   ✓ Extracted: 1999 Ford Coachman - $7000
+2025-10-26 12:11:23,174 - INFO - 🔗 Processing link 5/20
+2025-10-26 12:11:23,199 - INFO -   📄 Text: $8,000
+2009 Ford e250 super duty cargo
+Decatur, GA
+15K miles...
+2025-10-26 12:11:23,199 - INFO -   🔗 Href: /marketplace/item/1355585379527970/?ref=category_feed&referral_code=undefined&referral_story_type=listing&tracking=%7B%22qid%22%3A%22-8077694179745683774%22%2C%22mf_story_key%22%3A%2232759957263603584%22%2C%22commerce_rank_obj%22%3A%22%7B%5C%22target_id%5C%22%3A32759957263603584%2C%5C%22target_type%5C%22%3A0%2C%5C%22primary_position%5C%22%3A14%2C%5C%22ranking_signature%5C%22%3A6924044595105555005%2C%5C%22ranking_request_id%5C%22%3A7657003630755251597%2C%5C%22commerce_channel%5C%22%3A504%2C%5C%22value%5C%22%3A0.0017482900633144%2C%5C%22candidate_retrieval_source_map%5C%22%3A%7B%5C%2232759957263603584%5C%22%3A111%7D%7D%22%7D&__tn__=!%3AD
+2025-10-26 12:11:23,199 - INFO -   ✓ Extracted: 2009 Ford E250 - $8000
+2025-10-26 12:11:23,199 - INFO - 🔗 Processing link 6/20
+2025-10-26 12:11:23,219 - INFO -   📄 Text: $3,500
+2004 Jeep cherokee
+Lithonia, GA
+218K miles...
+2025-10-26 12:11:23,219 - INFO -   🔗 Href: /marketplace/item/672206898905833/?ref=category_feed&referral_code=undefined&referral_story_type=listing&tracking=%7B%22qid%22%3A%22-8077694179745683774%22%2C%22mf_story_key%22%3A%2224706947028954275%22%2C%22commerce_rank_obj%22%3A%22%7B%5C%22target_id%5C%22%3A24706947028954275%2C%5C%22target_type%5C%22%3A0%2C%5C%22primary_position%5C%22%3A16%2C%5C%22ranking_signature%5C%22%3A6924044595105555005%2C%5C%22ranking_request_id%5C%22%3A7657003630755251597%2C%5C%22commerce_channel%5C%22%3A504%2C%5C%22value%5C%22%3A0.0017482880633144%2C%5C%22candidate_retrieval_source_map%5C%22%3A%7B%5C%2224706947028954275%5C%22%3A111%7D%7D%22%7D&__tn__=!%3AD
+2025-10-26 12:11:23,220 - INFO -   ❌ Could not parse car data from text
+2025-10-26 12:11:23,220 - INFO - 🔗 Processing link 7/20
+2025-10-26 12:11:23,243 - INFO -   📄 Text: $5,000
+2017 Harley-Davidson sportster 1200
+Temple, GA
+2.1K miles...
+2025-10-26 12:11:23,243 - INFO -   🔗 Href: /marketplace/item/1318862286129976/?ref=category_feed&referral_code=undefined&referral_story_type=listing&tracking=%7B%22qid%22%3A%22-8077694179745683774%22%2C%22mf_story_key%22%3A%2224667586706277641%22%2C%22commerce_rank_obj%22%3A%22%7B%5C%22target_id%5C%22%3A24667586706277641%2C%5C%22target_type%5C%22%3A0%2C%5C%22primary_position%5C%22%3A19%2C%5C%22ranking_signature%5C%22%3A6924044595105555005%2C%5C%22ranking_request_id%5C%22%3A7657003630755251597%2C%5C%22commerce_channel%5C%22%3A504%2C%5C%22value%5C%22%3A0.0016618942004236%2C%5C%22candidate_retrieval_source_map%5C%22%3A%7B%5C%2224667586706277641%5C%22%3A111%7D%7D%22%7D&__tn__=!%3AD
+2025-10-26 12:11:23,243 - INFO -   ❌ Could not parse car data from text
+2025-10-26 12:11:23,243 - INFO - 🔗 Processing link 8/20
+2025-10-26 12:11:23,352 - INFO -   📄 Text: $1,600
+2008 Kawasaki kfx 400
+Brooks, GA...
+2025-10-26 12:11:23,352 - INFO -   🔗 Href: /marketplace/item/3340108869497775/?ref=category_feed&referral_code=undefined&referral_story_type=listing&tracking=%7B%22qid%22%3A%22-8077694179745683774%22%2C%22mf_story_key%22%3A%2224985697231060873%22%2C%22commerce_rank_obj%22%3A%22%7B%5C%22target_id%5C%22%3A24985697231060873%2C%5C%22target_type%5C%22%3A0%2C%5C%22primary_position%5C%22%3A20%2C%5C%22ranking_signature%5C%22%3A6924044595105555005%2C%5C%22ranking_request_id%5C%22%3A7657003630755251597%2C%5C%22commerce_channel%5C%22%3A504%2C%5C%22value%5C%22%3A0.0016541179309497%2C%5C%22candidate_retrieval_source_map%5C%22%3A%7B%5C%2224985697231060873%5C%22%3A111%7D%7D%22%7D&__tn__=!%3AD
+2025-10-26 12:11:23,353 - INFO -   ❌ Could not parse car data from text
+2025-10-26 12:11:23,353 - INFO - 🔗 Processing link 9/20
+2025-10-26 12:11:23,491 - INFO -   📄 Text: $16,500
+2015 Chevrolet 1500 extended cab Long Bed
+Buford, GA
+192K miles...
+2025-10-26 12:11:23,492 - INFO -   🔗 Href: /marketplace/item/4278387532398332/?ref=category_feed&referral_code=undefined&referral_story_type=listing&tracking=%7B%22qid%22%3A%22-8077694179745683774%22%2C%22mf_story_key%22%3A%2225668846279385193%22%2C%22commerce_rank_obj%22%3A%22%7B%5C%22target_id%5C%22%3A25668846279385193%2C%5C%22target_type%5C%22%3A0%2C%5C%22primary_position%5C%22%3A21%2C%5C%22ranking_signature%5C%22%3A6924044595105555005%2C%5C%22ranking_request_id%5C%22%3A7657003630755251597%2C%5C%22commerce_channel%5C%22%3A504%2C%5C%22value%5C%22%3A0.0016354340389385%2C%5C%22candidate_retrieval_source_map%5C%22%3A%7B%5C%2225668846279385193%5C%22%3A111%7D%7D%22%7D&__tn__=!%3AD
+2025-10-26 12:11:23,492 - INFO -   ✓ Extracted: 2015 Chevrolet 1500 - $16500
+2025-10-26 12:11:23,494 - INFO - 🔗 Processing link 10/20
+2025-10-26 12:11:23,696 - INFO -   📄 Text: $5,500
+2013 Honda cr-v
+Decatur, GA
+200K miles...
+2025-10-26 12:11:23,697 - INFO -   🔗 Href: /marketplace/item/615706774870253/?ref=category_feed&referral_code=undefined&referral_story_type=listing&tracking=%7B%22qid%22%3A%22-8077694179745683774%22%2C%22mf_story_key%22%3A%2225098280879767978%22%2C%22commerce_rank_obj%22%3A%22%7B%5C%22target_id%5C%22%3A25098280879767978%2C%5C%22target_type%5C%22%3A0%2C%5C%22primary_position%5C%22%3A23%2C%5C%22ranking_signature%5C%22%3A6924044595105555005%2C%5C%22ranking_request_id%5C%22%3A7657003630755251597%2C%5C%22commerce_channel%5C%22%3A504%2C%5C%22value%5C%22%3A0.0016071356861507%2C%5C%22candidate_retrieval_source_map%5C%22%3A%7B%5C%2225098280879767978%5C%22%3A111%7D%7D%22%7D&__tn__=!%3AD
+2025-10-26 12:11:23,697 - INFO -   ✓ Extracted: 2013 Honda Cr-V - $5500
+2025-10-26 12:11:23,698 - INFO - 🔗 Processing link 11/20
+2025-10-26 12:11:23,734 - INFO -   📄 Text: $2,500
+1998 Ford mustang GT Coupe 2D
+Temple, GA
+84K miles...
+2025-10-26 12:11:23,734 - INFO -   🔗 Href: /marketplace/item/1459357188697225/?ref=category_feed&referral_code=undefined&referral_story_type=listing&tracking=%7B%22qid%22%3A%22-8077694179745683774%22%2C%22mf_story_key%22%3A%2225255727914064498%22%2C%22commerce_rank_obj%22%3A%22%7B%5C%22target_id%5C%22%3A25255727914064498%2C%5C%22target_type%5C%22%3A0%2C%5C%22primary_position%5C%22%3A24%2C%5C%22ranking_signature%5C%22%3A6924044595105555005%2C%5C%22ranking_request_id%5C%22%3A7657003630755251597%2C%5C%22commerce_channel%5C%22%3A504%2C%5C%22value%5C%22%3A0.0016031145682888%2C%5C%22candidate_retrieval_source_map%5C%22%3A%7B%5C%2225255727914064498%5C%22%3A111%7D%7D%22%7D&__tn__=!%3AD
+2025-10-26 12:11:23,734 - INFO -   ✓ Extracted: 1998 Ford Mustang - $2500
+2025-10-26 12:11:23,734 - INFO - 🔗 Processing link 12/20
+2025-10-26 12:11:23,842 - INFO -   📄 Text: $14,500
+2017 Harley-Davidson road glide
+Villa Rica, GA
+10K miles...
+2025-10-26 12:11:23,842 - INFO -   🔗 Href: /marketplace/item/1159618942169400/?ref=category_feed&referral_code=undefined&referral_story_type=listing&tracking=%7B%22qid%22%3A%22-8077694179745683774%22%2C%22mf_story_key%22%3A%229585662271558412%22%2C%22commerce_rank_obj%22%3A%22%7B%5C%22target_id%5C%22%3A9585662271558412%2C%5C%22target_type%5C%22%3A0%2C%5C%22primary_position%5C%22%3A29%2C%5C%22ranking_signature%5C%22%3A6924044595105555005%2C%5C%22ranking_request_id%5C%22%3A7657003630755251597%2C%5C%22commerce_channel%5C%22%3A504%2C%5C%22value%5C%22%3A0.0015547762850656%2C%5C%22candidate_retrieval_source_map%5C%22%3A%7B%5C%229585662271558412%5C%22%3A111%7D%7D%22%7D&__tn__=!%3AD
+2025-10-26 12:11:23,842 - INFO -   ❌ Could not parse car data from text
+2025-10-26 12:11:23,842 - INFO - 🔗 Processing link 13/20
+2025-10-26 12:11:23,860 - INFO -   📄 Text: $12,000
+2020 Nissan nv200 S Van 4D
+Rockmart, GA
+115K miles...
+2025-10-26 12:11:23,860 - INFO -   🔗 Href: /marketplace/item/2288852241535941/?ref=category_feed&referral_code=undefined&referral_story_type=listing&tracking=%7B%22qid%22%3A%22-8077694179745683774%22%2C%22mf_story_key%22%3A%2225267899599502047%22%2C%22commerce_rank_obj%22%3A%22%7B%5C%22target_id%5C%22%3A25267899599502047%2C%5C%22target_type%5C%22%3A0%2C%5C%22primary_position%5C%22%3A31%2C%5C%22ranking_signature%5C%22%3A6924044595105555005%2C%5C%22ranking_request_id%5C%22%3A7657003630755251597%2C%5C%22commerce_channel%5C%22%3A504%2C%5C%22value%5C%22%3A0.0015452750549201%2C%5C%22candidate_retrieval_source_map%5C%22%3A%7B%5C%2225267899599502047%5C%22%3A111%7D%7D%22%7D&__tn__=!%3AD
+2025-10-26 12:11:23,861 - INFO -   ✓ Extracted: 2020 Nissan Nv200 - $12000
+2025-10-26 12:11:23,861 - INFO - 🔗 Processing link 14/20
+2025-10-26 12:11:23,963 - INFO -   📄 Text: $6,000
+2007 Yamaha yzf-r1
+Temple, GA
+18K miles...
+2025-10-26 12:11:23,963 - INFO -   🔗 Href: /marketplace/item/1268999415269451/?ref=category_feed&referral_code=undefined&referral_story_type=listing&tracking=%7B%22qid%22%3A%22-8077694179745683774%22%2C%22mf_story_key%22%3A%2224869669699358526%22%2C%22commerce_rank_obj%22%3A%22%7B%5C%22target_id%5C%22%3A24869669699358526%2C%5C%22target_type%5C%22%3A0%2C%5C%22primary_position%5C%22%3A32%2C%5C%22ranking_signature%5C%22%3A6924044595105555005%2C%5C%22ranking_request_id%5C%22%3A7657003630755251597%2C%5C%22commerce_channel%5C%22%3A504%2C%5C%22value%5C%22%3A0.0015432179721882%2C%5C%22candidate_retrieval_source_map%5C%22%3A%7B%5C%2224869669699358526%5C%22%3A111%7D%7D%22%7D&__tn__=!%3AD
+2025-10-26 12:11:23,963 - INFO -   ❌ Could not parse car data from text
+2025-10-26 12:11:23,963 - INFO - 🔗 Processing link 15/20
+2025-10-26 12:11:24,048 - INFO -   📄 Text: $4,000
+2002 Traila 7-18
+Union City, GA...
+2025-10-26 12:11:24,048 - INFO -   🔗 Href: /marketplace/item/1293093665412402/?ref=category_feed&referral_code=undefined&referral_story_type=listing&tracking=%7B%22qid%22%3A%22-8077694179745683774%22%2C%22mf_story_key%22%3A%2224609026215456514%22%2C%22commerce_rank_obj%22%3A%22%7B%5C%22target_id%5C%22%3A24609026215456514%2C%5C%22target_type%5C%22%3A0%2C%5C%22primary_position%5C%22%3A33%2C%5C%22ranking_signature%5C%22%3A6924044595105555005%2C%5C%22ranking_request_id%5C%22%3A7657003630755251597%2C%5C%22commerce_channel%5C%22%3A504%2C%5C%22value%5C%22%3A0.0015151339495878%2C%5C%22candidate_retrieval_source_map%5C%22%3A%7B%5C%2224609026215456514%5C%22%3A111%7D%7D%22%7D&__tn__=!%3AD
+2025-10-26 12:11:24,048 - INFO -   ❌ Could not parse car data from text
+2025-10-26 12:11:24,048 - INFO - 🔗 Processing link 16/20
+2025-10-26 12:11:24,070 - INFO -   📄 Text: $23,000
+2014 Kenworth t660
+Temple, GA...
+2025-10-26 12:11:24,070 - INFO -   🔗 Href: /marketplace/item/1491326305439071/?ref=category_feed&referral_code=undefined&referral_story_type=listing&tracking=%7B%22qid%22%3A%22-8077694179745683774%22%2C%22mf_story_key%22%3A%2224962516903409338%22%2C%22commerce_rank_obj%22%3A%22%7B%5C%22target_id%5C%22%3A24962516903409338%2C%5C%22target_type%5C%22%3A0%2C%5C%22primary_position%5C%22%3A34%2C%5C%22ranking_signature%5C%22%3A6924044595105555005%2C%5C%22ranking_request_id%5C%22%3A7657003630755251597%2C%5C%22commerce_channel%5C%22%3A504%2C%5C%22value%5C%22%3A0.0015014755643787%2C%5C%22candidate_retrieval_source_map%5C%22%3A%7B%5C%2224962516903409338%5C%22%3A111%7D%7D%22%7D&__tn__=!%3AD
+2025-10-26 12:11:24,071 - INFO -   ❌ Could not parse car data from text
+2025-10-26 12:11:24,071 - INFO - 🔗 Processing link 17/20
+2025-10-26 12:11:24,092 - INFO -   📄 Text: $17,500
+2013 Harley-Davidson streetglide
+Acworth, GA
+1.9K miles...
+2025-10-26 12:11:24,092 - INFO -   🔗 Href: /marketplace/item/1884325145799922/?ref=category_feed&referral_code=undefined&referral_story_type=listing&tracking=%7B%22qid%22%3A%22-8077694179745683774%22%2C%22mf_story_key%22%3A%2224933390926302128%22%2C%22commerce_rank_obj%22%3A%22%7B%5C%22target_id%5C%22%3A24933390926302128%2C%5C%22target_type%5C%22%3A0%2C%5C%22primary_position%5C%22%3A36%2C%5C%22ranking_signature%5C%22%3A6924044595105555005%2C%5C%22ranking_request_id%5C%22%3A7657003630755251597%2C%5C%22commerce_channel%5C%22%3A504%2C%5C%22value%5C%22%3A0.001481203928682%2C%5C%22candidate_retrieval_source_map%5C%22%3A%7B%5C%2224933390926302128%5C%22%3A111%7D%7D%22%7D&__tn__=!%3AD
+2025-10-26 12:11:24,092 - INFO -   ❌ Could not parse car data from text
+2025-10-26 12:11:24,093 - INFO - 🔗 Processing link 18/20
+2025-10-26 12:11:24,108 - INFO -   📄 Text: $3,500
+$4,500
+2004 Chevrolet 1500 extended cab Short Bed
+Temple, GA
+345K miles...
+2025-10-26 12:11:24,109 - INFO -   🔗 Href: /marketplace/item/792306276604972/?ref=category_feed&referral_code=undefined&referral_story_type=listing&tracking=%7B%22qid%22%3A%22-8077694179745683774%22%2C%22mf_story_key%22%3A%2225369825345944466%22%2C%22commerce_rank_obj%22%3A%22%7B%5C%22target_id%5C%22%3A25369825345944466%2C%5C%22target_type%5C%22%3A0%2C%5C%22primary_position%5C%22%3A37%2C%5C%22ranking_signature%5C%22%3A6924044595105555005%2C%5C%22ranking_request_id%5C%22%3A7657003630755251597%2C%5C%22commerce_channel%5C%22%3A504%2C%5C%22value%5C%22%3A0.0014769648792037%2C%5C%22candidate_retrieval_source_map%5C%22%3A%7B%5C%2225369825345944466%5C%22%3A111%7D%7D%22%7D&__tn__=!%3AD
+2025-10-26 12:11:24,109 - INFO -   ✓ Extracted: 2004 Chevrolet 1500 - $3500
+2025-10-26 12:11:24,109 - INFO - 🔗 Processing link 19/20
+2025-10-26 12:11:24,172 - INFO -   📄 Text: $2,000
+$2,500
+2007 Jeep grand cherokee All New Laredo Sport Utility 4D
+Temple, GA
+227K miles...
+2025-10-26 12:11:24,172 - INFO -   🔗 Href: /marketplace/item/1880863942778059/?ref=category_feed&referral_code=undefined&referral_story_type=listing&tracking=%7B%22qid%22%3A%22-8077694179745683774%22%2C%22mf_story_key%22%3A%2232489613843959190%22%2C%22commerce_rank_obj%22%3A%22%7B%5C%22target_id%5C%22%3A32489613843959190%2C%5C%22target_type%5C%22%3A0%2C%5C%22primary_position%5C%22%3A39%2C%5C%22ranking_signature%5C%22%3A6924044595105555005%2C%5C%22ranking_request_id%5C%22%3A7657003630755251597%2C%5C%22commerce_channel%5C%22%3A504%2C%5C%22value%5C%22%3A0.0014590434089729%2C%5C%22candidate_retrieval_source_map%5C%22%3A%7B%5C%2232489613843959190%5C%22%3A111%7D%7D%22%7D&__tn__=!%3AD
+2025-10-26 12:11:24,173 - INFO -   ❌ Could not parse car data from text
+2025-10-26 12:11:24,173 - INFO - 🔗 Processing link 20/20
+2025-10-26 12:11:24,210 - INFO -   📄 Text: $15,000
+2004 Ford f-250 HD Short Bed
+Temple, GA
+300K miles...
+2025-10-26 12:11:24,211 - INFO -   🔗 Href: /marketplace/item/1474942656856153/?ref=category_feed&referral_code=undefined&referral_story_type=listing&tracking=%7B%22qid%22%3A%22-8077694179745683774%22%2C%22mf_story_key%22%3A%2231745475158376766%22%2C%22commerce_rank_obj%22%3A%22%7B%5C%22target_id%5C%22%3A31745475158376766%2C%5C%22target_type%5C%22%3A0%2C%5C%22primary_position%5C%22%3A40%2C%5C%22ranking_signature%5C%22%3A6924044595105555005%2C%5C%22ranking_request_id%5C%22%3A7657003630755251597%2C%5C%22commerce_channel%5C%22%3A504%2C%5C%22value%5C%22%3A0.0014513602165916%2C%5C%22candidate_retrieval_source_map%5C%22%3A%7B%5C%2231745475158376766%5C%22%3A111%7D%7D%22%7D&__tn__=!%3AD
+2025-10-26 12:11:24,212 - INFO -   ✓ Extracted: 2004 Ford F-250 - $15000
+2025-10-26 12:11:24,212 - INFO - ✅ Successfully extracted 10 car listings
+2025-10-26 12:11:24,289 - INFO - ✓ Cleaned up page
+2025-10-26 12:11:24,351 - INFO - ✓ Cleaned up context
+2025-10-26 12:11:36,251 - INFO - ✓ Cleaned up browser
+2025-10-26 12:11:36,262 - INFO - ✓ Cleaned up playwright
+2025-10-26 12:11:36,262 - INFO - 📊 Processing 10 car listings...
+2025-10-26 12:11:36,262 - INFO - 📈 Calculating deal scores...
+2025-10-26 12:11:36,263 - INFO - 💾 Saving results to CSV...
+2025-10-26 12:11:36,268 - INFO - ✅ Scraping process completed successfully!
+2025-10-26 12:11:43,396 - INFO - 🚀 Starting Facebook Marketplace Car Scraper...
+2025-10-26 12:11:43,396 - INFO - 📁 Reading preferences from: Preferences.csv
+2025-10-26 12:11:43,397 - INFO - ✓ Successfully loaded 7 preferences
+2025-10-26 12:11:43,397 - INFO - 🔗 Building Facebook URL for location: atlanta
+2025-10-26 12:11:43,397 - INFO - ✓ Built URL: https://www.facebook.com/marketplace/atlanta/vehicles?minPrice=250&maxPrice=55000&minMileage=0&maxMileage=200000&minYear=1995&maxYear=2020&exact=false
+2025-10-26 12:11:43,398 - INFO - 🕰️ Starting Facebook scraping process...
+2025-10-26 12:11:43,398 - INFO - 🔍 Attempting to scrape: https://www.facebook.com/marketplace/atlanta/vehicles?minPrice=250&maxPrice=55000&minMileage=0&maxMileage=200000&minYear=1995&maxYear=2020&exact=false
+2025-10-26 12:11:43,398 - INFO - 📊 Scroll count: 10
+2025-10-26 12:11:43,398 - INFO - 🚀 Launching browser...
+2025-10-26 12:11:47,379 - INFO - ✓ Playwright started
+2025-10-26 12:11:47,913 - INFO - ✓ Browser launched
+2025-10-26 12:11:47,931 - INFO - ✓ Browser context created
+2025-10-26 12:11:48,243 - INFO - ✓ Page created and ready
+2025-10-26 12:11:48,245 - INFO - 🌐 Loading Facebook Marketplace...
+2025-10-26 12:11:48,245 - INFO - 📱 Navigating to: https://www.facebook.com/marketplace/atlanta/vehicles?minPrice=250&maxPrice=5500...
+2025-10-26 12:11:50,190 - INFO - 📡 Response status: 200
+2025-10-26 12:11:50,190 - INFO - ✓ Page loaded successfully
+2025-10-26 12:11:50,190 - INFO - ⏳ Waiting for page to stabilize...
+2025-10-26 12:11:52,193 - INFO - 🔐 Checking for login requirements...
+2025-10-26 12:11:52,194 - WARNING - ⚠ Could not check page text: Page.inner_text() missing 1 required positional argument: 'selector'
+2025-10-26 12:11:52,194 - INFO - 🚗 Looking for car listings...
+2025-10-26 12:11:52,194 - INFO - 🔍 Trying selector 1/5: a[href*='/marketplace/item/']
+2025-10-26 12:11:57,152 - INFO - ✓ Found 23 links with selector: a[href*='/marketplace/item/']
+2025-10-26 12:11:57,152 - INFO - 📝 Extracting car data from 20 links...
+2025-10-26 12:12:00,265 - INFO - ✅ Successfully extracted 12 car listings
+2025-10-26 12:12:30,423 - INFO - 📊 Processing 12 car listings...
+2025-10-26 12:12:30,424 - INFO - 📈 Calculating deal scores...
+2025-10-26 12:12:30,424 - INFO - 💾 Saving results to CSV...
+2025-10-26 12:12:30,425 - INFO - ✅ Scraping process completed successfully!
+2025-10-26 12:21:07,994 - INFO - 🚀 Starting Facebook Marketplace Car Scraper...
+2025-10-26 12:21:07,995 - INFO - 📁 Reading preferences from: Preferences.csv
+2025-10-26 12:21:07,996 - INFO - ✓ Successfully loaded 7 preferences
+2025-10-26 12:21:07,996 - INFO - 🔗 Building Facebook URL for location: atlanta
+2025-10-26 12:21:07,997 - INFO - ✓ Built URL: https://www.facebook.com/marketplace/atlanta/vehicles?minPrice=250&maxPrice=55000&minMileage=0&maxMileage=200000&minYear=1995&maxYear=2020&exact=false
+2025-10-26 12:21:07,998 - INFO - 🕰️ Starting Facebook scraping process...
+2025-10-26 12:21:07,999 - INFO - 🔍 Attempting to scrape: https://www.facebook.com/marketplace/atlanta/vehicles?minPrice=250&maxPrice=55000&minMileage=0&maxMileage=200000&minYear=1995&maxYear=2020&exact=false
+2025-10-26 12:21:07,999 - INFO - 📊 Scroll count: 10
+2025-10-26 12:21:08,000 - INFO - 🚀 Launching browser...
+2025-10-26 12:21:11,380 - INFO - ✓ Playwright started
+2025-10-26 12:21:12,696 - INFO - ✓ Browser launched
+2025-10-26 12:21:12,720 - INFO - ✓ Browser context created
+2025-10-26 12:21:13,293 - INFO - ✓ Page created and ready
+2025-10-26 12:21:13,295 - INFO - 🌐 Loading Facebook Marketplace...
+2025-10-26 12:21:13,297 - INFO - 📱 Navigating to: https://www.facebook.com/marketplace/atlanta/vehicles?minPrice=250&maxPrice=5500...
+2025-10-26 12:21:15,971 - INFO - 📡 Response status: 200
+2025-10-26 12:21:15,971 - INFO - ✓ Page loaded successfully
+2025-10-26 12:21:15,971 - INFO - ⏳ Waiting for page to stabilize...
+2025-10-26 12:21:23,810 - INFO - 🔍 Verbose logging enabled
+2025-10-26 12:21:23,820 - INFO - 🚀 Starting Facebook Marketplace Car Scraper...
+2025-10-26 12:21:23,821 - INFO - 📁 Reading preferences from: Preferences.csv
+2025-10-26 12:21:23,822 - INFO -   Line 1: Minimum Mileage = 0 (int)
+2025-10-26 12:21:23,824 - INFO -   Line 2: Maximum Mileage = 200000 (int)
+2025-10-26 12:21:23,874 - INFO -   Line 3: Minimum Price = 250 (int)
+2025-10-26 12:21:23,875 - INFO -   Line 4: Maximum Price = 55000 (int)
+2025-10-26 12:21:23,876 - INFO -   Line 5: Minimum Year = 1995 (int)
+2025-10-26 12:21:23,877 - INFO -   Line 6: Maximum Year = 2020 (int)
+2025-10-26 12:21:23,877 - INFO -   Line 7: Scroll Down Length = 10 (int)
+2025-10-26 12:21:23,877 - INFO - ✓ Successfully loaded 7 preferences
+2025-10-26 12:21:23,878 - INFO - 🔗 Building Facebook URL for location: atlanta
+2025-10-26 12:21:23,878 - INFO -   Added parameter: minPrice=250
+2025-10-26 12:21:23,878 - INFO -   Added parameter: maxPrice=55000
+2025-10-26 12:21:23,878 - INFO -   Added parameter: minMileage=0
+2025-10-26 12:21:23,880 - INFO -   Added parameter: maxMileage=200000
+2025-10-26 12:21:23,881 - INFO -   Added parameter: minYear=1995
+2025-10-26 12:21:23,881 - INFO -   Added parameter: maxYear=2020
+2025-10-26 12:21:23,881 - INFO - ✓ Built URL: https://www.facebook.com/marketplace/atlanta/vehicles?minPrice=250&maxPrice=55000&minMileage=0&maxMileage=200000&minYear=1995&maxYear=2020&exact=false
+2025-10-26 12:21:23,881 - INFO - 🕰️ Starting Facebook scraping process...
+2025-10-26 12:21:23,881 - INFO - 🔍 Attempting to scrape: https://www.facebook.com/marketplace/atlanta/vehicles?minPrice=250&maxPrice=55000&minMileage=0&maxMileage=200000&minYear=1995&maxYear=2020&exact=false
+2025-10-26 12:21:23,881 - INFO - 📊 Scroll count: 10
+2025-10-26 12:21:23,881 - INFO - 🚀 Launching browser...
+2025-10-26 12:21:28,021 - INFO - ✓ Playwright started
+2025-10-26 12:21:28,751 - INFO - ✓ Browser launched
+2025-10-26 12:21:28,834 - INFO - ✓ Browser context created
+2025-10-26 12:21:29,150 - INFO - ✓ Page created and ready
+2025-10-26 12:21:29,150 - INFO - 🌐 Loading Facebook Marketplace...
+2025-10-26 12:21:29,150 - INFO - 📱 Navigating to: https://www.facebook.com/marketplace/atlanta/vehicles?minPrice=250&maxPrice=5500...
+2025-10-26 12:21:31,974 - INFO - 📡 Response status: 200
+2025-10-26 12:21:31,976 - INFO - ✓ Page loaded successfully
+2025-10-26 12:21:31,976 - INFO - ⏳ Waiting for page to stabilize...
+2025-10-26 12:21:33,980 - INFO - 🔐 Checking for login requirements...
+2025-10-26 12:21:33,981 - WARNING - ⚠ Could not check page text: Page.inner_text() missing 1 required positional argument: 'selector'
+2025-10-26 12:21:33,981 - INFO - Continuing with scraping attempt...
+2025-10-26 12:21:33,981 - INFO - 🚗 Looking for car listings...
+2025-10-26 12:21:33,981 - INFO - 🔍 Trying selector 1/5: a[href*='/marketplace/item/']
+2025-10-26 12:21:39,435 - INFO - ✓ Found 24 links with selector: a[href*='/marketplace/item/']
+2025-10-26 12:21:39,437 - INFO - 📝 Taking first 20 links for processing
+2025-10-26 12:21:39,437 - INFO - 📝 Extracting car data from 20 links...
+2025-10-26 12:21:39,437 - INFO - 🔗 Processing link 1/20
+2025-10-26 12:21:42,011 - INFO -   📄 Text: $10,000
+2003 Winnebago itasca spir
+Senoia, GA...
+2025-10-26 12:21:42,012 - INFO -   🔗 Href: /marketplace/item/1340543507474186/?ref=category_feed&referral_code=undefined&referral_story_type=listing&tracking=%7B%22qid%22%3A%22-8077651642307999136%22%2C%22mf_story_key%22%3A%2233169308102668707%22%2C%22commerce_rank_obj%22%3A%22%7B%5C%22target_id%5C%22%3A33169308102668707%2C%5C%22target_type%5C%22%3A0%2C%5C%22primary_position%5C%22%3A6%2C%5C%22ranking_signature%5C%22%3A6030755705914833841%2C%5C%22ranking_request_id%5C%22%3A8413195922144480811%2C%5C%22commerce_channel%5C%22%3A504%2C%5C%22value%5C%22%3A0.001870261523576%2C%5C%22candidate_retrieval_source_map%5C%22%3A%7B%5C%2233169308102668707%5C%22%3A111%7D%7D%22%7D&__tn__=!%3AD
+2025-10-26 12:21:42,012 - INFO -   ❌ Could not parse car data from text
+2025-10-26 12:21:42,013 - INFO - 🔗 Processing link 2/20
+2025-10-26 12:21:42,195 - INFO -   📄 Text: $9,800
+2017 Ford f-150
+Atlanta, GA
+215K miles...
+2025-10-26 12:21:42,195 - INFO -   🔗 Href: /marketplace/item/2151076255300585/?ref=category_feed&referral_code=undefined&referral_story_type=listing&tracking=%7B%22qid%22%3A%22-8077651642307999136%22%2C%22mf_story_key%22%3A%2224310169208660723%22%2C%22commerce_rank_obj%22%3A%22%7B%5C%22target_id%5C%22%3A24310169208660723%2C%5C%22target_type%5C%22%3A0%2C%5C%22primary_position%5C%22%3A8%2C%5C%22ranking_signature%5C%22%3A6030755705914833841%2C%5C%22ranking_request_id%5C%22%3A8413195922144480811%2C%5C%22commerce_channel%5C%22%3A504%2C%5C%22value%5C%22%3A0.001870259523576%2C%5C%22candidate_retrieval_source_map%5C%22%3A%7B%5C%2224310169208660723%5C%22%3A111%7D%7D%22%7D&__tn__=!%3AD
+2025-10-26 12:21:42,195 - INFO -   ✓ Extracted: 2017 Ford F-150 - $9800
+2025-10-26 12:21:42,196 - INFO - 🔗 Processing link 3/20
+2025-10-26 12:21:42,217 - INFO -   📄 Text: $12,000
+2008 Jeep wrangler Unlimited X Sport Utility 4D
+Temple, GA
+96K miles...
+2025-10-26 12:21:42,218 - INFO -   🔗 Href: /marketplace/item/1493672898452314/?ref=category_feed&referral_code=undefined&referral_story_type=listing&tracking=%7B%22qid%22%3A%22-8077651642307999136%22%2C%22mf_story_key%22%3A%2231692297657082848%22%2C%22commerce_rank_obj%22%3A%22%7B%5C%22target_id%5C%22%3A31692297657082848%2C%5C%22target_type%5C%22%3A0%2C%5C%22primary_position%5C%22%3A9%2C%5C%22ranking_signature%5C%22%3A6030755705914833841%2C%5C%22ranking_request_id%5C%22%3A8413195922144480811%2C%5C%22commerce_channel%5C%22%3A504%2C%5C%22value%5C%22%3A0.001870258523576%2C%5C%22candidate_retrieval_source_map%5C%22%3A%7B%5C%2231692297657082848%5C%22%3A111%7D%7D%22%7D&__tn__=!%3AD
+2025-10-26 12:21:42,218 - INFO -   ❌ Could not parse car data from text
+2025-10-26 12:21:42,218 - INFO - 🔗 Processing link 4/20
+2025-10-26 12:21:42,242 - INFO -   📄 Text: $7,800
+2007 GMC savana 3500 cargo
+Carrollton, GA
+150K miles · Dealership...
+2025-10-26 12:21:42,243 - INFO -   🔗 Href: /marketplace/item/1873947040131900/?ref=category_feed&referral_code=undefined&referral_story_type=listing&tracking=%7B%22qid%22%3A%22-8077651642307999136%22%2C%22mf_story_key%22%3A%2224969409106010230%22%2C%22commerce_rank_obj%22%3A%22%7B%5C%22target_id%5C%22%3A24969409106010230%2C%5C%22target_type%5C%22%3A0%2C%5C%22primary_position%5C%22%3A13%2C%5C%22ranking_signature%5C%22%3A6030755705914833841%2C%5C%22ranking_request_id%5C%22%3A8413195922144480811%2C%5C%22commerce_channel%5C%22%3A504%2C%5C%22value%5C%22%3A0.001870254523576%2C%5C%22candidate_retrieval_source_map%5C%22%3A%7B%5C%2224969409106010230%5C%22%3A111%7D%7D%22%7D&__tn__=!%3AD
+2025-10-26 12:21:42,243 - INFO -   ❌ Could not parse car data from text
+2025-10-26 12:21:42,244 - INFO - 🔗 Processing link 5/20
+2025-10-26 12:21:42,261 - INFO -   📄 Text: $3,400
+2009 Toyota Corolla S
+Norcross, GA
+166K miles...
+2025-10-26 12:21:42,261 - INFO -   🔗 Href: /marketplace/item/2722912484727210/?ref=category_feed&referral_code=undefined&referral_story_type=listing&tracking=%7B%22qid%22%3A%22-8077651642307999136%22%2C%22mf_story_key%22%3A%2225716186941306830%22%2C%22commerce_rank_obj%22%3A%22%7B%5C%22target_id%5C%22%3A25716186941306830%2C%5C%22target_type%5C%22%3A0%2C%5C%22primary_position%5C%22%3A17%2C%5C%22ranking_signature%5C%22%3A6030755705914833841%2C%5C%22ranking_request_id%5C%22%3A8413195922144480811%2C%5C%22commerce_channel%5C%22%3A504%2C%5C%22value%5C%22%3A0.0018358137572363%2C%5C%22candidate_retrieval_source_map%5C%22%3A%7B%5C%2225716186941306830%5C%22%3A111%7D%7D%22%7D&__tn__=!%3AD
+2025-10-26 12:21:42,262 - INFO -   ✓ Extracted: 2009 Toyota Corolla - $3400
+2025-10-26 12:21:42,262 - INFO - 🔗 Processing link 6/20
+2025-10-26 12:21:42,278 - INFO -   📄 Text: $2,500
+1998 Ford mustang GT Coupe 2D
+Temple, GA
+84K miles...
+2025-10-26 12:21:42,279 - INFO -   🔗 Href: /marketplace/item/1459357188697225/?ref=category_feed&referral_code=undefined&referral_story_type=listing&tracking=%7B%22qid%22%3A%22-8077651642307999136%22%2C%22mf_story_key%22%3A%2225255727914064498%22%2C%22commerce_rank_obj%22%3A%22%7B%5C%22target_id%5C%22%3A25255727914064498%2C%5C%22target_type%5C%22%3A0%2C%5C%22primary_position%5C%22%3A20%2C%5C%22ranking_signature%5C%22%3A6030755705914833841%2C%5C%22ranking_request_id%5C%22%3A8413195922144480811%2C%5C%22commerce_channel%5C%22%3A504%2C%5C%22value%5C%22%3A0.0016303892915426%2C%5C%22candidate_retrieval_source_map%5C%22%3A%7B%5C%2225255727914064498%5C%22%3A111%7D%7D%22%7D&__tn__=!%3AD
+2025-10-26 12:21:42,279 - INFO -   ✓ Extracted: 1998 Ford Mustang - $2500
+2025-10-26 12:21:42,279 - INFO - 🔗 Processing link 7/20
+2025-10-26 12:21:42,438 - INFO -   📄 Text: $3,000
+2012 Chevrolet tahoe LT Sport Utility 4D
+Carrollton, GA
+123K miles...
+2025-10-26 12:21:42,438 - INFO -   🔗 Href: /marketplace/item/1337239787931434/?ref=category_feed&referral_code=undefined&referral_story_type=listing&tracking=%7B%22qid%22%3A%22-8077651642307999136%22%2C%22mf_story_key%22%3A%2224988908194063959%22%2C%22commerce_rank_obj%22%3A%22%7B%5C%22target_id%5C%22%3A24988908194063959%2C%5C%22target_type%5C%22%3A0%2C%5C%22primary_position%5C%22%3A21%2C%5C%22ranking_signature%5C%22%3A6030755705914833841%2C%5C%22ranking_request_id%5C%22%3A8413195922144480811%2C%5C%22commerce_channel%5C%22%3A504%2C%5C%22value%5C%22%3A0.0015991169268425%2C%5C%22candidate_retrieval_source_map%5C%22%3A%7B%5C%2224988908194063959%5C%22%3A111%7D%7D%22%7D&__tn__=!%3AD
+2025-10-26 12:21:42,439 - INFO -   ✓ Extracted: 2012 Chevrolet Tahoe - $3000
+2025-10-26 12:21:42,439 - INFO - 🔗 Processing link 8/20
+2025-10-26 12:21:42,494 - INFO -   📄 Text: $4,200
+$4,500
+2006 Toyota le
+Lawrenceville, GA
+191K miles...
+2025-10-26 12:21:42,495 - INFO -   🔗 Href: /marketplace/item/1318171696531793/?ref=category_feed&referral_code=undefined&referral_story_type=listing&tracking=%7B%22qid%22%3A%22-8077651642307999136%22%2C%22mf_story_key%22%3A%2231536916635955388%22%2C%22commerce_rank_obj%22%3A%22%7B%5C%22target_id%5C%22%3A31536916635955388%2C%5C%22target_type%5C%22%3A0%2C%5C%22primary_position%5C%22%3A22%2C%5C%22ranking_signature%5C%22%3A6030755705914833841%2C%5C%22ranking_request_id%5C%22%3A8413195922144480811%2C%5C%22commerce_channel%5C%22%3A504%2C%5C%22value%5C%22%3A0.0015817240759016%2C%5C%22candidate_retrieval_source_map%5C%22%3A%7B%5C%2231536916635955388%5C%22%3A111%7D%7D%22%7D&__tn__=!%3AD
+2025-10-26 12:21:42,496 - INFO -   ✓ Extracted: 2006 Toyota Le - $4200
+2025-10-26 12:21:42,496 - INFO - 🔗 Processing link 9/20
+2025-10-26 12:21:42,520 - INFO -   📄 Text: $18,500
+2016 Utility carrier reefer
+Villa Rica, GA...
+2025-10-26 12:21:42,522 - INFO -   🔗 Href: /marketplace/item/1333892258253673/?ref=category_feed&referral_code=undefined&referral_story_type=listing&tracking=%7B%22qid%22%3A%22-8077651642307999136%22%2C%22mf_story_key%22%3A%2224623731667221920%22%2C%22commerce_rank_obj%22%3A%22%7B%5C%22target_id%5C%22%3A24623731667221920%2C%5C%22target_type%5C%22%3A0%2C%5C%22primary_position%5C%22%3A23%2C%5C%22ranking_signature%5C%22%3A6030755705914833841%2C%5C%22ranking_request_id%5C%22%3A8413195922144480811%2C%5C%22commerce_channel%5C%22%3A504%2C%5C%22value%5C%22%3A0.0015526165735671%2C%5C%22candidate_retrieval_source_map%5C%22%3A%7B%5C%2224623731667221920%5C%22%3A111%7D%7D%22%7D&__tn__=!%3AD
+2025-10-26 12:21:42,523 - INFO -   ❌ Could not parse car data from text
+2025-10-26 12:21:42,533 - INFO - 🔗 Processing link 10/20
+2025-10-26 12:21:42,620 - INFO -   📄 Text: $4,500
+2014 Ford focus SE Sedan 4D
+Covington, GA
+113K miles...
+2025-10-26 12:21:42,621 - INFO -   🔗 Href: /marketplace/item/826104830286971/?ref=category_feed&referral_code=undefined&referral_story_type=listing&tracking=%7B%22qid%22%3A%22-8077651642307999136%22%2C%22mf_story_key%22%3A%2224864861846533309%22%2C%22commerce_rank_obj%22%3A%22%7B%5C%22target_id%5C%22%3A24864861846533309%2C%5C%22target_type%5C%22%3A0%2C%5C%22primary_position%5C%22%3A26%2C%5C%22ranking_signature%5C%22%3A6030755705914833841%2C%5C%22ranking_request_id%5C%22%3A8413195922144480811%2C%5C%22commerce_channel%5C%22%3A504%2C%5C%22value%5C%22%3A0.0015238058313091%2C%5C%22candidate_retrieval_source_map%5C%22%3A%7B%5C%2224864861846533309%5C%22%3A111%7D%7D%22%7D&__tn__=!%3AD
+2025-10-26 12:21:42,622 - INFO -   ✓ Extracted: 2014 Ford Focus - $4500
+2025-10-26 12:21:42,622 - INFO - 🔗 Processing link 11/20
+2025-10-26 12:21:42,658 - INFO -   📄 Text: $6,000
+1999 Dodge durango SLT Sport Utility 4D
+Temple, GA
+123K miles...
+2025-10-26 12:21:42,658 - INFO -   🔗 Href: /marketplace/item/2137249400133862/?ref=category_feed&referral_code=undefined&referral_story_type=listing&tracking=%7B%22qid%22%3A%22-8077651642307999136%22%2C%22mf_story_key%22%3A%2225058249880529152%22%2C%22commerce_rank_obj%22%3A%22%7B%5C%22target_id%5C%22%3A25058249880529152%2C%5C%22target_type%5C%22%3A0%2C%5C%22primary_position%5C%22%3A28%2C%5C%22ranking_signature%5C%22%3A6030755705914833841%2C%5C%22ranking_request_id%5C%22%3A8413195922144480811%2C%5C%22commerce_channel%5C%22%3A504%2C%5C%22value%5C%22%3A0.0014921717770117%2C%5C%22candidate_retrieval_source_map%5C%22%3A%7B%5C%2225058249880529152%5C%22%3A111%7D%7D%22%7D&__tn__=!%3AD
+2025-10-26 12:21:42,658 - INFO -   ❌ Could not parse car data from text
+2025-10-26 12:21:42,658 - INFO - 🔗 Processing link 12/20
+2025-10-26 12:21:42,696 - INFO -   📄 Text: $1,500
+$1,700
+1998 Cadillac deville Touring Sedan 4D
+Carrollton, GA
+170K miles...
+2025-10-26 12:21:42,696 - INFO -   🔗 Href: /marketplace/item/1094232166242274/?ref=category_feed&referral_code=undefined&referral_story_type=listing&tracking=%7B%22qid%22%3A%22-8077651642307999136%22%2C%22mf_story_key%22%3A%2224641941505440697%22%2C%22commerce_rank_obj%22%3A%22%7B%5C%22target_id%5C%22%3A24641941505440697%2C%5C%22target_type%5C%22%3A0%2C%5C%22primary_position%5C%22%3A29%2C%5C%22ranking_signature%5C%22%3A6030755705914833841%2C%5C%22ranking_request_id%5C%22%3A8413195922144480811%2C%5C%22commerce_channel%5C%22%3A504%2C%5C%22value%5C%22%3A0.0014900164898658%2C%5C%22candidate_retrieval_source_map%5C%22%3A%7B%5C%2224641941505440697%5C%22%3A111%7D%7D%22%7D&__tn__=!%3AD
+2025-10-26 12:21:42,697 - INFO -   ❌ Could not parse car data from text
+2025-10-26 12:21:42,697 - INFO - 🔗 Processing link 13/20
+2025-10-26 12:21:42,719 - INFO -   📄 Text: $6,800
+2015 Volkswagen tiguan 2.0T S Sport Utility 4D
+Duluth, GA
+136K miles...
+2025-10-26 12:21:42,719 - INFO -   🔗 Href: /marketplace/item/1169102525145976/?ref=category_feed&referral_code=undefined&referral_story_type=listing&tracking=%7B%22qid%22%3A%22-8077651642307999136%22%2C%22mf_story_key%22%3A%2224852494631038742%22%2C%22commerce_rank_obj%22%3A%22%7B%5C%22target_id%5C%22%3A24852494631038742%2C%5C%22target_type%5C%22%3A0%2C%5C%22primary_position%5C%22%3A30%2C%5C%22ranking_signature%5C%22%3A6030755705914833841%2C%5C%22ranking_request_id%5C%22%3A8413195922144480811%2C%5C%22commerce_channel%5C%22%3A504%2C%5C%22value%5C%22%3A0.0014845168401364%2C%5C%22candidate_retrieval_source_map%5C%22%3A%7B%5C%2224852494631038742%5C%22%3A111%7D%7D%22%7D&__tn__=!%3AD
+2025-10-26 12:21:42,719 - INFO -   ✓ Extracted: 2015 Volkswagen Tiguan - $6800
+2025-10-26 12:21:42,720 - INFO - 🔗 Processing link 14/20
+2025-10-26 12:21:42,742 - INFO -   📄 Text: $4,500
+$5,500
+2008 Honda trx450er
+Temple, GA...
+2025-10-26 12:21:42,742 - INFO -   🔗 Href: /marketplace/item/1575991736717119/?ref=category_feed&referral_code=undefined&referral_story_type=listing&tracking=%7B%22qid%22%3A%22-8077651642307999136%22%2C%22mf_story_key%22%3A%2224697609363260149%22%2C%22commerce_rank_obj%22%3A%22%7B%5C%22target_id%5C%22%3A24697609363260149%2C%5C%22target_type%5C%22%3A0%2C%5C%22primary_position%5C%22%3A32%2C%5C%22ranking_signature%5C%22%3A6030755705914833841%2C%5C%22ranking_request_id%5C%22%3A8413195922144480811%2C%5C%22commerce_channel%5C%22%3A504%2C%5C%22value%5C%22%3A0.0014781753088385%2C%5C%22candidate_retrieval_source_map%5C%22%3A%7B%5C%2224697609363260149%5C%22%3A111%7D%7D%22%7D&__tn__=!%3AD
+2025-10-26 12:21:42,743 - INFO -   ✓ Extracted: 2008 Honda Trx450Er - $4500
+2025-10-26 12:21:42,743 - INFO - 🔗 Processing link 15/20
+2025-10-26 12:21:42,770 - INFO -   📄 Text: $2,300
+$3,000
+2003 Honda 300ex
+Temple, GA...
+2025-10-26 12:21:42,771 - INFO -   🔗 Href: /marketplace/item/1323493766096341/?ref=category_feed&referral_code=undefined&referral_story_type=listing&tracking=%7B%22qid%22%3A%22-8077651642307999136%22%2C%22mf_story_key%22%3A%2231307919118856281%22%2C%22commerce_rank_obj%22%3A%22%7B%5C%22target_id%5C%22%3A31307919118856281%2C%5C%22target_type%5C%22%3A0%2C%5C%22primary_position%5C%22%3A34%2C%5C%22ranking_signature%5C%22%3A6030755705914833841%2C%5C%22ranking_request_id%5C%22%3A8413195922144480811%2C%5C%22commerce_channel%5C%22%3A504%2C%5C%22value%5C%22%3A0.0014666822514484%2C%5C%22candidate_retrieval_source_map%5C%22%3A%7B%5C%2231307919118856281%5C%22%3A111%7D%7D%22%7D&__tn__=!%3AD
+2025-10-26 12:21:42,771 - INFO -   ✓ Extracted: 2003 Honda 300Ex - $2300
+2025-10-26 12:21:42,771 - INFO - 🔗 Processing link 16/20
+2025-10-26 12:21:42,861 - INFO -   📄 Text: $4,900
+2016 Hyundai sonata LX Sedan 4D
+Lawrenceville, GA
+140K miles...
+2025-10-26 12:21:42,861 - INFO -   🔗 Href: /marketplace/item/816924041304839/?ref=category_feed&referral_code=undefined&referral_story_type=listing&tracking=%7B%22qid%22%3A%22-8077651642307999136%22%2C%22mf_story_key%22%3A%2225763057689950836%22%2C%22commerce_rank_obj%22%3A%22%7B%5C%22target_id%5C%22%3A25763057689950836%2C%5C%22target_type%5C%22%3A0%2C%5C%22primary_position%5C%22%3A35%2C%5C%22ranking_signature%5C%22%3A6030755705914833841%2C%5C%22ranking_request_id%5C%22%3A8413195922144480811%2C%5C%22commerce_channel%5C%22%3A504%2C%5C%22value%5C%22%3A0.0014584526216767%2C%5C%22candidate_retrieval_source_map%5C%22%3A%7B%5C%2225763057689950836%5C%22%3A111%7D%7D%22%7D&__tn__=!%3AD
+2025-10-26 12:21:42,861 - INFO -   ✓ Extracted: 2016 Hyundai Sonata - $4900
+2025-10-26 12:21:42,862 - INFO - 🔗 Processing link 17/20
+2025-10-26 12:21:42,892 - INFO -   📄 Text: $5,400
+2016 Ford fusion Se
+Norcross, GA
+119K miles...
+2025-10-26 12:21:42,893 - INFO -   🔗 Href: /marketplace/item/25032994103044435/?ref=category_feed&referral_code=undefined&referral_story_type=listing&tracking=%7B%22qid%22%3A%22-8077651642307999136%22%2C%22mf_story_key%22%3A%2231922150094099256%22%2C%22commerce_rank_obj%22%3A%22%7B%5C%22target_id%5C%22%3A31922150094099256%2C%5C%22target_type%5C%22%3A0%2C%5C%22primary_position%5C%22%3A36%2C%5C%22ranking_signature%5C%22%3A6030755705914833841%2C%5C%22ranking_request_id%5C%22%3A8413195922144480811%2C%5C%22commerce_channel%5C%22%3A504%2C%5C%22value%5C%22%3A0.0014346476428229%2C%5C%22candidate_retrieval_source_map%5C%22%3A%7B%5C%2231922150094099256%5C%22%3A111%7D%7D%22%7D&__tn__=!%3AD
+2025-10-26 12:21:42,893 - INFO -   ✓ Extracted: 2016 Ford Fusion - $5400
+2025-10-26 12:21:42,893 - INFO - 🔗 Processing link 18/20
+2025-10-26 12:21:42,993 - INFO -   📄 Text: $5,000
+2014 Jeep compass
+Atlanta, GA
+148K miles...
+2025-10-26 12:21:42,994 - INFO -   🔗 Href: /marketplace/item/1330208908500913/?ref=category_feed&referral_code=undefined&referral_story_type=listing&tracking=%7B%22qid%22%3A%22-8077651642307999136%22%2C%22mf_story_key%22%3A%2232181009948178937%22%2C%22commerce_rank_obj%22%3A%22%7B%5C%22target_id%5C%22%3A32181009948178937%2C%5C%22target_type%5C%22%3A0%2C%5C%22primary_position%5C%22%3A37%2C%5C%22ranking_signature%5C%22%3A6030755705914833841%2C%5C%22ranking_request_id%5C%22%3A8413195922144480811%2C%5C%22commerce_channel%5C%22%3A504%2C%5C%22value%5C%22%3A0.0014311497090856%2C%5C%22candidate_retrieval_source_map%5C%22%3A%7B%5C%2232181009948178937%5C%22%3A111%7D%7D%22%7D&__tn__=!%3AD
+2025-10-26 12:21:42,994 - INFO -   ❌ Could not parse car data from text
+2025-10-26 12:21:42,994 - INFO - 🔗 Processing link 19/20
+2025-10-26 12:21:43,022 - INFO -   📄 Text: $15,000
+2004 Ford f-250 HD Short Bed
+Temple, GA
+300K miles...
+2025-10-26 12:21:43,022 - INFO -   🔗 Href: /marketplace/item/1474942656856153/?ref=category_feed&referral_code=undefined&referral_story_type=listing&tracking=%7B%22qid%22%3A%22-8077651642307999136%22%2C%22mf_story_key%22%3A%2231745475158376766%22%2C%22commerce_rank_obj%22%3A%22%7B%5C%22target_id%5C%22%3A31745475158376766%2C%5C%22target_type%5C%22%3A0%2C%5C%22primary_position%5C%22%3A40%2C%5C%22ranking_signature%5C%22%3A6030755705914833841%2C%5C%22ranking_request_id%5C%22%3A8413195922144480811%2C%5C%22commerce_channel%5C%22%3A504%2C%5C%22value%5C%22%3A0.0014220245433171%2C%5C%22candidate_retrieval_source_map%5C%22%3A%7B%5C%2231745475158376766%5C%22%3A111%7D%7D%22%7D&__tn__=!%3AD
+2025-10-26 12:21:43,023 - INFO -   ✓ Extracted: 2004 Ford F-250 - $15000
+2025-10-26 12:21:43,023 - INFO - 🔗 Processing link 20/20
+2025-10-26 12:21:43,073 - INFO -   📄 Text: $3,500
+$4,500
+2004 Chevrolet 1500 extended cab Short Bed
+Temple, GA
+345K miles...
+2025-10-26 12:21:43,074 - INFO -   🔗 Href: /marketplace/item/792306276604972/?ref=category_feed&referral_code=undefined&referral_story_type=listing&tracking=%7B%22qid%22%3A%22-8077651642307999136%22%2C%22mf_story_key%22%3A%2225369825345944466%22%2C%22commerce_rank_obj%22%3A%22%7B%5C%22target_id%5C%22%3A25369825345944466%2C%5C%22target_type%5C%22%3A0%2C%5C%22primary_position%5C%22%3A41%2C%5C%22ranking_signature%5C%22%3A6030755705914833841%2C%5C%22ranking_request_id%5C%22%3A8413195922144480811%2C%5C%22commerce_channel%5C%22%3A504%2C%5C%22value%5C%22%3A0.0014092997149809%2C%5C%22candidate_retrieval_source_map%5C%22%3A%7B%5C%2225369825345944466%5C%22%3A111%7D%7D%22%7D&__tn__=!%3AD
+2025-10-26 12:21:43,074 - INFO -   ✓ Extracted: 2004 Chevrolet 1500 - $3500
+2025-10-26 12:21:43,074 - INFO - ✅ Successfully extracted 13 car listings
+2025-10-26 12:21:43,172 - INFO - ✓ Cleaned up page
+2025-10-26 12:21:43,198 - INFO - ✓ Cleaned up context
+2025-10-26 12:22:13,249 - INFO - ✓ Cleaned up browser
+2025-10-26 12:22:13,263 - INFO - ✓ Cleaned up playwright
+2025-10-26 12:22:13,263 - INFO - 📊 Processing 13 car listings...
+2025-10-26 12:22:13,263 - INFO - 📈 Calculating deal scores...
+2025-10-26 12:22:13,264 - INFO - 💾 Saving results to CSV...
+2025-10-26 12:22:13,267 - INFO - ✅ Scraping process completed successfully!
+2025-10-26 12:28:53,208 - INFO - 🔍 Verbose logging enabled
+2025-10-26 12:28:53,209 - INFO - 🚀 Starting Facebook Marketplace Car Scraper...
+2025-10-26 12:28:53,209 - INFO - 🤖 Running in non-interactive mode
+2025-10-26 12:28:53,209 - INFO - 📁 Reading preferences from: Preferences.csv
+2025-10-26 12:28:53,209 - INFO -   Line 1: Minimum Mileage = 0 (int)
+2025-10-26 12:28:53,209 - INFO -   Line 2: Maximum Mileage = 200000 (int)
+2025-10-26 12:28:53,209 - INFO -   Line 3: Minimum Price = 250 (int)
+2025-10-26 12:28:53,210 - INFO -   Line 4: Maximum Price = 55000 (int)
+2025-10-26 12:28:53,210 - INFO -   Line 5: Minimum Year = 1995 (int)
+2025-10-26 12:28:53,210 - INFO -   Line 6: Maximum Year = 2020 (int)
+2025-10-26 12:28:53,210 - INFO -   Line 7: Scroll Down Length = 10 (int)
+2025-10-26 12:28:53,210 - INFO -   Line 8: Search Term =  (str)
+2025-10-26 12:28:53,210 - INFO -   Line 9: Location = atlanta (str)
+2025-10-26 12:28:53,211 - INFO -   Line 10: Make =  (str)
+2025-10-26 12:28:53,211 - INFO -   Line 11: Model =  (str)
+2025-10-26 12:28:53,212 - INFO -   Line 12: Transmission =  (str)
+2025-10-26 12:28:53,212 - INFO -   Line 13: Fuel Type =  (str)
+2025-10-26 12:28:53,212 - INFO -   Line 14: Body Style =  (str)
+2025-10-26 12:28:53,212 - INFO -   Line 15: Condition =  (str)
+2025-10-26 12:28:53,212 - INFO -   Line 16: Seller Type =  (str)
+2025-10-26 12:28:53,220 - INFO -   Line 17: Sort By = creation_time_descend (str)
+2025-10-26 12:28:53,226 - INFO -   Line 18: Radius = 20 (int)
+2025-10-26 12:28:53,228 - INFO - ✓ Successfully loaded 18 preferences
+2025-10-26 12:28:53,232 - INFO - 🔗 Building Facebook URL for location: atlanta
+2025-10-26 12:28:53,235 - INFO -   Added parameter: minPrice=250
+2025-10-26 12:28:53,239 - INFO -   Added parameter: maxPrice=55000
+2025-10-26 12:28:53,240 - INFO -   Added parameter: maxMileage=200000
+2025-10-26 12:28:53,241 - INFO -   Added parameter: minYear=1995
+2025-10-26 12:28:53,242 - INFO -   Added parameter: maxYear=2020
+2025-10-26 12:28:53,244 - INFO -   Added parameter: radius=20
+2025-10-26 12:28:53,246 - INFO -   Added filter: sortBy=creation_time_descend
+2025-10-26 12:28:53,247 - INFO - ✓ Built URL: https://www.facebook.com/marketplace/atlanta/vehicles?minPrice=250&maxPrice=55000&maxMileage=200000&minYear=1995&maxYear=2020&radius=20&sortBy=creation_time_descend&exact=false
+2025-10-26 12:28:53,248 - INFO - 🕰️ Starting Facebook scraping process...
+2025-10-26 12:28:53,250 - INFO - 🔍 Attempting to scrape: https://www.facebook.com/marketplace/atlanta/vehicles?minPrice=250&maxPrice=55000&maxMileage=200000&minYear=1995&maxYear=2020&radius=20&sortBy=creation_time_descend&exact=false
+2025-10-26 12:28:53,251 - INFO - 📊 Scroll count: 10, Max listings: 500
+2025-10-26 12:28:53,253 - INFO - 🚀 Launching browser...
+2025-10-26 12:28:56,158 - INFO - ✓ Playwright started
+2025-10-26 12:28:56,606 - INFO - ✓ Browser launched
+2025-10-26 12:28:56,642 - INFO - ✓ Browser context created
+2025-10-26 12:28:56,889 - INFO - ✓ Page created and ready
+2025-10-26 12:28:56,890 - INFO - 🌐 Loading Facebook Marketplace...
+2025-10-26 12:28:56,891 - INFO - 📱 Navigating to: https://www.facebook.com/marketplace/atlanta/vehicles?minPrice=250&maxPrice=5500...
+2025-10-26 12:29:00,785 - INFO - 📡 Response status: 200
+2025-10-26 12:29:00,786 - INFO - ✓ Page loaded successfully
+2025-10-26 12:29:00,787 - INFO - ⏳ Waiting for page to stabilize...
+2025-10-26 12:29:03,793 - INFO - 🔐 Checking for login requirements...
+2025-10-26 12:29:03,794 - WARNING - ⚠ Could not check page text: Page.inner_text() missing 1 required positional argument: 'selector'
+2025-10-26 12:29:03,796 - INFO - Continuing with scraping attempt...
+2025-10-26 12:29:03,797 - INFO - 📜 Scrolling to load all available listings...
+2025-10-26 12:29:09,783 - INFO - 📊 Scroll 1/10: Found 24 unique listings
+2025-10-26 12:29:13,791 - INFO - 📊 Scroll 2/10: Found 24 unique listings
+2025-10-26 12:29:17,273 - INFO - 📊 Scroll 3/10: Found 24 unique listings
+2025-10-26 12:29:20,598 - INFO - 📊 Scroll 4/10: Found 24 unique listings
+2025-10-26 12:29:20,600 - INFO - ✅ No new listings found, stopping scroll
+2025-10-26 12:29:20,602 - INFO - 🎯 Total unique listings found: 24
+2025-10-26 12:29:20,603 - INFO - 📝 Extracting detailed car data from 24 listings...
+2025-10-26 12:29:20,639 - INFO -   ✓ Extracted: 2016 Ford Fusion Se - $5400
+2025-10-26 12:29:20,667 - INFO -   ✓ Extracted: 2012 Toyota Camry Le - $3650
+2025-10-26 12:29:20,726 - INFO -   ✓ Extracted: 2004 Ford Ranger Regular - $2900
+2025-10-26 12:29:20,796 - INFO -   ✓ Extracted: 2017 Dodge Durango Gt - $10000
+2025-10-26 12:29:20,827 - INFO -   ✓ Extracted: 2013 Kia Optima Sedan - $4800
+2025-10-26 12:29:21,589 - INFO - ✅ Successfully extracted 23 valid car listings
+2025-10-26 12:29:21,660 - INFO - ✓ Cleaned up page
+2025-10-26 12:29:21,692 - INFO - ✓ Cleaned up context
+2025-10-26 12:29:22,584 - INFO - ✓ Cleaned up browser
+2025-10-26 12:29:22,597 - INFO - ✓ Cleaned up playwright
+2025-10-26 12:29:22,598 - INFO - 📊 Processing 23 car listings...
+2025-10-26 12:29:22,599 - INFO - 📈 Calculating deal scores...
+2025-10-26 12:29:22,601 - INFO - 💾 Saving results to CSV...
+2025-10-26 12:29:22,603 - INFO - ✅ Scraping process completed successfully!
+2025-10-26 12:46:18,659 - INFO - 📋 Using default preferences:
+2025-10-26 12:46:18,661 - INFO -   Minimum Mileage: 0
+2025-10-26 12:46:18,661 - INFO -   Maximum Mileage: 200000
+2025-10-26 12:46:18,661 - INFO -   Minimum Price: 250
+2025-10-26 12:46:18,661 - INFO -   Maximum Price: 55000
+2025-10-26 12:46:18,661 - INFO -   Minimum Year: 1995
+2025-10-26 12:46:18,661 - INFO -   Maximum Year: 2020
+2025-10-26 12:46:18,662 - INFO -   Scroll Down Length: 10
+2025-10-26 12:46:18,662 - INFO -   Search Term: 
+2025-10-26 12:46:18,662 - INFO -   Location: atlanta
+2025-10-26 12:46:18,662 - INFO -   Make: 
+2025-10-26 12:46:18,662 - INFO -   Model: 
+2025-10-26 12:46:18,662 - INFO -   Transmission: 
+2025-10-26 12:46:18,662 - INFO -   Fuel Type: 
+2025-10-26 12:46:18,662 - INFO -   Body Style: 
+2025-10-26 12:46:18,662 - INFO -   Condition: 
+2025-10-26 12:46:18,663 - INFO -   Seller Type: 
+2025-10-26 12:46:18,663 - INFO -   Sort By: creation_time_descend
+2025-10-26 12:46:18,663 - INFO -   Radius: 20
+2025-10-26 12:47:11,847 - INFO - 🔗 Building Facebook URL for location: detroit
+2025-10-26 12:47:11,847 - INFO - ✓ Built URL: https://www.facebook.com/marketplace/detroit/search?query=Dodge%20Charger&minPrice=250&maxPrice=40000&maxMileage=200000&minYear=2005&maxYear=2025&radius=20&make=dodge&model=charger&sortBy=creation_time_descend&exact=false
+2025-10-26 12:47:12,357 - INFO - 🚀 Launching browser...
+2025-10-26 12:47:14,815 - INFO - ✓ Playwright started
+2025-10-26 12:47:15,253 - INFO - ✓ Browser launched
+2025-10-26 12:47:15,337 - INFO - ✓ Browser context created
+2025-10-26 12:47:15,544 - INFO - ✓ Page created and ready
+2025-10-26 12:51:56,658 - INFO - 🤖 Running in non-interactive mode
+2025-10-26 12:51:56,658 - INFO - 📁 Reading preferences from: Preferences.csv
+2025-10-26 12:51:56,659 - INFO - ✓ Successfully loaded 18 preferences
+2025-10-26 12:51:56,659 - INFO - 🔗 Building Facebook URL for location: atlanta
+2025-10-26 12:51:56,660 - INFO - ✓ Built URL: https://www.facebook.com/marketplace/atlanta/vehicles?minPrice=250&maxPrice=55000&maxMileage=200000&minYear=1995&maxYear=2020&radius=20&sortBy=creation_time_descend&exact=false
+2025-10-26 12:51:56,660 - INFO - 🔍 Attempting to scrape: https://www.facebook.com/marketplace/atlanta/vehicles?minPrice=250&maxPrice=55000&maxMileage=200000&minYear=1995&maxYear=2020&radius=20&sortBy=creation_time_descend&exact=false
+2025-10-26 12:51:56,660 - INFO - 📊 Scroll count: 10, Max listings: 500
+2025-10-26 12:51:56,660 - INFO - 🚀 Launching browser...
+2025-10-26 12:52:00,430 - INFO - ✓ Playwright started
+2025-10-26 12:52:00,917 - INFO - ✓ Browser launched
+2025-10-26 12:52:00,936 - INFO - ✓ Browser context created
+2025-10-26 12:52:01,283 - INFO - ✓ Page created and ready
+2025-10-26 12:52:01,283 - INFO - 🌐 Loading Facebook Marketplace...
+2025-10-26 12:52:01,283 - INFO - 📱 Navigating to: https://www.facebook.com/marketplace/atlanta/vehicles?minPrice=250&maxPrice=5500...
+2025-10-26 12:52:09,549 - INFO - 📡 Response status: 200
+2025-10-26 12:52:09,549 - INFO - ✓ Page loaded successfully
+2025-10-26 12:52:09,550 - INFO - ⏳ Waiting for page to stabilize...
+2025-10-26 12:52:12,551 - INFO - 🔐 Checking for login requirements...
+2025-10-26 12:52:12,552 - WARNING - ⚠ Could not check page text: Page.inner_text() missing 1 required positional argument: 'selector'
+2025-10-26 12:52:12,552 - INFO - 📜 Scrolling to load all available listings...
+2025-10-26 12:52:18,820 - INFO - 📊 Scroll 1/10: Found 24 unique listings
+2025-10-26 12:52:24,322 - INFO - 📊 Scroll 2/10: Found 24 unique listings
+2025-10-26 12:52:31,425 - INFO - 📊 Scroll 3/10: Found 24 unique listings
+2025-10-26 12:52:39,454 - INFO - 📊 Scroll 4/10: Found 24 unique listings
+2025-10-26 12:52:39,455 - INFO - ✅ No new listings found, stopping scroll
+2025-10-26 12:52:39,455 - INFO - 🎯 Total unique listings found: 24
+2025-10-26 12:52:39,455 - INFO - 📝 Extracting detailed car data from 24 listings...
+2025-10-26 12:52:43,362 - INFO - ✅ Successfully extracted 23 valid car listings
+2025-10-26 12:54:56,507 - INFO - 🔍 Verbose logging enabled
+2025-10-26 12:54:56,508 - INFO - 🤖 Running in non-interactive mode
+2025-10-26 12:54:56,508 - INFO - 📁 Reading preferences from: Preferences.csv
+2025-10-26 12:54:56,509 - INFO -   Line 1: Minimum Mileage = 0 (int)
+2025-10-26 12:54:56,509 - INFO -   Line 2: Maximum Mileage = 200000 (int)
+2025-10-26 12:54:56,509 - INFO -   Line 3: Minimum Price = 250 (int)
+2025-10-26 12:54:56,509 - INFO -   Line 4: Maximum Price = 55000 (int)
+2025-10-26 12:54:56,509 - INFO -   Line 5: Minimum Year = 1995 (int)
+2025-10-26 12:54:56,509 - INFO -   Line 6: Maximum Year = 2020 (int)
+2025-10-26 12:54:56,509 - INFO -   Line 7: Scroll Down Length = 10 (int)
+2025-10-26 12:54:56,509 - INFO -   Line 8: Search Term =  (str)
+2025-10-26 12:54:56,509 - INFO -   Line 9: Location = atlanta (str)
+2025-10-26 12:54:56,510 - INFO -   Line 10: Make =  (str)
+2025-10-26 12:54:56,510 - INFO -   Line 11: Model =  (str)
+2025-10-26 12:54:56,510 - INFO -   Line 12: Transmission =  (str)
+2025-10-26 12:54:56,510 - INFO -   Line 13: Fuel Type =  (str)
+2025-10-26 12:54:56,510 - INFO -   Line 14: Body Style =  (str)
+2025-10-26 12:54:56,511 - INFO -   Line 15: Condition =  (str)
+2025-10-26 12:54:56,511 - INFO -   Line 16: Seller Type =  (str)
+2025-10-26 12:54:56,511 - INFO -   Line 17: Sort By = creation_time_descend (str)
+2025-10-26 12:54:56,511 - INFO -   Line 18: Radius = 20 (int)
+2025-10-26 12:54:56,511 - INFO - ✓ Successfully loaded 18 preferences
+2025-10-26 12:54:56,511 - INFO - 🔗 Building Facebook URL for location: atlanta
+2025-10-26 12:54:56,511 - INFO -   Added parameter: minPrice=250
+2025-10-26 12:54:56,511 - INFO -   Added parameter: maxPrice=55000
+2025-10-26 12:54:56,511 - INFO -   Added parameter: maxMileage=200000
+2025-10-26 12:54:56,512 - INFO -   Added parameter: minYear=1995
+2025-10-26 12:54:56,512 - INFO -   Added parameter: maxYear=2020
+2025-10-26 12:54:56,512 - INFO -   Added parameter: radius=20
+2025-10-26 12:54:56,512 - INFO -   Added filter: sortBy=creation_time_descend
+2025-10-26 12:54:56,512 - INFO - ✓ Built URL: https://www.facebook.com/marketplace/atlanta/vehicles?minPrice=250&maxPrice=55000&maxMileage=200000&minYear=1995&maxYear=2020&radius=20&sortBy=creation_time_descend&exact=false
+2025-10-26 12:54:56,512 - INFO - 🔍 Attempting to scrape: https://www.facebook.com/marketplace/atlanta/vehicles?minPrice=250&maxPrice=55000&maxMileage=200000&minYear=1995&maxYear=2020&radius=20&sortBy=creation_time_descend&exact=false
+2025-10-26 12:54:56,512 - INFO - 📊 Scroll count: 10, Max listings: 500
+2025-10-26 12:54:56,512 - INFO - 🚀 Launching browser...
+2025-10-26 12:55:01,767 - INFO - ✓ Playwright started
+2025-10-26 12:55:02,425 - INFO - ✓ Browser launched
+2025-10-26 12:55:02,442 - INFO - ✓ Browser context created
+2025-10-26 12:55:02,860 - INFO - ✓ Page created and ready
+2025-10-26 12:55:02,860 - INFO - 🌐 Loading Facebook Marketplace...
+2025-10-26 12:55:02,861 - INFO - 📱 Navigating to: https://www.facebook.com/marketplace/atlanta/vehicles?minPrice=250&maxPrice=5500...
+2025-10-26 12:55:05,458 - INFO - 📡 Response status: 200
+2025-10-26 12:55:05,459 - INFO - ✓ Page loaded successfully
+2025-10-26 12:55:05,459 - INFO - ⏳ Waiting for page to stabilize...
+2025-10-26 12:55:08,475 - INFO - 🔐 Checking for login requirements...
+2025-10-26 12:55:08,476 - WARNING - ⚠ Could not check page text: Page.inner_text() missing 1 required positional argument: 'selector'
+2025-10-26 12:55:08,476 - INFO - Continuing with scraping attempt...
+2025-10-26 12:55:08,476 - INFO - 📜 Scrolling to load all available listings...
+2025-10-26 12:55:22,147 - INFO - 📊 Scroll 1/10: Found 24 unique listings
+2025-10-26 12:55:27,101 - INFO - 📊 Scroll 2/10: Found 24 unique listings
+2025-10-26 12:55:31,951 - INFO - 📊 Scroll 3/10: Found 24 unique listings
+2025-10-26 12:55:37,107 - INFO - 📊 Scroll 4/10: Found 24 unique listings
+2025-10-26 12:55:37,109 - INFO - ✅ No new listings found, stopping scroll
+2025-10-26 12:55:37,110 - INFO - 🎯 Total unique listings found: 24
+2025-10-26 12:55:37,111 - INFO - 📝 Extracting detailed car data from 24 listings...
+2025-10-26 12:55:37,141 - INFO -   ✓ Extracted: 2018 Acura Ilx Atlanta, - $12500
+2025-10-26 12:55:37,181 - INFO -   ✓ Extracted: 2012 Toyota Camry Le - $3650
+2025-10-26 12:55:37,530 - INFO -   ✓ Extracted: 2004 Ford Ranger Regular - $2900
+2025-10-26 12:55:37,569 - INFO -   ✓ Extracted: 2016 Hyundai Sonata Lx - $4900
+2025-10-26 12:55:37,769 - INFO -   ✓ Extracted: 1999 Dodge Durango Slt - $6000
+2025-10-26 12:55:39,314 - INFO - ✅ Successfully extracted 23 valid car listings
+2025-10-26 12:55:39,381 - INFO - ✓ Cleaned up page
+2025-10-26 12:55:39,410 - INFO - ✓ Cleaned up context
+2025-10-26 12:56:09,441 - INFO - ✓ Cleaned up browser
+2025-10-26 12:56:09,456 - INFO - ✓ Cleaned up playwright
+2025-10-26 12:57:14,094 - INFO - 📋 Using default preferences:
+2025-10-26 12:57:14,096 - INFO -   Minimum Mileage: 0
+2025-10-26 12:57:14,097 - INFO -   Maximum Mileage: 200000
+2025-10-26 12:57:14,097 - INFO -   Minimum Price: 250
+2025-10-26 12:57:14,097 - INFO -   Maximum Price: 55000
+2025-10-26 12:57:14,097 - INFO -   Minimum Year: 1995
+2025-10-26 12:57:14,097 - INFO -   Maximum Year: 2020
+2025-10-26 12:57:14,098 - INFO -   Scroll Down Length: 10
+2025-10-26 12:57:14,098 - INFO -   Search Term: 
+2025-10-26 12:57:14,098 - INFO -   Location: atlanta
+2025-10-26 12:57:14,098 - INFO -   Make: 
+2025-10-26 12:57:14,099 - INFO -   Model: 
+2025-10-26 12:57:14,101 - INFO -   Transmission: 
+2025-10-26 12:57:14,101 - INFO -   Fuel Type: 
+2025-10-26 12:57:14,101 - INFO -   Body Style: 
+2025-10-26 12:57:14,102 - INFO -   Condition: 
+2025-10-26 12:57:14,102 - INFO -   Seller Type: 
+2025-10-26 12:57:14,102 - INFO -   Sort By: creation_time_descend
+2025-10-26 12:57:14,102 - INFO -   Radius: 20
+2025-10-26 12:57:35,571 - INFO - 🔗 Building Facebook URL for location: Detroit
+2025-10-26 12:57:35,572 - INFO -   Added parameter: minPrice=250
+2025-10-26 12:57:35,572 - INFO -   Added parameter: maxPrice=55000
+2025-10-26 12:57:35,572 - INFO -   Added parameter: maxMileage=200000
+2025-10-26 12:57:35,572 - INFO -   Added parameter: minYear=1995
+2025-10-26 12:57:35,572 - INFO -   Added parameter: maxYear=2020
+2025-10-26 12:57:35,572 - INFO -   Added parameter: radius=20
+2025-10-26 12:57:35,572 - INFO -   Added filter: sortBy=creation_time_descend
+2025-10-26 12:57:35,573 - INFO - ✓ Built URL: https://www.facebook.com/marketplace/Detroit/search?query=Toyota&minPrice=250&maxPrice=55000&maxMileage=200000&minYear=1995&maxYear=2020&radius=20&sortBy=creation_time_descend&exact=false
+2025-10-26 12:57:36,078 - INFO - 🚀 Launching browser...
+2025-10-26 12:57:38,342 - INFO - ✓ Playwright started
+2025-10-26 12:57:38,795 - INFO - ✓ Browser launched
+2025-10-26 12:57:38,829 - INFO - ✓ Browser context created
+2025-10-26 12:57:39,111 - INFO - ✓ Page created and ready
+2025-10-26 12:58:13,635 - INFO - ✓ Cleaned up page
+2025-10-26 12:58:13,656 - INFO - ✓ Cleaned up context
+2025-10-26 12:58:17,973 - INFO - ✓ Cleaned up browser
+2025-10-26 12:58:17,991 - INFO - ✓ Cleaned up playwright
