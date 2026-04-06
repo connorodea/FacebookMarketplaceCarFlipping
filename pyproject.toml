@@ -8,6 +8,7 @@ dependencies = [
     "rich>=13.0",
     "fastapi>=0.110",
     "uvicorn>=0.29",
+    "anthropic>=0.30",
 ]
 
 [project.scripts]

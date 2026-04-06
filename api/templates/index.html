@@ -3,45 +3,46 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DealFinder - Car Deal Analytics</title>
+<title>DealFinder Pro - AI Car Deal Analytics</title>
 <style>
 /* =========================================================================
-   RESET & BASE
+   RESET & CUSTOM PROPERTIES
    ========================================================================= */
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg-primary: #0f172a;
-  --bg-secondary: #1e293b;
-  --bg-card: rgba(30, 41, 59, 0.7);
-  --bg-card-hover: rgba(30, 41, 59, 0.9);
-  --bg-input: rgba(15, 23, 42, 0.8);
-  --border-color: rgba(148, 163, 184, 0.12);
-  --border-focus: rgba(16, 185, 129, 0.5);
+  --bg-deep: #0a0a0f;
+  --bg-surface: rgba(255,255,255,0.03);
+  --bg-surface-hover: rgba(255,255,255,0.06);
+  --bg-input: rgba(255,255,255,0.04);
+  --bg-overlay: rgba(10,10,15,0.85);
+  --border: rgba(255,255,255,0.06);
+  --border-hover: rgba(255,255,255,0.10);
+  --border-focus: rgba(59,130,246,0.5);
   --text-primary: #f1f5f9;
   --text-secondary: #94a3b8;
-  --text-muted: #64748b;
-  --accent: #10b981;
-  --accent-hover: #059669;
-  --accent-dim: rgba(16, 185, 129, 0.12);
-  --red: #ef4444;
-  --red-dim: rgba(239, 68, 68, 0.12);
+  --text-muted: #475569;
   --blue: #3b82f6;
-  --blue-dim: rgba(59, 130, 246, 0.12);
-  --yellow: #f59e0b;
-  --yellow-dim: rgba(245, 158, 11, 0.12);
-  --shadow-sm: 0 1px 2px rgba(0,0,0,0.2);
-  --shadow-md: 0 4px 12px rgba(0,0,0,0.25);
-  --shadow-lg: 0 8px 32px rgba(0,0,0,0.35);
+  --blue-dim: rgba(59,130,246,0.12);
+  --blue-glow: rgba(59,130,246,0.20);
+  --emerald: #10b981;
+  --emerald-dim: rgba(16,185,129,0.12);
+  --rose: #f43f5e;
+  --rose-dim: rgba(244,63,94,0.12);
+  --amber: #f59e0b;
+  --amber-dim: rgba(245,158,11,0.12);
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.5);
+  --shadow-glow: 0 0 20px rgba(59,130,246,0.15);
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 14px;
+  --radius-xl: 18px;
   --radius-pill: 999px;
-  --transition: 180ms ease;
+  --transition-fast: 150ms ease;
+  --transition: 200ms ease;
+  --transition-slow: 300ms ease;
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
 }
@@ -54,396 +55,885 @@ html {
 
 body {
   font-family: var(--font-sans);
-  background: var(--bg-primary);
+  background: var(--bg-deep);
+  background-image: radial-gradient(ellipse at 50% 0%, rgba(59,130,246,0.04) 0%, transparent 60%);
   color: var(--text-primary);
   line-height: 1.5;
   min-height: 100vh;
 }
 
 /* =========================================================================
-   LAYOUT
+   UTILITY CLASSES
    ========================================================================= */
-.app-container {
-  display: grid;
-  grid-template-columns: 1fr;
-  grid-template-rows: auto auto 1fr;
-  min-height: 100vh;
-}
-
-.main-content {
-  display: grid;
-  grid-template-columns: 1fr 300px;
-  gap: 24px;
-  max-width: 1440px;
-  width: 100%;
-  margin: 0 auto;
-  padding: 0 24px 48px;
-}
-
-.primary-column {
-  min-width: 0;
-}
-
-.sidebar {
-  min-width: 0;
+.sr-only {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0,0,0,0); border: 0;
 }
 
 /* =========================================================================
-   HEADER
+   SCROLLBAR
    ========================================================================= */
-.app-header {
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.14); }
+
+/* =========================================================================
+   APP LAYOUT
+   ========================================================================= */
+.app {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 24px;
-  border-bottom: 1px solid var(--border-color);
-  background: rgba(15, 23, 42, 0.95);
-  backdrop-filter: blur(12px);
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* =========================================================================
+   TOP NAV
+   ========================================================================= */
+.topnav {
   position: sticky;
   top: 0;
   z-index: 100;
-}
-
-.header-brand {
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: space-between;
+  padding: 0 24px;
+  height: 56px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(10,10,15,0.80);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
-.header-brand svg {
-  color: var(--accent);
-  flex-shrink: 0;
+.topnav-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.header-brand h1 {
-  font-size: 1.25rem;
+.topnav-brand svg {
+  width: 26px;
+  height: 26px;
+  color: var(--blue);
+}
+
+.topnav-brand-name {
+  font-size: 16px;
   font-weight: 700;
   letter-spacing: -0.02em;
   color: var(--text-primary);
 }
 
-.header-brand span {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  font-weight: 400;
-  margin-left: 2px;
+.topnav-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--blue);
+  background: var(--blue-dim);
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(59,130,246,0.18);
 }
 
-.header-status {
+.topnav-right {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
 }
 
-.status-badge {
+.status-pill {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 5px 12px;
+  padding: 4px 12px;
+  font-size: 11px;
+  font-weight: 600;
   border-radius: var(--radius-pill);
-  font-size: 0.73rem;
-  font-weight: 500;
-  letter-spacing: 0.01em;
-  border: 1px solid var(--border-color);
-  background: var(--bg-card);
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
+  color: var(--text-muted);
+  transition: all var(--transition);
 }
 
-.status-badge .dot {
-  width: 7px;
-  height: 7px;
+.status-pill .dot {
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  flex-shrink: 0;
+  background: var(--text-muted);
+  transition: background var(--transition);
 }
 
-.status-badge.active .dot { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
-.status-badge.inactive .dot { background: var(--text-muted); }
-.status-badge.error .dot { background: var(--red); box-shadow: 0 0 6px var(--red); }
+.status-pill.active {
+  color: var(--emerald);
+  border-color: rgba(16,185,129,0.2);
+  background: var(--emerald-dim);
+}
 
-/* Login Button */
-.btn-login {
+.status-pill.active .dot {
+  background: var(--emerald);
+  box-shadow: 0 0 6px rgba(16,185,129,0.4);
+}
+
+.status-pill.warning {
+  color: var(--amber);
+  border-color: rgba(245,158,11,0.2);
+  background: var(--amber-dim);
+}
+
+.status-pill.warning .dot {
+  background: var(--amber);
+}
+
+.status-pill.error {
+  color: var(--rose);
+  border-color: rgba(244,63,94,0.2);
+  background: var(--rose-dim);
+}
+
+.status-pill.error .dot {
+  background: var(--rose);
+}
+
+.btn-connect {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   padding: 6px 16px;
-  border-radius: var(--radius-pill);
-  font-size: 0.78rem;
+  font-size: 12px;
   font-weight: 600;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(59,130,246,0.3);
+  background: transparent;
+  color: var(--blue);
   cursor: pointer;
-  border: 1px solid var(--accent);
-  background: transparent;
-  color: var(--accent);
-  transition: all 0.18s ease;
-}
-.btn-login:hover {
-  background: var(--accent);
-  color: #fff;
-}
-.btn-login:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  border-color: var(--text-muted);
-  color: var(--text-muted);
-}
-.btn-login:disabled:hover {
-  background: transparent;
-  color: var(--text-muted);
-}
-.btn-login.logging-in {
-  border-color: var(--yellow);
-  color: var(--yellow);
-  animation: pulse-glow 1.5s ease-in-out infinite;
-}
-@keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(234, 179, 8, 0); }
-  50% { box-shadow: 0 0 10px 2px rgba(234, 179, 8, 0.25); }
-}
-.btn-login .btn-login-icon {
-  width: 14px;
-  height: 14px;
+  transition: all var(--transition);
+  font-family: var(--font-sans);
 }
 
-/* Login Modal Overlay */
-.login-modal {
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
-  background: rgba(0,0,0,0.6);
-  backdrop-filter: blur(4px);
-  justify-content: center;
-  align-items: center;
+.btn-connect:hover {
+  background: var(--blue-dim);
+  border-color: rgba(59,130,246,0.5);
 }
-.login-modal.open { display: flex; }
-.login-modal-content {
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  padding: 32px 40px;
-  max-width: 440px;
-  width: 90%;
-  text-align: center;
+
+.btn-connect:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
 }
-.login-modal-content h3 {
-  margin: 0 0 8px;
-  font-size: 1.2rem;
-  color: var(--text-primary);
+
+.btn-connect.connected {
+  color: var(--emerald);
+  border-color: rgba(16,185,129,0.3);
+  cursor: default;
 }
-.login-modal-content p {
-  margin: 0 0 20px;
-  color: var(--text-secondary);
-  font-size: 0.88rem;
-  line-height: 1.6;
-}
-.login-modal-content .login-status-text {
-  font-weight: 600;
-  font-size: 0.9rem;
-  margin-bottom: 16px;
-}
-.login-modal-content .login-status-text.waiting { color: var(--yellow); }
-.login-modal-content .login-status-text.success { color: var(--accent); }
-.login-modal-content .login-status-text.failed { color: var(--red); }
-.login-modal-content .btn-close-modal {
-  padding: 8px 24px;
-  border-radius: var(--radius-pill);
-  font-size: 0.82rem;
-  font-weight: 600;
-  cursor: pointer;
-  border: 1px solid var(--border-color);
-  background: var(--bg-card);
-  color: var(--text-secondary);
-  transition: all 0.18s ease;
-}
-.login-modal-content .btn-close-modal:hover {
-  background: var(--bg-elevated);
-  color: var(--text-primary);
+
+.btn-connect.connected:hover {
+  background: var(--emerald-dim);
 }
 
 /* =========================================================================
-   STATS BAR
+   MAIN CONTENT
    ========================================================================= */
-.stats-bar {
+.main-wrap {
+  max-width: 1440px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+/* Stats row */
+.stats-row {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
-  max-width: 1440px;
-  width: 100%;
-  margin: 0 auto;
-  padding: 24px 24px 0;
-}
-
-.stat-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  padding: 20px 24px;
-  backdrop-filter: blur(8px);
-  transition: border-color var(--transition), box-shadow var(--transition);
-}
-
-.stat-card:hover {
-  border-color: rgba(148, 163, 184, 0.2);
-  box-shadow: var(--shadow-md);
-}
-
-.stat-card .label {
-  font-size: 0.73rem;
-  font-weight: 500;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  margin-bottom: 8px;
-}
-
-.stat-card .value {
-  font-size: 1.75rem;
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  color: var(--text-primary);
-  font-variant-numeric: tabular-nums;
-}
-
-.stat-card .value.accent { color: var(--accent); }
-
-.stat-card .sub {
-  font-size: 0.73rem;
-  color: var(--text-secondary);
-  margin-top: 4px;
+  margin-bottom: 24px;
 }
 
 /* =========================================================================
-   SECTION SPACING
-   ========================================================================= */
-.section-gap {
-  padding: 24px 24px 0;
-  max-width: 1440px;
-  width: 100%;
-  margin: 0 auto;
-}
-
-/* =========================================================================
-   CARDS (GENERIC)
+   GLASS CARD
    ========================================================================= */
 .card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  backdrop-filter: blur(8px);
-  overflow: hidden;
+  padding: 20px 24px;
+  transition: border-color var(--transition), background var(--transition);
+}
+
+.card:hover {
+  border-color: var(--border-hover);
 }
 
 .card-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 16px;
 }
 
-.card-header h2 {
-  font-size: 0.93rem;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.card-body {
-  padding: 20px;
-}
-
-/* =========================================================================
-   COLLAPSIBLE SEARCH PANEL
-   ========================================================================= */
-.search-panel {
-  margin-bottom: 24px;
-}
-
-.search-toggle {
+.card-title {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: none;
-  border: none;
-  color: var(--text-primary);
-  cursor: pointer;
-  font-family: inherit;
-  font-size: 0.93rem;
+  font-size: 13px;
   font-weight: 600;
-  padding: 0;
-  width: 100%;
-  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);
 }
 
-.search-toggle svg {
-  transition: transform var(--transition);
+.card-title svg {
+  width: 16px;
+  height: 16px;
+  opacity: 0.6;
+}
+
+/* =========================================================================
+   STAT CARDS
+   ========================================================================= */
+.stat-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-card .stat-label {
+  font-size: 12px;
+  font-weight: 500;
   color: var(--text-muted);
-  flex-shrink: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
-.search-toggle.open svg {
-  transform: rotate(180deg);
+.stat-card .stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
 }
 
-.search-form-container {
+.stat-card .stat-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.stat-value.emerald { color: var(--emerald); }
+.stat-value.blue { color: var(--blue); }
+.stat-value.amber { color: var(--amber); }
+.stat-value.rose { color: var(--rose); }
+
+/* AI status dot */
+.ai-status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+.ai-status-dot.on {
+  background: var(--emerald);
+  box-shadow: 0 0 8px rgba(16,185,129,0.5);
+}
+.ai-status-dot.off {
+  background: var(--text-muted);
+}
+
+/* =========================================================================
+   TWO-COLUMN LAYOUT
+   ========================================================================= */
+.content-grid {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 24px;
+}
+
+.left-col {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+}
+
+.right-col {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+}
+
+/* =========================================================================
+   AI MARKET INSIGHTS
+   ========================================================================= */
+.ai-panel {
+  position: relative;
   overflow: hidden;
-  max-height: 0;
-  transition: max-height 350ms ease, opacity 200ms ease;
-  opacity: 0;
 }
 
-.search-form-container.open {
-  max-height: 500px;
+.ai-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--blue), transparent);
+  opacity: 0.4;
+}
+
+.ai-panel .card-title {
+  color: var(--blue);
+}
+
+.ai-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.ai-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ai-field.full {
+  grid-column: 1 / -1;
+}
+
+.ai-field-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.ai-field-value {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.trend-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-radius: var(--radius-pill);
+}
+
+.trend-badge.hot {
+  color: var(--emerald);
+  background: var(--emerald-dim);
+}
+
+.trend-badge.cold {
+  color: var(--rose);
+  background: var(--rose-dim);
+}
+
+.trend-badge.neutral {
+  color: var(--amber);
+  background: var(--amber-dim);
+}
+
+.ai-empty {
+  text-align: center;
+  padding: 32px 16px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.ai-empty svg {
+  display: block;
+  margin: 0 auto 12px;
+  width: 32px;
+  height: 32px;
+  opacity: 0.3;
+}
+
+/* =========================================================================
+   QUICK SCORE + AI ANALYZE
+   ========================================================================= */
+.score-panel-inner {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 24px;
+}
+
+.score-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.score-form .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.score-results {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.score-result-section {
+  padding: 16px;
+  border-radius: var(--radius-md);
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border);
+}
+
+.score-result-section h4 {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.score-result-section h4 svg {
+  width: 14px;
+  height: 14px;
+}
+
+.score-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.score-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.score-metric-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.score-metric-value {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+}
+
+/* AI Analysis result */
+.ai-result {
+  position: relative;
+}
+
+.ai-result::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--blue);
+  border-radius: 1px;
+  opacity: 0.5;
+}
+
+.verdict-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-radius: var(--radius-pill);
+}
+
+.verdict-badge.buy {
+  color: var(--emerald);
+  background: var(--emerald-dim);
+  border: 1px solid rgba(16,185,129,0.2);
+}
+
+.verdict-badge.pass {
+  color: var(--rose);
+  background: var(--rose-dim);
+  border: 1px solid rgba(244,63,94,0.2);
+}
+
+.verdict-badge.negotiate {
+  color: var(--amber);
+  background: var(--amber-dim);
+  border: 1px solid rgba(245,158,11,0.2);
+}
+
+/* Confidence dots */
+.confidence-meter {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.confidence-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.06);
+  transition: background var(--transition-fast);
+}
+
+.confidence-dot.filled {
+  background: var(--blue);
+  box-shadow: 0 0 4px rgba(59,130,246,0.3);
+}
+
+.ai-text {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.ai-risks {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ai-risks li {
+  font-size: 13px;
+  color: var(--text-secondary);
+  padding-left: 16px;
+  position: relative;
+}
+
+.ai-risks li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 7px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--rose);
+  opacity: 0.6;
+}
+
+.ai-powered-label {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-muted);
+  letter-spacing: 0.03em;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.ai-powered-label svg {
+  width: 12px;
+  height: 12px;
+  opacity: 0.5;
+}
+
+.score-empty, .ai-analysis-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+/* =========================================================================
+   DEALS TABLE
+   ========================================================================= */
+.table-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  gap: 12px;
+}
+
+.table-count {
+  font-size: 13px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.table-search {
+  flex: 1;
+  max-width: 280px;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+}
+
+.deals-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.deals-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.deals-table th {
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  background: rgba(255,255,255,0.03);
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  user-select: none;
+  transition: color var(--transition-fast);
+  white-space: nowrap;
+}
+
+.deals-table th:hover {
+  color: var(--text-secondary);
+}
+
+.deals-table th.sorted {
+  color: var(--blue);
+}
+
+.deals-table th .sort-arrow {
+  display: inline-block;
+  margin-left: 4px;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+  font-size: 10px;
+}
+
+.deals-table th.sorted .sort-arrow {
   opacity: 1;
 }
 
-.search-form {
+.deals-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.deals-table tbody tr {
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.deals-table tbody tr:hover {
+  background: rgba(59,130,246,0.04);
+}
+
+.deals-table tbody tr:hover td {
+  color: var(--text-primary);
+}
+
+.deals-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Quality pills in table */
+.quality-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: var(--radius-pill);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.quality-pill.excellent { color: var(--emerald); background: var(--emerald-dim); }
+.quality-pill.good { color: var(--blue); background: var(--blue-dim); }
+.quality-pill.fair { color: var(--amber); background: var(--amber-dim); }
+.quality-pill.poor { color: var(--rose); background: var(--rose-dim); }
+
+.profit-positive { color: var(--emerald); }
+.profit-negative { color: var(--rose); }
+
+.table-empty {
+  text-align: center;
+  padding: 48px 16px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.table-empty svg {
+  display: block;
+  margin: 0 auto 12px;
+  width: 40px;
+  height: 40px;
+  opacity: 0.2;
+}
+
+/* Inline row expansion */
+.deal-expand-row td {
+  padding: 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.deal-expand-inner {
+  padding: 20px 24px;
+  background: rgba(59,130,246,0.02);
+  border-top: 1px solid rgba(59,130,246,0.08);
+  animation: slideDown 200ms ease;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; max-height: 0; padding-top: 0; padding-bottom: 0; }
+  to { opacity: 1; max-height: 500px; }
+}
+
+.deal-expand-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.deal-expand-header h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.deal-expand-close {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: rgba(255,255,255,0.04);
+  color: var(--text-muted);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 16px;
+  transition: all var(--transition-fast);
+}
+
+.deal-expand-close:hover {
+  background: rgba(255,255,255,0.08);
+  color: var(--text-primary);
+}
+
+.deal-expand-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 14px;
-  padding-top: 16px;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+}
+
+.deal-expand-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.deal-expand-field.full {
+  grid-column: 1 / -1;
+}
+
+.deal-expand-field-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.deal-expand-field-value {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* =========================================================================
+   FORMS & INPUTS
+   ========================================================================= */
+.form-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 9px 12px;
+  font-size: 13px;
+  font-family: var(--font-sans);
+  color: var(--text-primary);
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  outline: none;
+}
+
+.form-input::placeholder {
+  color: var(--text-muted);
+}
+
+.form-input:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+}
+
+.form-input:hover:not(:focus) {
+  border-color: var(--border-hover);
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 5px;
-}
-
-.form-group label {
-  font-size: 0.73rem;
-  font-weight: 500;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.form-group input,
-.form-group select {
-  background: var(--bg-input);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
-  padding: 9px 12px;
-  font-size: 0.87rem;
-  font-family: inherit;
-  color: var(--text-primary);
-  transition: border-color var(--transition), box-shadow var(--transition);
-  outline: none;
-  width: 100%;
-}
-
-.form-group input::placeholder {
-  color: var(--text-muted);
-}
-
-.form-group input:focus,
-.form-group select:focus {
-  border-color: var(--border-focus);
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-}
-
-.search-actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding-top: 16px;
 }
 
 /* =========================================================================
@@ -453,1155 +943,1078 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 9px 20px;
-  border-radius: var(--radius-sm);
-  font-family: inherit;
-  font-size: 0.87rem;
-  font-weight: 500;
+  gap: 6px;
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-sans);
   border: none;
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: background var(--transition), box-shadow var(--transition), opacity var(--transition);
+  transition: all var(--transition);
   outline: none;
   white-space: nowrap;
 }
 
 .btn:focus-visible {
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3);
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
 }
 
 .btn:disabled {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: not-allowed;
 }
 
 .btn-primary {
-  background: var(--accent);
+  background: var(--blue);
   color: #fff;
+  box-shadow: 0 1px 3px rgba(59,130,246,0.3);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: var(--accent-hover);
+  background: #2563eb;
+  box-shadow: 0 2px 8px rgba(59,130,246,0.4);
 }
 
-.btn-secondary {
-  background: transparent;
+.btn-ghost {
+  background: rgba(255,255,255,0.04);
   color: var(--text-secondary);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border);
 }
 
-.btn-secondary:hover:not(:disabled) {
-  background: var(--bg-card);
+.btn-ghost:hover:not(:disabled) {
+  background: rgba(255,255,255,0.06);
   color: var(--text-primary);
+  border-color: var(--border-hover);
 }
 
 .btn-sm {
   padding: 6px 14px;
-  font-size: 0.8rem;
+  font-size: 12px;
+}
+
+.btn-full {
+  width: 100%;
+}
+
+.btn-row {
+  display: flex;
+  gap: 8px;
 }
 
 /* =========================================================================
-   PROGRESS BAR
+   SEARCH PANEL (RIGHT COL)
    ========================================================================= */
-.progress-container {
-  display: none;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: 16px;
-}
-
-.progress-container.visible {
+.search-form {
   display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.progress-track {
+.progress-section {
+  margin-top: 12px;
+}
+
+.progress-bar-track {
   width: 100%;
   height: 4px;
-  background: rgba(148, 163, 184, 0.1);
-  border-radius: var(--radius-pill);
+  background: rgba(255,255,255,0.04);
+  border-radius: 2px;
   overflow: hidden;
+  margin-bottom: 6px;
 }
 
-.progress-fill {
+.progress-bar-fill {
   height: 100%;
+  background: var(--blue);
+  border-radius: 2px;
   width: 0%;
-  background: var(--accent);
-  border-radius: var(--radius-pill);
   transition: width 300ms ease;
 }
 
 .progress-text {
-  font-size: 0.8rem;
-  color: var(--text-secondary);
+  font-size: 12px;
+  color: var(--text-muted);
 }
 
 /* =========================================================================
-   QUICK SCORE WIDGET
-   ========================================================================= */
-.quick-score {
-  margin-bottom: 24px;
-}
-
-.quick-score .card-body {
-  padding: 16px 20px;
-}
-
-.quick-score-form {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr) auto;
-  gap: 10px;
-  align-items: end;
-}
-
-.quick-score-result {
-  display: none;
-  margin-top: 14px;
-  padding: 14px 16px;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border-color);
-  background: var(--bg-input);
-}
-
-.quick-score-result.visible {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  flex-wrap: wrap;
-}
-
-.score-item {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.score-item .score-label {
-  font-size: 0.67rem;
-  font-weight: 500;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
-.score-item .score-value {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  font-variant-numeric: tabular-nums;
-}
-
-/* =========================================================================
-   DEALS TABLE
-   ========================================================================= */
-.table-wrapper {
-  overflow-x: auto;
-}
-
-.deals-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-variant-numeric: tabular-nums;
-}
-
-.deals-table thead th {
-  padding: 10px 14px;
-  font-size: 0.7rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--text-muted);
-  text-align: left;
-  border-bottom: 1px solid var(--border-color);
-  cursor: pointer;
-  white-space: nowrap;
-  user-select: none;
-  transition: color var(--transition);
-  position: sticky;
-  top: 0;
-  background: var(--bg-card);
-  z-index: 2;
-}
-
-.deals-table thead th:hover {
-  color: var(--text-secondary);
-}
-
-.deals-table thead th.sorted-asc::after,
-.deals-table thead th.sorted-desc::after {
-  margin-left: 4px;
-  font-size: 0.6rem;
-}
-
-.deals-table thead th.sorted-asc::after { content: " \2191"; }
-.deals-table thead th.sorted-desc::after { content: " \2193"; }
-
-.deals-table tbody tr {
-  border-bottom: 1px solid rgba(148, 163, 184, 0.06);
-  cursor: pointer;
-  transition: background var(--transition);
-}
-
-.deals-table tbody tr:hover {
-  background: rgba(148, 163, 184, 0.06);
-}
-
-.deals-table td {
-  padding: 11px 14px;
-  font-size: 0.87rem;
-  color: var(--text-secondary);
-  white-space: nowrap;
-}
-
-.deals-table td:first-child {
-  color: var(--text-muted);
-  font-size: 0.8rem;
-  font-weight: 500;
-}
-
-.deals-table td.profit-positive { color: var(--accent); font-weight: 600; }
-.deals-table td.profit-negative { color: var(--red); font-weight: 600; }
-
-.quality-pill {
-  display: inline-flex;
-  align-items: center;
-  padding: 3px 10px;
-  border-radius: var(--radius-pill);
-  font-size: 0.73rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-}
-
-.quality-excellent { background: var(--accent-dim); color: var(--accent); }
-.quality-good { background: var(--blue-dim); color: var(--blue); }
-.quality-fair { background: var(--yellow-dim); color: var(--yellow); }
-.quality-poor { background: var(--red-dim); color: var(--red); }
-
-.table-empty {
-  text-align: center;
-  padding: 64px 24px;
-  color: var(--text-muted);
-}
-
-.table-empty p:first-child {
-  font-size: 1.1rem;
-  font-weight: 500;
-  color: var(--text-secondary);
-  margin-bottom: 6px;
-}
-
-.table-empty p:last-child {
-  font-size: 0.87rem;
-}
-
-/* Table filter bar */
-.table-toolbar {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 20px;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.table-toolbar input {
-  background: var(--bg-input);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
-  padding: 7px 12px 7px 34px;
-  font-size: 0.8rem;
-  font-family: inherit;
-  color: var(--text-primary);
-  width: 240px;
-  outline: none;
-  transition: border-color var(--transition);
-}
-
-.table-toolbar input:focus {
-  border-color: var(--border-focus);
-}
-
-.table-toolbar .filter-wrapper {
-  position: relative;
-}
-
-.table-toolbar .filter-wrapper svg {
-  position: absolute;
-  left: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--text-muted);
-  pointer-events: none;
-}
-
-.table-toolbar .deal-count {
-  font-size: 0.8rem;
-  color: var(--text-muted);
-  margin-left: auto;
-  font-variant-numeric: tabular-nums;
-}
-
-/* =========================================================================
-   SIDEBAR - HISTORY
+   HISTORY PANEL (RIGHT COL)
    ========================================================================= */
 .history-list {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 6px;
+  max-height: 240px;
+  overflow-y: auto;
 }
 
 .history-item {
   display: flex;
-  flex-direction: column;
-  gap: 3px;
-  padding: 12px 16px;
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  transition: background var(--transition);
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: rgba(255,255,255,0.02);
   border: 1px solid transparent;
+  cursor: pointer;
+  transition: all var(--transition-fast);
 }
 
 .history-item:hover {
-  background: rgba(148, 163, 184, 0.06);
+  background: rgba(255,255,255,0.04);
+  border-color: var(--border);
 }
 
-.history-item.active {
-  background: var(--accent-dim);
-  border-color: rgba(16, 185, 129, 0.2);
-}
-
-.history-item .run-meta {
+.history-item-left {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 2px;
 }
 
-.history-item .run-location {
-  font-size: 0.87rem;
+.history-item-loc {
+  font-size: 13px;
   font-weight: 500;
   color: var(--text-primary);
-  text-transform: capitalize;
 }
 
-.history-item .run-count {
-  font-size: 0.73rem;
-  color: var(--text-muted);
-  font-weight: 500;
-  font-variant-numeric: tabular-nums;
-}
-
-.history-item .run-time {
-  font-size: 0.73rem;
+.history-item-time {
+  font-size: 11px;
   color: var(--text-muted);
 }
 
-.history-item .run-term {
-  font-size: 0.73rem;
+.history-item-count {
+  font-size: 12px;
+  font-weight: 600;
   color: var(--text-secondary);
-  font-style: italic;
+  background: rgba(255,255,255,0.04);
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
 }
 
 .history-empty {
-  padding: 32px 16px;
   text-align: center;
+  padding: 24px 8px;
+  font-size: 13px;
   color: var(--text-muted);
-  font-size: 0.87rem;
+}
+
+/* =========================================================================
+   LOGIN MODAL
+   ========================================================================= */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-overlay);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-slow);
+}
+
+.modal-overlay.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal {
+  width: 100%;
+  max-width: 420px;
+  background: #111118;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 32px;
+  box-shadow: var(--shadow-lg);
+  transform: translateY(8px) scale(0.98);
+  transition: transform var(--transition-slow);
+}
+
+.modal-overlay.visible .modal {
+  transform: translateY(0) scale(1);
+}
+
+.modal-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--text-primary);
+}
+
+.modal-desc {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+
+.modal-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  min-height: 50px;
+}
+
+.modal-status .spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255,255,255,0.1);
+  border-top-color: var(--blue);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.modal-status.success {
+  color: var(--emerald);
+  border-color: rgba(16,185,129,0.2);
+  background: var(--emerald-dim);
+}
+
+.modal-status.error {
+  color: var(--rose);
+  border-color: rgba(244,63,94,0.2);
+  background: var(--rose-dim);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
 }
 
 /* =========================================================================
    SKELETON LOADING
    ========================================================================= */
-@keyframes shimmer {
-  0% { background-position: -400px 0; }
-  100% { background-position: 400px 0; }
-}
-
 .skeleton {
-  background: linear-gradient(90deg, var(--bg-secondary) 25%, rgba(148,163,184,0.08) 50%, var(--bg-secondary) 75%);
-  background-size: 800px 100%;
-  animation: shimmer 1.5s infinite;
+  position: relative;
+  overflow: hidden;
+  background: rgba(255,255,255,0.04);
   border-radius: var(--radius-sm);
 }
 
-.skeleton-text {
-  height: 14px;
-  width: 80%;
-  margin-bottom: 8px;
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent);
+  animation: shimmer 1.5s infinite;
 }
 
-.skeleton-value {
-  height: 28px;
-  width: 50%;
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
 }
+
+.skeleton-line {
+  height: 14px;
+  margin-bottom: 8px;
+  border-radius: 4px;
+}
+
+.skeleton-line.w60 { width: 60%; }
+.skeleton-line.w80 { width: 80%; }
+.skeleton-line.w40 { width: 40%; }
+.skeleton-line.w100 { width: 100%; }
+.skeleton-block { height: 48px; width: 100%; border-radius: var(--radius-sm); }
 
 /* =========================================================================
    ANIMATIONS
    ========================================================================= */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(6px); }
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 .fade-in {
-  animation: fadeIn 250ms ease forwards;
+  animation: fadeInUp 400ms ease forwards;
+  opacity: 0;
 }
 
-/* =========================================================================
-   SCROLLBAR
-   ========================================================================= */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
+.fade-in-d1 { animation-delay: 50ms; }
+.fade-in-d2 { animation-delay: 100ms; }
+.fade-in-d3 { animation-delay: 150ms; }
+.fade-in-d4 { animation-delay: 200ms; }
+.fade-in-d5 { animation-delay: 250ms; }
+.fade-in-d6 { animation-delay: 300ms; }
 
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.15);
-  border-radius: var(--radius-pill);
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.25);
+/* Count-up animation for stat values */
+.counting {
+  transition: none;
 }
 
 /* =========================================================================
    RESPONSIVE
    ========================================================================= */
 @media (max-width: 1024px) {
-  .main-content {
+  .content-grid {
     grid-template-columns: 1fr;
   }
-
-  .sidebar {
-    order: -1;
+  .right-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
   }
-
-  .stats-bar {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .quick-score-form {
-    grid-template-columns: repeat(3, 1fr);
+  .score-panel-inner {
+    grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 768px) {
-  .app-header {
-    flex-direction: column;
-    gap: 12px;
-    align-items: flex-start;
+  .topnav {
+    padding: 0 16px;
   }
-
-  .stats-bar {
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
+  .topnav .status-pill span:not(.dot) {
+    display: none;
   }
-
-  .search-form {
+  .main-wrap {
+    padding: 16px;
+  }
+  .stats-row {
     grid-template-columns: 1fr 1fr;
   }
-
-  .quick-score-form {
+  .right-col {
+    grid-template-columns: 1fr;
+  }
+  .ai-grid {
+    grid-template-columns: 1fr;
+  }
+  .score-metrics {
     grid-template-columns: 1fr 1fr;
   }
-
-  .main-content {
-    padding: 0 16px 32px;
+  .deal-expand-grid {
+    grid-template-columns: 1fr;
   }
-
-  .stats-bar {
-    padding: 16px 16px 0;
-  }
-
-  .section-gap {
-    padding: 16px 16px 0;
+  .stat-card .stat-value {
+    font-size: 22px;
   }
 }
 
 @media (max-width: 640px) {
-  .stats-bar {
+  .stats-row {
     grid-template-columns: 1fr;
   }
-
-  .search-form {
-    grid-template-columns: 1fr;
+  .table-toolbar {
+    flex-direction: column;
+    align-items: stretch;
   }
-
-  .quick-score-form {
-    grid-template-columns: 1fr;
+  .table-search {
+    max-width: 100%;
   }
 }
-
-/* =========================================================================
-   UTILITY
-   ========================================================================= */
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0,0,0,0);
-  border: 0;
-}
-
-.text-accent { color: var(--accent); }
-.text-red { color: var(--red); }
-.text-blue { color: var(--blue); }
-.text-yellow { color: var(--yellow); }
-.text-muted { color: var(--text-muted); }
 </style>
 </head>
 <body>
 
-<div class="app-container">
+<div class="app">
 
-  <!-- ===================================================================
-       HEADER
-       =================================================================== -->
-  <header class="app-header" role="banner">
-    <div class="header-brand">
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-2-2.2-3.5C13 5.5 12 5 11 5H5c-1.1 0-2.1.6-2.6 1.5L1 9v7c0 .6.4 1 1 1h2"/>
+  <!-- ====================================================================
+       TOP NAV
+       ==================================================================== -->
+  <nav class="topnav" role="navigation" aria-label="Main navigation">
+    <div class="topnav-brand">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9L18 10l-2-4H8L6 10l-2.5 1.1C2.7 11.3 2 12.1 2 13v3c0 .6.4 1 1 1h2"/>
         <circle cx="7" cy="17" r="2"/>
         <circle cx="17" cy="17" r="2"/>
-        <path d="M5 17H3"/>
-        <path d="M19 17h-2"/>
         <path d="M9 17h6"/>
       </svg>
-      <h1>DealFinder <span>Car Deal Analytics</span></h1>
+      <span class="topnav-brand-name">DealFinder</span>
+      <span class="topnav-badge">Pro</span>
     </div>
-    <div class="header-status">
-      <div id="badge-session" class="status-badge inactive">
+    <div class="topnav-right">
+      <div id="statusAI" class="status-pill" aria-label="AI status">
         <span class="dot"></span>
-        <span>Session: Checking...</span>
+        <span>AI</span>
       </div>
-      <div id="badge-playwright" class="status-badge inactive">
+      <div id="statusSession" class="status-pill" aria-label="Session status">
         <span class="dot"></span>
-        <span>Playwright: Checking...</span>
+        <span>Session</span>
       </div>
-      <button id="btn-login" class="btn-login" onclick="startLogin()">
-        <svg class="btn-login-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
-          <polyline points="10 17 15 12 10 7"/>
-          <line x1="15" y1="12" x2="3" y2="12"/>
-        </svg>
-        Login to Facebook
+      <div id="statusPlaywright" class="status-pill" aria-label="Playwright status">
+        <span class="dot"></span>
+        <span>Playwright</span>
+      </div>
+      <button id="connectBtn" class="btn-connect" onclick="window.openLoginModal()" aria-label="Connect to Facebook">
+        Connect Facebook
       </button>
     </div>
-  </header>
+  </nav>
 
-  <!-- Login Modal -->
-  <div id="login-modal" class="login-modal" onclick="if(event.target===this)closeLoginModal()">
-    <div class="login-modal-content">
-      <h3>Facebook Login</h3>
-      <p id="login-modal-desc">A browser window will open on your machine. Log in to your Facebook account there. Your session will be saved for future scraping.</p>
-      <div id="login-status-text" class="login-status-text waiting" style="display:none;"></div>
-      <button class="btn-close-modal" onclick="closeLoginModal()">Close</button>
-    </div>
-  </div>
+  <!-- ====================================================================
+       MAIN CONTENT
+       ==================================================================== -->
+  <main class="main-wrap">
 
-  <!-- ===================================================================
-       STATS BAR
-       =================================================================== -->
-  <div class="stats-bar" role="region" aria-label="Key Metrics">
-    <div class="stat-card" id="stat-total">
-      <div class="label">Total Deals Analyzed</div>
-      <div class="value"><span class="skeleton skeleton-value"></span></div>
-      <div class="sub" id="stat-total-sub">&nbsp;</div>
-    </div>
-    <div class="stat-card" id="stat-avg">
-      <div class="label">Avg Deal Ratio</div>
-      <div class="value accent"><span class="skeleton skeleton-value"></span></div>
-      <div class="sub">Higher is better</div>
-    </div>
-    <div class="stat-card" id="stat-best">
-      <div class="label">Best Deal Ratio</div>
-      <div class="value accent"><span class="skeleton skeleton-value"></span></div>
-      <div class="sub">Top score found</div>
-    </div>
-    <div class="stat-card" id="stat-session">
-      <div class="label">System Status</div>
-      <div class="value" id="stat-session-value"><span class="skeleton skeleton-value"></span></div>
-      <div class="sub" id="stat-session-sub">&nbsp;</div>
-    </div>
-  </div>
+    <!-- Stats Row -->
+    <section class="stats-row" aria-label="Statistics overview">
+      <div class="card stat-card fade-in fade-in-d1">
+        <span class="stat-label">Deals Analyzed</span>
+        <span class="stat-value" id="statTotal">--</span>
+        <span class="stat-sub" id="statRuns">across 0 runs</span>
+      </div>
+      <div class="card stat-card fade-in fade-in-d2">
+        <span class="stat-label">Best Ratio</span>
+        <span class="stat-value" id="statBestRatio">--</span>
+        <span class="stat-sub">higher is better</span>
+      </div>
+      <div class="card stat-card fade-in fade-in-d3">
+        <span class="stat-label">Avg Profit</span>
+        <span class="stat-value" id="statAvgProfit">--</span>
+        <span class="stat-sub">per deal</span>
+      </div>
+      <div class="card stat-card fade-in fade-in-d4">
+        <span class="stat-label">AI Engine</span>
+        <span class="stat-value" id="statAI" style="font-size:18px;"><span class="ai-status-dot off" id="aiDot"></span> Checking...</span>
+        <span class="stat-sub">Claude-powered analysis</span>
+      </div>
+    </section>
 
-  <!-- ===================================================================
-       MAIN GRID
-       =================================================================== -->
-  <div class="section-gap">
-    <div class="main-content">
+    <!-- Two column layout -->
+    <div class="content-grid">
 
-      <!-- PRIMARY COLUMN -->
-      <div class="primary-column">
+      <!-- LEFT COLUMN -->
+      <div class="left-col">
 
-        <!-- SEARCH PANEL -->
-        <div class="search-panel card">
+        <!-- AI Market Insights -->
+        <section class="card ai-panel fade-in fade-in-d5" aria-label="AI Market Intelligence">
           <div class="card-header">
-            <button class="search-toggle" id="search-toggle" type="button" aria-expanded="false" aria-controls="search-form-wrap">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
-              <span>Marketplace Search</span>
+            <div class="card-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M12 3l1.5 5.5L19 10l-5.5 1.5L12 17l-1.5-5.5L5 10l5.5-1.5z"/>
+                <path d="M18 2l.6 2.1L20.8 5l-2.1.6L18 8l-.6-2.4L15.2 5l2.1-.9z"/>
+              </svg>
+              AI Market Intelligence
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="window.refreshBatchAnalysis()" aria-label="Refresh analysis">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 12a9 9 0 11-2.63-6.37"/>
+                <path d="M21 3v6h-6"/>
+              </svg>
+              Refresh
             </button>
           </div>
-          <div class="card-body">
-            <div class="search-form-container" id="search-form-wrap">
-              <form class="search-form" id="search-form" autocomplete="off">
-                <div class="form-group">
-                  <label for="sf-location">Location</label>
-                  <input type="text" id="sf-location" value="atlanta" placeholder="City name">
-                </div>
-                <div class="form-group">
-                  <label for="sf-term">Search Term</label>
-                  <input type="text" id="sf-term" value="" placeholder="e.g. sedan, truck">
-                </div>
-                <div class="form-group">
-                  <label for="sf-make">Make</label>
-                  <input type="text" id="sf-make" value="" placeholder="e.g. Toyota">
-                </div>
-                <div class="form-group">
-                  <label for="sf-model">Model</label>
-                  <input type="text" id="sf-model" value="" placeholder="e.g. Camry">
-                </div>
-                <div class="form-group">
-                  <label for="sf-min-price">Min Price</label>
-                  <input type="number" id="sf-min-price" value="250" min="0">
-                </div>
-                <div class="form-group">
-                  <label for="sf-max-price">Max Price</label>
-                  <input type="number" id="sf-max-price" value="55000" min="0">
-                </div>
-                <div class="form-group">
-                  <label for="sf-min-year">Min Year</label>
-                  <input type="number" id="sf-min-year" value="1995" min="1980" max="2027">
-                </div>
-                <div class="form-group">
-                  <label for="sf-max-year">Max Year</label>
-                  <input type="number" id="sf-max-year" value="2025" min="1980" max="2027">
-                </div>
-                <div class="form-group">
-                  <label for="sf-mileage">Max Mileage</label>
-                  <input type="number" id="sf-mileage" value="200000" min="0">
-                </div>
-                <div class="form-group">
-                  <label for="sf-scrolls">Scroll Count</label>
-                  <input type="number" id="sf-scrolls" value="10" min="1" max="50">
-                </div>
-              </form>
-              <div class="search-actions">
-                <button type="button" class="btn btn-primary" id="btn-search">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                  Search Marketplace
-                </button>
-                <button type="button" class="btn btn-secondary" id="btn-cancel-search" style="display:none;">Cancel</button>
-              </div>
-              <div class="progress-container" id="search-progress">
-                <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
-                <div class="progress-text" id="progress-text">Preparing search...</div>
-              </div>
+          <div id="batchInsights">
+            <div class="ai-empty">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M12 3l1.5 5.5L19 10l-5.5 1.5L12 17l-1.5-5.5L5 10l5.5-1.5z"/>
+              </svg>
+              Run a search to get AI market insights
             </div>
           </div>
-        </div>
+        </section>
 
-        <!-- QUICK SCORE -->
-        <div class="quick-score card">
+        <!-- Quick Score + AI Analyze -->
+        <section class="card fade-in fade-in-d6" aria-label="Quick deal scoring">
           <div class="card-header">
-            <h2>Score a Deal</h2>
-          </div>
-          <div class="card-body">
-            <form class="quick-score-form" id="qs-form" autocomplete="off">
-              <div class="form-group">
-                <label for="qs-price">Price ($)</label>
-                <input type="number" id="qs-price" placeholder="14500" min="1" required>
-              </div>
-              <div class="form-group">
-                <label for="qs-year">Year</label>
-                <input type="number" id="qs-year" placeholder="2018" min="1980" max="2027" required>
-              </div>
-              <div class="form-group">
-                <label for="qs-make">Make</label>
-                <input type="text" id="qs-make" placeholder="Honda" required>
-              </div>
-              <div class="form-group">
-                <label for="qs-model">Model</label>
-                <input type="text" id="qs-model" placeholder="Civic" required>
-              </div>
-              <div class="form-group">
-                <label for="qs-mileage">Mileage</label>
-                <input type="number" id="qs-mileage" placeholder="65000" min="0">
-              </div>
-              <div class="form-group" style="align-self: end;">
-                <button type="submit" class="btn btn-primary btn-sm" id="btn-score">Score</button>
-              </div>
-            </form>
-            <div class="quick-score-result" id="qs-result"></div>
-          </div>
-        </div>
-
-        <!-- DEALS TABLE -->
-        <div class="card" id="deals-card">
-          <div class="table-toolbar">
-            <div class="filter-wrapper">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              <input type="text" id="table-filter" placeholder="Filter deals..." aria-label="Filter deals table">
+            <div class="card-title">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+              </svg>
+              Quick Score + AI Analysis
             </div>
-            <span class="deal-count" id="deal-count">0 deals</span>
           </div>
-          <div class="table-wrapper" style="max-height: 560px; overflow-y: auto;">
-            <table class="deals-table" id="deals-table" role="grid">
+          <div class="score-panel-inner">
+            <div class="score-form">
+              <div class="form-group">
+                <label class="form-label" for="scorePrice">Price ($)</label>
+                <input type="number" id="scorePrice" class="form-input" placeholder="15000" min="1">
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="scoreYear">Year</label>
+                  <input type="number" id="scoreYear" class="form-input" placeholder="2018" min="1980" max="2027">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="scoreMileage">Mileage</label>
+                  <input type="number" id="scoreMileage" class="form-input" placeholder="85000" min="0">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="scoreMake">Make</label>
+                  <input type="text" id="scoreMake" class="form-input" placeholder="Toyota">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="scoreModel">Model</label>
+                  <input type="text" id="scoreModel" class="form-input" placeholder="Camry">
+                </div>
+              </div>
+              <div class="btn-row">
+                <button class="btn btn-primary btn-sm" onclick="window.quickScore()" id="btnScore">Score Deal</button>
+                <button class="btn btn-ghost btn-sm" onclick="window.aiAnalyze()" id="btnAnalyze">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 3l1.5 5.5L19 10l-5.5 1.5L12 17l-1.5-5.5L5 10l5.5-1.5z"/>
+                  </svg>
+                  AI Analyze
+                </button>
+              </div>
+            </div>
+            <div class="score-results">
+              <div id="scoreResult" class="score-result-section" style="display:none;">
+                <h4>
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 20V10"/>
+                    <path d="M18 20V4"/>
+                    <path d="M6 20v-4"/>
+                  </svg>
+                  Deal Score
+                </h4>
+                <div id="scoreResultContent"></div>
+              </div>
+              <div id="aiResult" class="score-result-section ai-result" style="display:none;">
+                <h4>
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 3l1.5 5.5L19 10l-5.5 1.5L12 17l-1.5-5.5L5 10l5.5-1.5z"/>
+                  </svg>
+                  AI Analysis
+                </h4>
+                <div id="aiResultContent"></div>
+              </div>
+              <div id="scoreEmpty" class="score-empty">Enter deal details and click Score or AI Analyze</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Deals Table -->
+        <section class="card" aria-label="Deals table">
+          <div class="card-header">
+            <div class="card-title">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <path d="M3 9h18"/>
+                <path d="M9 21V9"/>
+              </svg>
+              Deals
+            </div>
+            <span class="table-count" id="tableCount">0 deals</span>
+          </div>
+          <div class="table-toolbar">
+            <div class="table-search">
+              <input type="text" id="tableFilter" class="form-input" placeholder="Filter deals..." oninput="window.filterDeals()">
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table class="deals-table" id="dealsTable" role="grid">
               <thead>
                 <tr>
-                  <th data-key="index" aria-sort="none">#</th>
-                  <th data-key="year" aria-sort="none">Year</th>
-                  <th data-key="make" aria-sort="none">Make</th>
-                  <th data-key="model" aria-sort="none">Model</th>
-                  <th data-key="price" aria-sort="none">Price</th>
-                  <th data-key="market" aria-sort="none">Market Value</th>
-                  <th data-key="profit" aria-sort="none">Profit</th>
-                  <th data-key="ratio" aria-sort="none">Ratio</th>
-                  <th data-key="quality" aria-sort="none">Quality</th>
-                  <th data-key="mileage" aria-sort="none">Mileage</th>
-                  <th data-key="source" aria-sort="none">Source</th>
+                  <th data-col="index" aria-sort="none"># <span class="sort-arrow"></span></th>
+                  <th data-col="year" aria-sort="none">Year <span class="sort-arrow"></span></th>
+                  <th data-col="make" aria-sort="none">Make <span class="sort-arrow"></span></th>
+                  <th data-col="model" aria-sort="none">Model <span class="sort-arrow"></span></th>
+                  <th data-col="price" aria-sort="none">Price <span class="sort-arrow"></span></th>
+                  <th data-col="market" aria-sort="none">Market Value <span class="sort-arrow"></span></th>
+                  <th data-col="profit" aria-sort="none">Profit <span class="sort-arrow"></span></th>
+                  <th data-col="ratio" aria-sort="none">Ratio <span class="sort-arrow"></span></th>
+                  <th data-col="quality" aria-sort="none">Quality <span class="sort-arrow"></span></th>
+                  <th data-col="mileage" aria-sort="none">Mileage <span class="sort-arrow"></span></th>
                 </tr>
               </thead>
-              <tbody id="deals-body">
-                <tr><td colspan="11" class="table-empty">
-                  <p>No deals loaded</p>
-                  <p>Run a search or select a past run from history</p>
-                </td></tr>
+              <tbody id="dealsBody">
+                <tr>
+                  <td colspan="10">
+                    <div class="table-empty">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <rect x="3" y="3" width="18" height="18" rx="2"/>
+                        <path d="M3 9h18"/>
+                        <path d="M9 21V9"/>
+                      </svg>
+                      No deals yet. Run a search to populate results.
+                    </div>
+                  </td>
+                </tr>
               </tbody>
             </table>
           </div>
-        </div>
+        </section>
 
       </div>
 
-      <!-- SIDEBAR -->
-      <aside class="sidebar">
-        <div class="card" style="position: sticky; top: 80px;">
+      <!-- RIGHT COLUMN -->
+      <div class="right-col">
+
+        <!-- Search Panel -->
+        <section class="card" aria-label="Search marketplace">
           <div class="card-header">
-            <h2>Search History</h2>
-          </div>
-          <div class="card-body" style="padding: 8px; max-height: 600px; overflow-y: auto;">
-            <div class="history-list" id="history-list">
-              <div class="history-empty">Loading history...</div>
+            <div class="card-title">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="11" cy="11" r="8"/>
+                <path d="M21 21l-4.35-4.35"/>
+              </svg>
+              Search Marketplace
             </div>
           </div>
-        </div>
-      </aside>
+          <div class="search-form">
+            <div class="form-group">
+              <label class="form-label" for="searchLocation">Location</label>
+              <input type="text" id="searchLocation" class="form-input" placeholder="atlanta" value="atlanta">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="searchTerm">Search Term</label>
+              <input type="text" id="searchTerm" class="form-input" placeholder="car, truck, SUV...">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="searchMinPrice">Min Price</label>
+                <input type="number" id="searchMinPrice" class="form-input" placeholder="250" value="250" min="0">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="searchMaxPrice">Max Price</label>
+                <input type="number" id="searchMaxPrice" class="form-input" placeholder="55000" value="55000" min="0">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="searchMinYear">Min Year</label>
+                <input type="number" id="searchMinYear" class="form-input" placeholder="1995" value="1995" min="1980">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="searchMaxYear">Max Year</label>
+                <input type="number" id="searchMaxYear" class="form-input" placeholder="2025" value="2025" max="2027">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="searchMaxMileage">Max Mileage</label>
+                <input type="number" id="searchMaxMileage" class="form-input" placeholder="200000" value="200000" min="0">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="searchScrollCount">Scroll Count</label>
+                <input type="number" id="searchScrollCount" class="form-input" placeholder="10" value="10" min="1" max="50">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="searchMake">Make</label>
+                <input type="text" id="searchMake" class="form-input" placeholder="Any">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="searchModel">Model</label>
+                <input type="text" id="searchModel" class="form-input" placeholder="Any">
+              </div>
+            </div>
+            <button class="btn btn-primary btn-full" onclick="window.startSearch()" id="btnSearch">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="11" cy="11" r="8"/>
+                <path d="M21 21l-4.35-4.35"/>
+              </svg>
+              Search Marketplace
+            </button>
+            <div id="searchProgress" class="progress-section" style="display:none;">
+              <div class="progress-bar-track">
+                <div class="progress-bar-fill" id="progressBar"></div>
+              </div>
+              <div class="progress-text" id="progressText">Preparing...</div>
+            </div>
+          </div>
+        </section>
 
+        <!-- History Panel -->
+        <section class="card" aria-label="Search history">
+          <div class="card-header">
+            <div class="card-title">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+              </svg>
+              History
+            </div>
+          </div>
+          <div id="historyList" class="history-list">
+            <div class="history-empty">No past searches</div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ====================================================================
+       LOGIN MODAL
+       ==================================================================== -->
+  <div class="modal-overlay" id="loginModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal">
+      <h2 class="modal-title" id="modalTitle">Connect Facebook</h2>
+      <p class="modal-desc">
+        This will open a Chromium browser window on the server. Log in to your Facebook account in that window. Your session will be saved for future headless scraping.
+      </p>
+      <div class="modal-status" id="loginStatus">
+        Click "Start Login" to begin.
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="window.closeLoginModal()">Close</button>
+        <button class="btn btn-primary" onclick="window.startLogin()" id="btnLogin">Start Login</button>
+      </div>
     </div>
   </div>
 
 </div>
 
-<!-- =======================================================================
+<!-- ====================================================================
      JAVASCRIPT
-     ======================================================================= -->
+     ==================================================================== -->
 <script>
 (function() {
   'use strict';
 
-  /* -------------------------------------------------------------------
-     CONFIG
-     ------------------------------------------------------------------- */
-  var API_BASE = window.location.origin;
-  var WS_BASE = (window.location.protocol === 'https:' ? 'wss://' : 'ws://') + window.location.host;
-
-  /* -------------------------------------------------------------------
+  /* -----------------------------------------------------------------------
      STATE
-     ------------------------------------------------------------------- */
-  var state = {
-    deals: [],
-    sortKey: 'ratio',
-    sortDir: 'desc',
-    filterText: '',
-    activeRunId: null,
-    ws: null,
-    searching: false
-  };
+     ----------------------------------------------------------------------- */
+  let allDeals = [];
+  let filteredDeals = [];
+  let sortCol = 'ratio';
+  let sortDir = 'desc';
+  let expandedRow = null;
+  let loginPollTimer = null;
+  let ws = null;
+  let aiAvailable = false;
 
-  /* -------------------------------------------------------------------
+  /* -----------------------------------------------------------------------
      HELPERS
-     ------------------------------------------------------------------- */
-  function $(sel) { return document.querySelector(sel); }
-  function $$(sel) { return document.querySelectorAll(sel); }
+     ----------------------------------------------------------------------- */
+  function $(id) { return document.getElementById(id); }
 
   function fmt(n) {
-    if (n == null) return '--';
-    return n.toLocaleString('en-US');
+    if (n == null || isNaN(n)) return '--';
+    return Number(n).toLocaleString('en-US');
   }
 
   function fmtDollar(n) {
-    if (n == null) return '--';
-    var sign = n < 0 ? '-' : '';
-    return sign + '$' + Math.abs(n).toLocaleString('en-US');
+    if (n == null || isNaN(n)) return '--';
+    var abs = Math.abs(n);
+    var prefix = n < 0 ? '-$' : '$';
+    return prefix + abs.toLocaleString('en-US');
   }
 
   function fmtRatio(n) {
-    if (n == null || n === 0) return '--';
-    return n.toFixed(3);
+    if (n == null || isNaN(n)) return '--';
+    return Number(n).toFixed(2);
   }
 
   function qualityClass(q) {
-    if (!q) return 'quality-poor';
-    var lower = q.toLowerCase();
-    if (lower === 'excellent') return 'quality-excellent';
-    if (lower === 'good') return 'quality-good';
-    if (lower === 'fair') return 'quality-fair';
-    return 'quality-poor';
+    if (!q) return '';
+    return q.toLowerCase();
   }
 
-  function relativeTime(ts) {
-    try {
-      var d = new Date(ts);
-      var now = new Date();
-      var diff = Math.floor((now - d) / 1000);
-      if (diff < 60) return 'Just now';
-      if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
-      if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
-      if (diff < 604800) return Math.floor(diff / 86400) + 'd ago';
-      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    } catch(e) {
-      return ts;
-    }
+  function ratioColor(r) {
+    if (r >= 1.3) return 'emerald';
+    if (r >= 1.1) return 'blue';
+    if (r >= 0.95) return 'amber';
+    return 'rose';
   }
 
-  async function apiFetch(path, opts) {
-    var resp = await fetch(API_BASE + path, opts);
+  function escHtml(s) {
+    var d = document.createElement('div');
+    d.textContent = s || '';
+    return d.innerHTML;
+  }
+
+  function relTime(ts) {
+    if (!ts) return '';
+    var d = new Date(ts);
+    var now = Date.now();
+    var diff = (now - d.getTime()) / 1000;
+    if (diff < 60) return 'just now';
+    if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+    if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+    return Math.floor(diff / 86400) + 'd ago';
+  }
+
+  async function api(url, opts) {
+    var resp = await fetch(url, opts);
     if (!resp.ok) {
-      var body;
-      try { body = await resp.json(); } catch(e) { body = {}; }
-      throw new Error(body.detail || 'API error ' + resp.status);
+      var errBody;
+      try { errBody = await resp.json(); } catch(e) { errBody = {}; }
+      throw new Error(errBody.detail || resp.statusText || 'Request failed');
     }
     return resp.json();
   }
 
-  /* -------------------------------------------------------------------
-     STATUS
-     ------------------------------------------------------------------- */
-  async function loadStatus() {
-    try {
-      var data = await apiFetch('/api/status');
-      var sBadge = $('#badge-session');
-      var pBadge = $('#badge-playwright');
+  /* -----------------------------------------------------------------------
+     COUNT-UP ANIMATION
+     ----------------------------------------------------------------------- */
+  function countUp(el, target, prefix, suffix, decimals) {
+    prefix = prefix || '';
+    suffix = suffix || '';
+    decimals = decimals || 0;
+    var start = 0;
+    var dur = 600;
+    var startTime = null;
 
-      var loginBtn = $('#btn-login');
-      if (data.session_active) {
-        sBadge.className = 'status-badge active';
-        sBadge.querySelector('span:last-child').textContent = 'Session: Active';
-        loginBtn.textContent = 'Session Active';
-        loginBtn.disabled = true;
-        loginBtn.classList.remove('logging-in');
-      } else if (data.login_in_progress) {
-        sBadge.className = 'status-badge inactive';
-        sBadge.querySelector('span:last-child').textContent = 'Session: Logging in...';
-        loginBtn.classList.add('logging-in');
-        loginBtn.textContent = 'Logging in...';
-        loginBtn.disabled = true;
+    function step(ts) {
+      if (!startTime) startTime = ts;
+      var progress = Math.min((ts - startTime) / dur, 1);
+      var ease = 1 - Math.pow(1 - progress, 3);
+      var current = start + (target - start) * ease;
+      if (decimals > 0) {
+        el.textContent = prefix + current.toFixed(decimals) + suffix;
       } else {
-        sBadge.className = 'status-badge inactive';
-        sBadge.querySelector('span:last-child').textContent = 'Session: Inactive';
-        loginBtn.textContent = 'Login to Facebook';
-        loginBtn.disabled = false;
-        loginBtn.classList.remove('logging-in');
+        el.textContent = prefix + Math.round(current).toLocaleString('en-US') + suffix;
       }
-
-      if (data.playwright_available) {
-        pBadge.className = 'status-badge active';
-        pBadge.querySelector('span:last-child').textContent = 'Playwright: Ready';
-      } else {
-        pBadge.className = 'status-badge error';
-        pBadge.querySelector('span:last-child').textContent = 'Playwright: Not Installed';
+      if (progress < 1) {
+        requestAnimationFrame(step);
       }
-    } catch(e) {
-      $('#badge-session').className = 'status-badge error';
-      $('#badge-session').querySelector('span:last-child').textContent = 'API: Offline';
-      $('#badge-playwright').className = 'status-badge error';
-      $('#badge-playwright').querySelector('span:last-child').textContent = 'Playwright: Unknown';
     }
+    requestAnimationFrame(step);
   }
 
-  /* -------------------------------------------------------------------
-     LOGIN
-     ------------------------------------------------------------------- */
-  var loginPollTimer = null;
-
-  window.startLogin = startLogin;
-  window.closeLoginModal = closeLoginModal;
-
-  async function startLogin() {
-    var modal = $('#login-modal');
-    var statusText = $('#login-status-text');
-    var desc = $('#login-modal-desc');
-    var btn = $('#btn-login');
-
-    modal.classList.add('open');
-    statusText.style.display = 'block';
-    statusText.className = 'login-status-text waiting';
-    statusText.textContent = 'Launching browser...';
-    desc.textContent = 'A Chromium browser window will open. Log in to your Facebook account there. Your session will be saved automatically.';
-    btn.classList.add('logging-in');
-    btn.textContent = 'Logging in...';
-    btn.disabled = true;
-
+  /* -----------------------------------------------------------------------
+     STATUS POLLING
+     ----------------------------------------------------------------------- */
+  async function fetchStatus() {
     try {
-      var resp = await fetch('/api/login', { method: 'POST' });
-      var data = await resp.json();
-
-      if (!resp.ok) {
-        statusText.className = 'login-status-text failed';
-        statusText.textContent = data.detail || 'Failed to start login';
-        btn.disabled = false;
-        btn.classList.remove('logging-in');
-        btn.textContent = 'Login to Facebook';
-        return;
-      }
-
-      statusText.textContent = 'Browser opened -- please log in to Facebook...';
-
-      // Poll for login completion
-      loginPollTimer = setInterval(async function() {
-        try {
-          var status = await apiFetch('/api/login/status');
-          if (status.status === 'completed' && status.success) {
-            clearInterval(loginPollTimer);
-            statusText.className = 'login-status-text success';
-            statusText.textContent = 'Login successful! Session saved.';
-            btn.disabled = true;
-            btn.classList.remove('logging-in');
-            btn.textContent = 'Session Active';
-            loadStatus();
-          } else if (status.status === 'failed') {
-            clearInterval(loginPollTimer);
-            statusText.className = 'login-status-text failed';
-            statusText.textContent = 'Login failed or timed out. Try again.';
-            btn.disabled = false;
-            btn.classList.remove('logging-in');
-            btn.textContent = 'Login to Facebook';
-          }
-          // else still in_progress, keep polling
-        } catch(e) {
-          // ignore poll errors
-        }
-      }, 2000);
-
+      var data = await api('/api/status');
+      updateStatusPills(data);
+      aiAvailable = data.ai_available;
     } catch(e) {
-      statusText.className = 'login-status-text failed';
-      statusText.textContent = 'Error: ' + e.message;
-      btn.disabled = false;
-      btn.classList.remove('logging-in');
-      btn.textContent = 'Login to Facebook';
+      console.warn('Status fetch failed:', e);
     }
   }
 
-  function closeLoginModal() {
-    $('#login-modal').classList.remove('open');
-    if (loginPollTimer) {
-      clearInterval(loginPollTimer);
-      loginPollTimer = null;
+  function updateStatusPills(data) {
+    var aiPill = $('statusAI');
+    var sessPill = $('statusSession');
+    var pwPill = $('statusPlaywright');
+    var connectBtn = $('connectBtn');
+
+    aiPill.className = 'status-pill ' + (data.ai_available ? 'active' : '');
+    sessPill.className = 'status-pill ' + (data.session_active ? 'active' : (data.login_in_progress ? 'warning' : ''));
+    pwPill.className = 'status-pill ' + (data.playwright_available ? 'active' : 'error');
+
+    if (data.session_active) {
+      connectBtn.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Connected';
+      connectBtn.classList.add('connected');
+    } else {
+      connectBtn.innerHTML = 'Connect Facebook';
+      connectBtn.classList.remove('connected');
     }
-    loadStatus();
+
+    // AI stat card
+    var aiDot = $('aiDot');
+    var statAI = $('statAI');
+    if (data.ai_available) {
+      aiDot.className = 'ai-status-dot on';
+      statAI.innerHTML = '<span class="ai-status-dot on" id="aiDot"></span> Active';
+    } else {
+      aiDot.className = 'ai-status-dot off';
+      statAI.innerHTML = '<span class="ai-status-dot off" id="aiDot"></span> Unavailable';
+    }
   }
 
-  /* -------------------------------------------------------------------
+  /* -----------------------------------------------------------------------
      STATS
-     ------------------------------------------------------------------- */
-  async function loadStats() {
+     ----------------------------------------------------------------------- */
+  async function fetchStats() {
     try {
-      var data = await apiFetch('/api/stats');
-      var totalCard = $('#stat-total');
-      totalCard.querySelector('.value').textContent = fmt(data.total_listings);
-      totalCard.querySelector('.sub').textContent = data.total_runs + ' search run' + (data.total_runs !== 1 ? 's' : '');
+      var data = await api('/api/stats');
+      countUp($('statTotal'), data.total_listings || 0, '', '');
+      $('statRuns').textContent = 'across ' + (data.total_runs || 0) + ' runs';
 
-      $('#stat-avg').querySelector('.value').textContent = fmtRatio(data.avg_deal_ratio);
-      $('#stat-best').querySelector('.value').textContent = fmtRatio(data.best_deal_ratio);
+      var bestR = data.best_deal_ratio || 0;
+      $('statBestRatio').textContent = fmtRatio(bestR);
+      $('statBestRatio').className = 'stat-value ' + ratioColor(bestR);
 
-      var sessionVal = $('#stat-session-value');
-      var sessionSub = $('#stat-session-sub');
-      sessionVal.textContent = data.total_runs > 0 ? 'Active' : 'Ready';
-      sessionVal.classList.add('accent');
-      sessionSub.textContent = data.top_makes.length > 0
-        ? 'Top make: ' + data.top_makes[0].make + ' (' + data.top_makes[0].count + ')'
-        : 'No data yet';
+      // Compute avg profit from excellent deals
+      var excellents = data.recent_excellent_deals || [];
+      var avgProfit = 0;
+      if (excellents.length > 0) {
+        var sum = excellents.reduce(function(a, d) { return a + (d.potential_profit || 0); }, 0);
+        avgProfit = Math.round(sum / excellents.length);
+      }
+      var profitEl = $('statAvgProfit');
+      countUp(profitEl, avgProfit, '$', '');
+      profitEl.className = 'stat-value ' + (avgProfit >= 0 ? 'emerald' : 'rose');
     } catch(e) {
-      $('#stat-total').querySelector('.value').textContent = '--';
-      $('#stat-avg').querySelector('.value').textContent = '--';
-      $('#stat-best').querySelector('.value').textContent = '--';
-      $('#stat-session-value').textContent = 'Offline';
-      $('#stat-session-value').className = 'value text-red';
+      console.warn('Stats fetch failed:', e);
     }
   }
 
-  /* -------------------------------------------------------------------
+  /* -----------------------------------------------------------------------
      HISTORY
-     ------------------------------------------------------------------- */
-  async function loadHistory() {
-    var container = $('#history-list');
+     ----------------------------------------------------------------------- */
+  async function fetchHistory() {
     try {
-      var runs = await apiFetch('/api/history?limit=20');
-      if (!runs.length) {
-        container.innerHTML = '<div class="history-empty">No search runs yet. Run your first search above.</div>';
-        return;
-      }
-
-      container.innerHTML = '';
-      runs.forEach(function(run) {
-        var item = document.createElement('div');
-        item.className = 'history-item' + (state.activeRunId === run.id ? ' active' : '');
-        item.setAttribute('data-run-id', run.id);
-        item.setAttribute('role', 'button');
-        item.setAttribute('tabindex', '0');
-        item.setAttribute('aria-label', 'Load run from ' + run.location + ', ' + run.listing_count + ' deals');
-
-        var termHtml = run.search_term ? '<div class="run-term">' + escapeHtml(run.search_term) + '</div>' : '';
-
-        item.innerHTML =
-          '<div class="run-meta">' +
-            '<span class="run-location">' + escapeHtml(run.location || 'Unknown') + '</span>' +
-            '<span class="run-count">' + run.listing_count + ' deals</span>' +
-          '</div>' +
-          '<div class="run-time">' + relativeTime(run.timestamp) + '</div>' +
-          termHtml;
-
-        item.addEventListener('click', function() { loadRun(run.id); });
-        item.addEventListener('keydown', function(e) {
-          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); loadRun(run.id); }
-        });
-
-        container.appendChild(item);
-      });
-
-      // Auto-load most recent run if no deals loaded
-      if (!state.deals.length && runs.length) {
-        loadRun(runs[0].id);
-      }
+      var runs = await api('/api/history?limit=20');
+      renderHistory(runs);
     } catch(e) {
-      container.innerHTML = '<div class="history-empty">Could not load history</div>';
+      console.warn('History fetch failed:', e);
     }
+  }
+
+  function renderHistory(runs) {
+    var list = $('historyList');
+    if (!runs || runs.length === 0) {
+      list.innerHTML = '<div class="history-empty">No past searches</div>';
+      return;
+    }
+    list.innerHTML = runs.map(function(r) {
+      return '<div class="history-item" onclick="window.loadRun(' + r.id + ')" tabindex="0" role="button" aria-label="Load search run from ' + escHtml(r.location) + '">'
+        + '<div class="history-item-left">'
+        + '<span class="history-item-loc">' + escHtml(r.location || 'Unknown') + (r.search_term ? ' - ' + escHtml(r.search_term) : '') + '</span>'
+        + '<span class="history-item-time">' + relTime(r.timestamp) + '</span>'
+        + '</div>'
+        + '<span class="history-item-count">' + r.listing_count + '</span>'
+        + '</div>';
+    }).join('');
   }
 
   async function loadRun(runId) {
-    state.activeRunId = runId;
-
-    // Update active state in sidebar
-    $$('.history-item').forEach(function(el) {
-      el.classList.toggle('active', parseInt(el.getAttribute('data-run-id')) === runId);
-    });
-
     try {
-      var data = await apiFetch('/api/history/' + runId);
-      state.deals = normalizeDealRows(data.deals || []);
-      renderTable();
+      var data = await api('/api/history/' + runId);
+      if (data && data.deals) {
+        loadDealsFromHistory(data.deals);
+      }
     } catch(e) {
-      state.deals = [];
-      renderTable();
+      console.warn('Failed to load run:', e);
     }
   }
 
-  /* -------------------------------------------------------------------
-     NORMALIZE DATA
-     ------------------------------------------------------------------- */
-  function normalizeDealRows(rows) {
-    return rows.map(function(r) {
-      // Handle both API formats:
-      // 1. From /api/search or /api/score: nested listing/market_estimate
-      // 2. From /api/history/{id}: flat dict from storage
-      if (r.listing) {
-        return {
-          year: r.listing.year,
-          make: r.listing.make,
-          model: r.listing.model,
-          price: r.listing.price,
-          mileage: r.listing.mileage,
-          url: r.listing.url || '',
-          location: r.listing.location || '',
-          market: r.market_estimate ? r.market_estimate.private_party : 0,
-          source: r.market_estimate ? r.market_estimate.source : '',
-          profit: r.potential_profit || 0,
-          ratio: r.ratio || 0,
-          quality: r.quality || 'Unknown'
-        };
-      }
+  function loadDealsFromHistory(rows) {
+    allDeals = rows.map(function(r, i) {
       return {
+        index: i + 1,
         year: r.year || 0,
         make: r.make || '',
         model: r.model || '',
         price: r.price || 0,
-        mileage: r.mileage,
-        url: r.url || '',
-        location: r.location || '',
-        market: r.private_party || r.market_value || 0,
-        source: r.pricing_source || r.source || '',
+        market: r.private_party || r.dealer_retail || 0,
         profit: r.potential_profit || 0,
         ratio: r.ratio || 0,
-        quality: r.quality || 'Unknown'
+        quality: r.quality || 'Unknown',
+        mileage: r.mileage || null,
+        _raw: r
       };
     });
+    filterAndRender();
   }
 
-  /* -------------------------------------------------------------------
-     TABLE RENDERING
-     ------------------------------------------------------------------- */
-  function renderTable() {
-    var filtered = getFilteredDeals();
-    var sorted = getSortedDeals(filtered);
-    var tbody = $('#deals-body');
-    var countEl = $('#deal-count');
+  /* -----------------------------------------------------------------------
+     SEARCH (WEBSOCKET)
+     ----------------------------------------------------------------------- */
+  function startSearch() {
+    var btn = $('btnSearch');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner" style="width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;display:inline-block;"></span> Searching...';
 
-    countEl.textContent = sorted.length + ' deal' + (sorted.length !== 1 ? 's' : '');
+    $('searchProgress').style.display = 'block';
+    $('progressBar').style.width = '0%';
+    $('progressText').textContent = 'Connecting...';
 
-    if (!sorted.length) {
-      tbody.innerHTML = '<tr><td colspan="11" class="table-empty">' +
-        '<p>No deals found</p>' +
-        '<p>' + (state.filterText ? 'Try adjusting your filter' : 'Run a search or select a past run') + '</p>' +
-        '</td></tr>';
-      return;
+    var proto = location.protocol === 'https:' ? 'wss' : 'ws';
+    ws = new WebSocket(proto + '://' + location.host + '/ws/search');
+
+    ws.onopen = function() {
+      var payload = {
+        location: $('searchLocation').value || 'atlanta',
+        search_term: $('searchTerm').value || '',
+        min_price: parseInt($('searchMinPrice').value) || 250,
+        max_price: parseInt($('searchMaxPrice').value) || 55000,
+        min_year: parseInt($('searchMinYear').value) || 1995,
+        max_year: parseInt($('searchMaxYear').value) || 2025,
+        max_mileage: parseInt($('searchMaxMileage').value) || 200000,
+        make: $('searchMake').value || '',
+        model: $('searchModel').value || '',
+        scroll_count: parseInt($('searchScrollCount').value) || 10
+      };
+      ws.send(JSON.stringify(payload));
+    };
+
+    ws.onmessage = function(ev) {
+      var msg;
+      try { msg = JSON.parse(ev.data); } catch(e) { return; }
+
+      if (msg.type === 'progress') {
+        $('progressBar').style.width = (msg.percent || 0) + '%';
+        $('progressText').textContent = msg.message || '';
+      }
+      else if (msg.type === 'results') {
+        loadSearchResults(msg);
+        resetSearchBtn();
+        fetchHistory();
+        fetchStats();
+      }
+      else if (msg.type === 'error') {
+        $('progressText').textContent = 'Error: ' + (msg.message || 'Unknown');
+        $('progressBar').style.width = '0%';
+        $('progressBar').style.background = 'var(--rose)';
+        resetSearchBtn();
+      }
+    };
+
+    ws.onerror = function() {
+      $('progressText').textContent = 'Connection error';
+      resetSearchBtn();
+    };
+
+    ws.onclose = function() {
+      resetSearchBtn();
+    };
+  }
+
+  function resetSearchBtn() {
+    var btn = $('btnSearch');
+    btn.disabled = false;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg> Search Marketplace';
+  }
+
+  function loadSearchResults(msg) {
+    var deals = msg.deals || [];
+    allDeals = deals.map(function(d, i) {
+      return {
+        index: i + 1,
+        year: d.listing ? d.listing.year : 0,
+        make: d.listing ? d.listing.make : '',
+        model: d.listing ? d.listing.model : '',
+        price: d.listing ? d.listing.price : 0,
+        market: d.market_estimate ? d.market_estimate.private_party : 0,
+        profit: d.potential_profit || 0,
+        ratio: d.ratio || 0,
+        quality: d.quality || '',
+        mileage: d.listing ? d.listing.mileage : null,
+        _raw: d
+      };
+    });
+    filterAndRender();
+  }
+
+  /* -----------------------------------------------------------------------
+     DEALS TABLE
+     ----------------------------------------------------------------------- */
+  function filterAndRender() {
+    var query = ($('tableFilter').value || '').toLowerCase().trim();
+    if (query) {
+      filteredDeals = allDeals.filter(function(d) {
+        return (d.make + ' ' + d.model + ' ' + d.year + ' ' + d.quality).toLowerCase().indexOf(query) >= 0;
+      });
+    } else {
+      filteredDeals = allDeals.slice();
     }
-
-    var html = '';
-    sorted.forEach(function(deal, i) {
-      var profitClass = deal.profit >= 0 ? 'profit-positive' : 'profit-negative';
-      var qClass = qualityClass(deal.quality);
-      var rowUrl = deal.url ? ' onclick="window.open(\'' + escapeAttr(deal.url) + '\', \'_blank\')"' : '';
-
-      html += '<tr class="fade-in" style="animation-delay:' + (i * 20) + 'ms"' + rowUrl + '>' +
-        '<td>' + (i + 1) + '</td>' +
-        '<td>' + (deal.year || '--') + '</td>' +
-        '<td>' + escapeHtml(deal.make) + '</td>' +
-        '<td>' + escapeHtml(deal.model) + '</td>' +
-        '<td>' + fmtDollar(deal.price) + '</td>' +
-        '<td>' + fmtDollar(deal.market) + '</td>' +
-        '<td class="' + profitClass + '">' + fmtDollar(deal.profit) + '</td>' +
-        '<td>' + fmtRatio(deal.ratio) + '</td>' +
-        '<td><span class="quality-pill ' + qClass + '">' + escapeHtml(deal.quality) + '</span></td>' +
-        '<td>' + (deal.mileage != null ? fmt(deal.mileage) + ' mi' : '--') + '</td>' +
-        '<td>' + escapeHtml(deal.source) + '</td>' +
-        '</tr>';
-    });
-
-    tbody.innerHTML = html;
+    sortDeals();
+    renderTable();
+    $('tableCount').textContent = filteredDeals.length + ' deal' + (filteredDeals.length !== 1 ? 's' : '');
   }
 
-  function getFilteredDeals() {
-    var q = state.filterText.toLowerCase();
-    if (!q) return state.deals;
-    return state.deals.filter(function(d) {
-      return (d.make + ' ' + d.model + ' ' + d.year + ' ' + d.quality + ' ' + d.source)
-        .toLowerCase().indexOf(q) !== -1;
-    });
-  }
-
-  function getSortedDeals(deals) {
-    var key = state.sortKey;
-    var dir = state.sortDir === 'asc' ? 1 : -1;
-    return deals.slice().sort(function(a, b) {
-      var va = a[key];
-      var vb = b[key];
-      if (va == null) va = key === 'mileage' ? Infinity : '';
-      if (vb == null) vb = key === 'mileage' ? Infinity : '';
+  function sortDeals() {
+    var col = sortCol;
+    var dir = sortDir === 'asc' ? 1 : -1;
+    filteredDeals.sort(function(a, b) {
+      var va = a[col];
+      var vb = b[col];
       if (typeof va === 'string') va = va.toLowerCase();
       if (typeof vb === 'string') vb = vb.toLowerCase();
       if (va < vb) return -1 * dir;
@@ -1610,292 +2023,458 @@ body {
     });
   }
 
-  function escapeHtml(str) {
-    if (!str) return '';
-    var div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
-  }
+  function renderTable() {
+    var tbody = $('dealsBody');
+    expandedRow = null;
+    if (filteredDeals.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="10"><div class="table-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>No deals yet. Run a search to populate results.</div></td></tr>';
+      return;
+    }
+    tbody.innerHTML = filteredDeals.map(function(d, i) {
+      var profitClass = d.profit >= 0 ? 'profit-positive' : 'profit-negative';
+      var profitStr = d.profit >= 0 ? '+' + fmtDollar(d.profit) : '-' + fmtDollar(Math.abs(d.profit));
+      if (d.profit >= 0) profitStr = '+' + fmtDollar(d.profit);
+      else profitStr = fmtDollar(d.profit);
+      return '<tr data-idx="' + i + '" onclick="window.toggleDealExpand(' + i + ')" tabindex="0" role="row" aria-label="' + d.year + ' ' + escHtml(d.make) + ' ' + escHtml(d.model) + '">'
+        + '<td>' + d.index + '</td>'
+        + '<td>' + d.year + '</td>'
+        + '<td>' + escHtml(d.make) + '</td>'
+        + '<td>' + escHtml(d.model) + '</td>'
+        + '<td>' + fmtDollar(d.price) + '</td>'
+        + '<td>' + fmtDollar(d.market) + '</td>'
+        + '<td class="' + profitClass + '">' + profitStr + '</td>'
+        + '<td style="color:var(--' + ratioColor(d.ratio) + ')">' + fmtRatio(d.ratio) + '</td>'
+        + '<td><span class="quality-pill ' + qualityClass(d.quality) + '">' + escHtml(d.quality) + '</span></td>'
+        + '<td>' + (d.mileage ? fmt(d.mileage) : '--') + '</td>'
+        + '</tr>';
+    }).join('');
 
-  function escapeAttr(str) {
-    if (!str) return '';
-    return str.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-  }
-
-  /* -------------------------------------------------------------------
-     SORTING
-     ------------------------------------------------------------------- */
-  function initSorting() {
-    $$('.deals-table thead th').forEach(function(th) {
-      th.addEventListener('click', function() {
-        var key = this.getAttribute('data-key');
-        if (!key) return;
-
-        if (state.sortKey === key) {
-          state.sortDir = state.sortDir === 'asc' ? 'desc' : 'asc';
-        } else {
-          state.sortKey = key;
-          state.sortDir = 'desc';
-        }
-
-        // Update header classes
-        $$('.deals-table thead th').forEach(function(h) {
-          h.classList.remove('sorted-asc', 'sorted-desc');
-          h.setAttribute('aria-sort', 'none');
-        });
-        this.classList.add(state.sortDir === 'asc' ? 'sorted-asc' : 'sorted-desc');
-        this.setAttribute('aria-sort', state.sortDir === 'asc' ? 'ascending' : 'descending');
-
-        renderTable();
-      });
+    // Update sort headers
+    document.querySelectorAll('.deals-table th').forEach(function(th) {
+      var col = th.getAttribute('data-col');
+      if (col === sortCol) {
+        th.classList.add('sorted');
+        th.querySelector('.sort-arrow').textContent = sortDir === 'asc' ? '\u25B2' : '\u25BC';
+        th.setAttribute('aria-sort', sortDir === 'asc' ? 'ascending' : 'descending');
+      } else {
+        th.classList.remove('sorted');
+        th.querySelector('.sort-arrow').textContent = '';
+        th.setAttribute('aria-sort', 'none');
+      }
     });
   }
 
-  /* -------------------------------------------------------------------
-     FILTER
-     ------------------------------------------------------------------- */
-  function initFilter() {
-    var input = $('#table-filter');
-    var timer = null;
-    input.addEventListener('input', function() {
-      clearTimeout(timer);
-      timer = setTimeout(function() {
-        state.filterText = input.value;
-        renderTable();
-      }, 150);
-    });
+  function handleSort(e) {
+    var th = e.target.closest('th');
+    if (!th) return;
+    var col = th.getAttribute('data-col');
+    if (!col) return;
+    if (col === sortCol) {
+      sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+    } else {
+      sortCol = col;
+      sortDir = 'desc';
+    }
+    filterAndRender();
   }
 
-  /* -------------------------------------------------------------------
-     SEARCH PANEL TOGGLE
-     ------------------------------------------------------------------- */
-  function initSearchToggle() {
-    var toggle = $('#search-toggle');
-    var wrap = $('#search-form-wrap');
-
-    toggle.addEventListener('click', function() {
-      var isOpen = wrap.classList.contains('open');
-      wrap.classList.toggle('open');
-      toggle.classList.toggle('open');
-      toggle.setAttribute('aria-expanded', !isOpen);
-    });
-
-    // Start expanded
-    wrap.classList.add('open');
-    toggle.classList.add('open');
-    toggle.setAttribute('aria-expanded', 'true');
+  function filterDeals() {
+    filterAndRender();
   }
 
-  /* -------------------------------------------------------------------
-     WEBSOCKET SEARCH
-     ------------------------------------------------------------------- */
-  function initSearch() {
-    $('#btn-search').addEventListener('click', startSearch);
-    $('#btn-cancel-search').addEventListener('click', cancelSearch);
-  }
+  /* -----------------------------------------------------------------------
+     DEAL ROW EXPANSION (INLINE AI ANALYSIS)
+     ----------------------------------------------------------------------- */
+  function toggleDealExpand(idx) {
+    var tbody = $('dealsBody');
+    var existingExpand = tbody.querySelector('.deal-expand-row');
 
-  function startSearch() {
-    if (state.searching) return;
-
-    var payload = {
-      location: $('#sf-location').value || 'atlanta',
-      search_term: $('#sf-term').value,
-      make: $('#sf-make').value,
-      model: $('#sf-model').value,
-      min_price: parseInt($('#sf-min-price').value) || 250,
-      max_price: parseInt($('#sf-max-price').value) || 55000,
-      min_year: parseInt($('#sf-min-year').value) || 1995,
-      max_year: parseInt($('#sf-max-year').value) || 2025,
-      max_mileage: parseInt($('#sf-mileage').value) || 200000,
-      scroll_count: parseInt($('#sf-scrolls').value) || 10
-    };
-
-    state.searching = true;
-    $('#btn-search').disabled = true;
-    $('#btn-cancel-search').style.display = '';
-    $('#search-progress').classList.add('visible');
-    $('#progress-fill').style.width = '0%';
-    $('#progress-text').textContent = 'Connecting...';
-
-    try {
-      state.ws = new WebSocket(WS_BASE + '/ws/search');
-    } catch(e) {
-      searchError('Could not connect to WebSocket');
+    // If clicking the same row, collapse
+    if (existingExpand && parseInt(existingExpand.getAttribute('data-expand-idx')) === idx) {
+      existingExpand.remove();
+      expandedRow = null;
       return;
     }
 
-    state.ws.onopen = function() {
-      state.ws.send(JSON.stringify(payload));
-    };
+    // Remove any existing expansion
+    if (existingExpand) existingExpand.remove();
 
-    state.ws.onmessage = function(event) {
-      var msg;
-      try { msg = JSON.parse(event.data); } catch(e) { return; }
+    expandedRow = idx;
+    var deal = filteredDeals[idx];
+    if (!deal) return;
 
-      if (msg.type === 'progress') {
-        $('#progress-fill').style.width = (msg.percent || 0) + '%';
-        $('#progress-text').textContent = msg.message || 'Working...';
-      } else if (msg.type === 'results') {
-        state.deals = normalizeDealRows(msg.deals || []);
-        renderTable();
-        searchComplete(msg.total_deals);
-        // Refresh stats and history
-        loadStats();
-        loadHistory();
-      } else if (msg.type === 'error') {
-        searchError(msg.message);
-      }
-    };
+    var dataRow = tbody.querySelector('tr[data-idx="' + idx + '"]');
+    if (!dataRow) return;
 
-    state.ws.onerror = function() {
-      searchError('WebSocket connection error');
-    };
+    var expandTr = document.createElement('tr');
+    expandTr.className = 'deal-expand-row';
+    expandTr.setAttribute('data-expand-idx', idx);
+    expandTr.innerHTML = '<td colspan="10"><div class="deal-expand-inner">'
+      + '<div class="deal-expand-header">'
+      + '<h4><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.5 5.5L19 10l-5.5 1.5L12 17l-1.5-5.5L5 10l5.5-1.5z"/></svg> AI Analysis: ' + deal.year + ' ' + escHtml(deal.make) + ' ' + escHtml(deal.model) + '</h4>'
+      + '<button class="deal-expand-close" onclick="event.stopPropagation();window.closeDealExpand()" aria-label="Close analysis">&times;</button>'
+      + '</div>'
+      + '<div id="dealExpandContent"><div class="skeleton skeleton-line w80"></div><div class="skeleton skeleton-line w60"></div><div class="skeleton skeleton-line w100"></div></div>'
+      + '</div></td>';
+    dataRow.after(expandTr);
 
-    state.ws.onclose = function() {
-      if (state.searching) {
-        searchReset();
-      }
-    };
+    // Fetch AI analysis
+    fetchDealAnalysis(deal, idx);
   }
 
-  function cancelSearch() {
-    if (state.ws) {
-      state.ws.close();
-      state.ws = null;
+  async function fetchDealAnalysis(deal, idx) {
+    var contentEl = $('dealExpandContent');
+    if (!contentEl) return;
+
+    var raw = deal._raw || {};
+    var price = raw.price || deal.price;
+    var year = raw.year || deal.year;
+    var make = raw.make || deal.make;
+    var model = raw.model || deal.model;
+    var mileage = raw.mileage || deal.mileage;
+    if (raw.listing) {
+      price = raw.listing.price || price;
+      year = raw.listing.year || year;
+      make = raw.listing.make || make;
+      model = raw.listing.model || model;
+      mileage = raw.listing.mileage || mileage;
     }
-    searchReset();
-    $('#progress-text').textContent = 'Search cancelled';
-  }
 
-  function searchComplete(total) {
-    searchReset();
-    $('#progress-fill').style.width = '100%';
-    $('#progress-text').textContent = 'Found ' + total + ' deals';
-    $('#search-progress').classList.add('visible');
-
-    setTimeout(function() {
-      $('#search-progress').classList.remove('visible');
-    }, 3000);
-  }
-
-  function searchError(msg) {
-    searchReset();
-    $('#progress-text').textContent = 'Error: ' + msg;
-    $('#progress-fill').style.width = '0%';
-    $('#search-progress').classList.add('visible');
-
-    setTimeout(function() {
-      $('#search-progress').classList.remove('visible');
-    }, 5000);
-  }
-
-  function searchReset() {
-    state.searching = false;
-    $('#btn-search').disabled = false;
-    $('#btn-cancel-search').style.display = 'none';
-    if (state.ws) {
-      state.ws.close();
-      state.ws = null;
+    try {
+      var data = await api('/api/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ price: price, year: year, make: make, model: model, mileage: mileage || null })
+      });
+      renderDealExpand(data, contentEl);
+    } catch(e) {
+      contentEl.innerHTML = '<div style="color:var(--rose);font-size:13px;">Analysis failed: ' + escHtml(e.message) + '</div>';
     }
   }
 
-  /* -------------------------------------------------------------------
+  function renderDealExpand(data, el) {
+    var a = data.analysis || {};
+    var d = data.deal || {};
+
+    var verdictClass = (a.verdict || '').toLowerCase();
+    if (verdictClass === 'buy') verdictClass = 'buy';
+    else if (verdictClass === 'pass') verdictClass = 'pass';
+    else verdictClass = 'negotiate';
+
+    var confDots = '';
+    for (var i = 1; i <= 10; i++) {
+      confDots += '<span class="confidence-dot' + (i <= (a.confidence || 0) ? ' filled' : '') + '"></span>';
+    }
+
+    var risksHtml = '';
+    if (a.risks && a.risks.length) {
+      risksHtml = '<ul class="ai-risks">' + a.risks.map(function(r) { return '<li>' + escHtml(r) + '</li>'; }).join('') + '</ul>';
+    }
+
+    var poweredLabel = a.ai_powered ? 'Powered by Claude' : 'Rule-based analysis';
+
+    el.innerHTML = '<div class="deal-expand-grid">'
+      + '<div class="deal-expand-field">'
+      + '<span class="deal-expand-field-label">Verdict</span>'
+      + '<span class="deal-expand-field-value"><span class="verdict-badge ' + verdictClass + '">' + escHtml(a.verdict || '--') + '</span></span>'
+      + '</div>'
+      + '<div class="deal-expand-field">'
+      + '<span class="deal-expand-field-label">Confidence</span>'
+      + '<span class="deal-expand-field-value"><div class="confidence-meter">' + confDots + '</div></span>'
+      + '</div>'
+      + '<div class="deal-expand-field">'
+      + '<span class="deal-expand-field-label">Est. Flip Profit</span>'
+      + '<span class="deal-expand-field-value" style="color:var(--emerald);font-weight:600;">' + fmtDollar(a.estimated_flip_profit) + '</span>'
+      + '</div>'
+      + '<div class="deal-expand-field full">'
+      + '<span class="deal-expand-field-label">Summary</span>'
+      + '<span class="deal-expand-field-value">' + escHtml(a.summary || '') + '</span>'
+      + '</div>'
+      + '<div class="deal-expand-field full">'
+      + '<span class="deal-expand-field-label">Flip Potential</span>'
+      + '<span class="deal-expand-field-value">' + escHtml(a.flip_potential || '') + '</span>'
+      + '</div>'
+      + '<div class="deal-expand-field">'
+      + '<span class="deal-expand-field-label">Risks</span>'
+      + '<span class="deal-expand-field-value">' + (risksHtml || '--') + '</span>'
+      + '</div>'
+      + '<div class="deal-expand-field" style="grid-column:span 2;">'
+      + '<span class="deal-expand-field-label">Negotiation Tip</span>'
+      + '<span class="deal-expand-field-value">' + escHtml(a.negotiation_tip || '') + '</span>'
+      + '</div>'
+      + '<div class="deal-expand-field full">'
+      + '<span class="deal-expand-field-label">Market Insight</span>'
+      + '<span class="deal-expand-field-value">' + escHtml(a.market_insight || '') + '</span>'
+      + '</div>'
+      + '</div>'
+      + '<div class="ai-powered-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.5 5.5L19 10l-5.5 1.5L12 17l-1.5-5.5L5 10l5.5-1.5z"/></svg> ' + poweredLabel + '</div>';
+  }
+
+  function closeDealExpand() {
+    var existing = document.querySelector('.deal-expand-row');
+    if (existing) existing.remove();
+    expandedRow = null;
+  }
+
+  /* -----------------------------------------------------------------------
      QUICK SCORE
-     ------------------------------------------------------------------- */
-  function initQuickScore() {
-    $('#qs-form').addEventListener('submit', async function(e) {
-      e.preventDefault();
+     ----------------------------------------------------------------------- */
+  function getScoreInputs() {
+    return {
+      price: parseInt($('scorePrice').value) || 0,
+      year: parseInt($('scoreYear').value) || 0,
+      make: $('scoreMake').value.trim(),
+      model: $('scoreModel').value.trim(),
+      mileage: parseInt($('scoreMileage').value) || null
+    };
+  }
 
-      var price = parseInt($('#qs-price').value);
-      var year = parseInt($('#qs-year').value);
-      var make = $('#qs-make').value.trim();
-      var model = $('#qs-model').value.trim();
-      var mileage = $('#qs-mileage').value ? parseInt($('#qs-mileage').value) : null;
+  async function quickScore() {
+    var inputs = getScoreInputs();
+    if (!inputs.price || !inputs.year || !inputs.make || !inputs.model) return;
 
-      if (!price || !year || !make || !model) return;
+    $('scoreEmpty').style.display = 'none';
+    $('scoreResult').style.display = 'block';
+    $('scoreResultContent').innerHTML = '<div class="skeleton skeleton-block"></div>';
 
-      var btn = $('#btn-score');
-      btn.disabled = true;
-      btn.textContent = 'Scoring...';
+    try {
+      var data = await api('/api/score', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(inputs)
+      });
+      renderScoreResult(data);
+    } catch(e) {
+      $('scoreResultContent').innerHTML = '<div style="color:var(--rose);font-size:13px;">' + escHtml(e.message) + '</div>';
+    }
+  }
 
-      var resultEl = $('#qs-result');
+  function renderScoreResult(data) {
+    var qClass = qualityClass(data.quality);
+    var rColor = ratioColor(data.ratio);
+    var market = data.market_estimate ? data.market_estimate.private_party : 0;
+    var profitStr = data.potential_profit >= 0 ? fmtDollar(data.potential_profit) : fmtDollar(data.potential_profit);
+    var profitColor = data.potential_profit >= 0 ? 'emerald' : 'rose';
 
+    $('scoreResultContent').innerHTML = '<div class="score-metrics">'
+      + '<div class="score-metric"><span class="score-metric-label">Quality</span><span class="score-metric-value"><span class="quality-pill ' + qClass + '">' + escHtml(data.quality) + '</span></span></div>'
+      + '<div class="score-metric"><span class="score-metric-label">Ratio</span><span class="score-metric-value" style="color:var(--' + rColor + ')">' + fmtRatio(data.ratio) + '</span></div>'
+      + '<div class="score-metric"><span class="score-metric-label">Market Value</span><span class="score-metric-value">' + fmtDollar(market) + '</span></div>'
+      + '<div class="score-metric"><span class="score-metric-label">Profit</span><span class="score-metric-value" style="color:var(--' + profitColor + ')">' + profitStr + '</span></div>'
+      + '</div>';
+  }
+
+  /* -----------------------------------------------------------------------
+     AI ANALYZE (SINGLE DEAL FROM FORM)
+     ----------------------------------------------------------------------- */
+  async function aiAnalyze() {
+    var inputs = getScoreInputs();
+    if (!inputs.price || !inputs.year || !inputs.make || !inputs.model) return;
+
+    $('scoreEmpty').style.display = 'none';
+    $('aiResult').style.display = 'block';
+    $('aiResultContent').innerHTML = '<div class="skeleton skeleton-line w80"></div><div class="skeleton skeleton-line w60"></div><div class="skeleton skeleton-line w100"></div>';
+
+    // Also score it
+    $('scoreResult').style.display = 'block';
+    $('scoreResultContent').innerHTML = '<div class="skeleton skeleton-block"></div>';
+
+    try {
+      var data = await api('/api/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(inputs)
+      });
+      if (data.deal) renderScoreResult(data.deal);
+      renderAiResult(data.analysis || {});
+    } catch(e) {
+      $('aiResultContent').innerHTML = '<div style="color:var(--rose);font-size:13px;">' + escHtml(e.message) + '</div>';
+    }
+  }
+
+  function renderAiResult(a) {
+    var verdictClass = (a.verdict || '').toLowerCase();
+    if (verdictClass !== 'buy' && verdictClass !== 'pass') verdictClass = 'negotiate';
+
+    var confDots = '';
+    for (var i = 1; i <= 10; i++) {
+      confDots += '<span class="confidence-dot' + (i <= (a.confidence || 0) ? ' filled' : '') + '"></span>';
+    }
+
+    var risksHtml = '';
+    if (a.risks && a.risks.length) {
+      risksHtml = '<ul class="ai-risks">' + a.risks.map(function(r) { return '<li>' + escHtml(r) + '</li>'; }).join('') + '</ul>';
+    }
+
+    var poweredLabel = a.ai_powered ? 'Powered by Claude' : 'Rule-based analysis';
+
+    $('aiResultContent').innerHTML = '<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">'
+      + '<span class="verdict-badge ' + verdictClass + '">' + escHtml(a.verdict || '--') + '</span>'
+      + '<div class="confidence-meter">' + confDots + '</div>'
+      + '</div>'
+      + '<div class="ai-text" style="margin-bottom:8px;">' + escHtml(a.summary || '') + '</div>'
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">'
+      + '<div><span class="deal-expand-field-label">Flip Potential</span><div class="ai-text">' + escHtml(a.flip_potential || '') + '</div></div>'
+      + '<div><span class="deal-expand-field-label">Est. Flip Profit</span><div class="ai-text" style="color:var(--emerald);font-weight:600;">' + fmtDollar(a.estimated_flip_profit) + '</div></div>'
+      + '</div>'
+      + '<div style="margin-bottom:10px;"><span class="deal-expand-field-label">Risks</span>' + (risksHtml || '<div class="ai-text">--</div>') + '</div>'
+      + '<div style="margin-bottom:10px;"><span class="deal-expand-field-label">Negotiation Tip</span><div class="ai-text">' + escHtml(a.negotiation_tip || '') + '</div></div>'
+      + '<div style="margin-bottom:8px;"><span class="deal-expand-field-label">Market Insight</span><div class="ai-text">' + escHtml(a.market_insight || '') + '</div></div>'
+      + '<div class="ai-powered-label"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.5 5.5L19 10l-5.5 1.5L12 17l-1.5-5.5L5 10l5.5-1.5z"/></svg> ' + poweredLabel + '</div>';
+  }
+
+  /* -----------------------------------------------------------------------
+     BATCH AI ANALYSIS (MARKET INSIGHTS)
+     ----------------------------------------------------------------------- */
+  async function refreshBatchAnalysis() {
+    var container = $('batchInsights');
+    container.innerHTML = '<div style="padding:16px;"><div class="skeleton skeleton-line w80"></div><div class="skeleton skeleton-line w60"></div><div class="skeleton skeleton-line w100"></div><div class="skeleton skeleton-line w40"></div></div>';
+
+    try {
+      var data = await api('/api/analyze/batch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: '{}'
+      });
+      renderBatchInsights(data);
+    } catch(e) {
+      container.innerHTML = '<div class="ai-empty">' + escHtml(e.message) + '</div>';
+    }
+  }
+
+  function renderBatchInsights(data) {
+    var a = data.analysis || {};
+    var trendClass = (a.market_trend || 'neutral').toLowerCase();
+    var trendLabel = trendClass.charAt(0).toUpperCase() + trendClass.slice(1) + ' Market';
+    var poweredLabel = a.ai_powered ? 'Powered by Claude' : 'Rule-based';
+
+    $('batchInsights').innerHTML = '<div class="ai-grid">'
+      + '<div class="ai-field full">'
+      + '<span class="ai-field-label">Market Summary</span>'
+      + '<span class="ai-field-value">' + escHtml(a.market_summary || '') + '</span>'
+      + '</div>'
+      + '<div class="ai-field">'
+      + '<span class="ai-field-label">Top Pick</span>'
+      + '<span class="ai-field-value">' + escHtml(a.top_pick || '') + '</span>'
+      + '</div>'
+      + '<div class="ai-field">'
+      + '<span class="ai-field-label">Market Trend</span>'
+      + '<span class="ai-field-value"><span class="trend-badge ' + trendClass + '">' + trendLabel + '</span></span>'
+      + '</div>'
+      + '<div class="ai-field full">'
+      + '<span class="ai-field-label">Strategy</span>'
+      + '<span class="ai-field-value">' + escHtml(a.strategy || '') + '</span>'
+      + '</div>'
+      + '<div class="ai-field">'
+      + '<span class="ai-field-label">Best Value Segment</span>'
+      + '<span class="ai-field-value">' + escHtml(a.best_value_segment || '') + '</span>'
+      + '</div>'
+      + '<div class="ai-field">'
+      + '<span class="ai-field-label">Avoid</span>'
+      + '<span class="ai-field-value">' + escHtml(a.avoid || '') + '</span>'
+      + '</div>'
+      + '</div>'
+      + '<div class="ai-powered-label" style="margin-top:12px;"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.5 5.5L19 10l-5.5 1.5L12 17l-1.5-5.5L5 10l5.5-1.5z"/></svg> ' + poweredLabel + ' -- ' + (data.total_deals || 0) + ' deals analyzed</div>';
+  }
+
+  /* -----------------------------------------------------------------------
+     LOGIN MODAL
+     ----------------------------------------------------------------------- */
+  function openLoginModal() {
+    $('loginModal').classList.add('visible');
+    $('loginStatus').className = 'modal-status';
+    $('loginStatus').innerHTML = 'Click "Start Login" to begin.';
+    $('btnLogin').disabled = false;
+  }
+
+  function closeLoginModal() {
+    $('loginModal').classList.remove('visible');
+    if (loginPollTimer) {
+      clearInterval(loginPollTimer);
+      loginPollTimer = null;
+    }
+  }
+
+  async function startLogin() {
+    $('btnLogin').disabled = true;
+    $('loginStatus').className = 'modal-status';
+    $('loginStatus').innerHTML = '<div class="spinner"></div> Launching browser...';
+
+    try {
+      await api('/api/login', { method: 'POST' });
+      $('loginStatus').innerHTML = '<div class="spinner"></div> Log in to Facebook in the browser window...';
+      pollLoginStatus();
+    } catch(e) {
+      $('loginStatus').className = 'modal-status error';
+      $('loginStatus').innerHTML = 'Failed: ' + escHtml(e.message);
+      $('btnLogin').disabled = false;
+    }
+  }
+
+  function pollLoginStatus() {
+    loginPollTimer = setInterval(async function() {
       try {
-        var payload = { price: price, year: year, make: make, model: model };
-        if (mileage != null) payload.mileage = mileage;
-
-        var data = await apiFetch('/api/score', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-
-        var qClass = qualityClass(data.quality);
-        var profitColor = data.potential_profit >= 0 ? 'text-accent' : 'text-red';
-        var marketVal = data.market_estimate ? data.market_estimate.private_party : 0;
-
-        resultEl.innerHTML =
-          '<div class="score-item">' +
-            '<span class="score-label">Quality</span>' +
-            '<span class="score-value"><span class="quality-pill ' + qClass + '">' + escapeHtml(data.quality) + '</span></span>' +
-          '</div>' +
-          '<div class="score-item">' +
-            '<span class="score-label">Ratio</span>' +
-            '<span class="score-value">' + fmtRatio(data.ratio) + '</span>' +
-          '</div>' +
-          '<div class="score-item">' +
-            '<span class="score-label">Market Value</span>' +
-            '<span class="score-value">' + fmtDollar(marketVal) + '</span>' +
-          '</div>' +
-          '<div class="score-item">' +
-            '<span class="score-label">Potential Profit</span>' +
-            '<span class="score-value ' + profitColor + '">' + fmtDollar(data.potential_profit) + '</span>' +
-          '</div>' +
-          '<div class="score-item">' +
-            '<span class="score-label">Condition</span>' +
-            '<span class="score-value">' + escapeHtml(data.condition) + '</span>' +
-          '</div>';
-
-        resultEl.classList.add('visible');
+        var data = await api('/api/login/status');
+        if (data.status === 'completed' && data.session_active) {
+          clearInterval(loginPollTimer);
+          loginPollTimer = null;
+          $('loginStatus').className = 'modal-status success';
+          $('loginStatus').innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Connected successfully!';
+          $('btnLogin').disabled = true;
+          fetchStatus();
+        } else if (data.status === 'failed') {
+          clearInterval(loginPollTimer);
+          loginPollTimer = null;
+          $('loginStatus').className = 'modal-status error';
+          $('loginStatus').innerHTML = 'Login failed. ' + (data.error || 'Try again.');
+          $('btnLogin').disabled = false;
+        }
       } catch(e) {
-        resultEl.innerHTML =
-          '<div class="score-item">' +
-            '<span class="score-label">Error</span>' +
-            '<span class="score-value text-red">' + escapeHtml(e.message) + '</span>' +
-          '</div>';
-        resultEl.classList.add('visible');
+        // continue polling
       }
-
-      btn.disabled = false;
-      btn.textContent = 'Score';
-    });
+    }, 2000);
   }
 
-  /* -------------------------------------------------------------------
+  /* -----------------------------------------------------------------------
+     TABLE HEADER SORT
+     ----------------------------------------------------------------------- */
+  document.querySelector('.deals-table thead').addEventListener('click', handleSort);
+
+  // Close modal on overlay click
+  $('loginModal').addEventListener('click', function(e) {
+    if (e.target === $('loginModal')) closeLoginModal();
+  });
+
+  // Close modal on Escape
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      closeLoginModal();
+      closeDealExpand();
+    }
+  });
+
+  /* -----------------------------------------------------------------------
+     EXPOSE TO WINDOW (ONCLICK HANDLERS)
+     ----------------------------------------------------------------------- */
+  window.startSearch = startSearch;
+  window.quickScore = quickScore;
+  window.aiAnalyze = aiAnalyze;
+  window.refreshBatchAnalysis = refreshBatchAnalysis;
+  window.openLoginModal = openLoginModal;
+  window.closeLoginModal = closeLoginModal;
+  window.startLogin = startLogin;
+  window.loadRun = loadRun;
+  window.filterDeals = filterDeals;
+  window.toggleDealExpand = toggleDealExpand;
+  window.closeDealExpand = closeDealExpand;
+
+  /* -----------------------------------------------------------------------
      INIT
-     ------------------------------------------------------------------- */
-  function init() {
-    initSearchToggle();
-    initSorting();
-    initFilter();
-    initSearch();
-    initQuickScore();
-
-    // Load data in parallel
-    loadStatus();
-    loadStats();
-    loadHistory();
-
-    // Refresh status every 30s
-    setInterval(loadStatus, 30000);
-  }
-
-  // Run when DOM is ready
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
-  }
+     ----------------------------------------------------------------------- */
+  fetchStatus();
+  fetchStats();
+  fetchHistory();
+  setInterval(fetchStatus, 15000);
 
 })();
 </script>

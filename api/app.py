@@ -18,6 +18,7 @@ from fbscraper.pricing import PricingEngine
 from fbscraper.scorer import DealScorer
 from fbscraper.scraper import FacebookScraper, has_valid_session, is_playwright_available
 from fbscraper.storage import Storage, export_csv, export_json
+from fbscraper.ai_analysis import DealAnalyzer, is_ai_available
 
 from .schemas import (
     SearchRequest, SearchResultResponse, DealResponse, ListingResponse,
@@ -30,6 +31,7 @@ logger = logging.getLogger(__name__)
 pricing_engine = PricingEngine()
 scorer = DealScorer(pricing_engine)
 storage = Storage()
+ai_analyzer = DealAnalyzer()
 
 # Track active scraping jobs
 active_jobs: dict[str, dict] = {}
@@ -111,6 +113,7 @@ async def get_status():
         "status": "ok",
         "playwright_available": is_playwright_available(),
         "session_active": has_valid_session(),
+        "ai_available": is_ai_available(),
         "active_jobs": len(active_jobs),
         "login_in_progress": active_jobs.get("login", {}).get("status") == "in_progress",
     }
@@ -228,6 +231,51 @@ async def quick_score(request: QuickScoreRequest):
 
     score = scorer.score(listing)
     return deal_to_response(score)
+
+
+@app.post("/api/analyze")
+async def analyze_deal(request: QuickScoreRequest):
+    """AI-powered analysis of a single car deal."""
+    listing = CarListing(
+        price=request.price,
+        year=request.year,
+        make=request.make,
+        model=request.model,
+        mileage=request.mileage,
+    )
+    score = scorer.score(listing)
+    analysis = await asyncio.to_thread(ai_analyzer.analyze_deal, score)
+    return {
+        "deal": deal_to_response(score).model_dump(),
+        "analysis": analysis,
+    }
+
+
+@app.post("/api/analyze/batch")
+async def analyze_batch_deals(request: SearchRequest):
+    """AI-powered market analysis on recent search results."""
+    # Use the most recent search run
+    runs = storage.get_recent_runs(1)
+    if not runs:
+        raise HTTPException(status_code=404, detail="No search data available. Run a search first.")
+
+    # Re-score from stored data to get DealScore objects
+    run_data = storage.get_run_scores(runs[0]["id"])
+    if not run_data:
+        raise HTTPException(status_code=404, detail="No deals in last search run")
+
+    # Reconstruct DealScore objects from stored data
+    scores = []
+    for row in run_data:
+        listing = CarListing(
+            price=row["price"], year=row["year"], make=row["make"],
+            model=row["model"], mileage=row.get("mileage"),
+            location=row.get("location", ""), url=row.get("url", ""),
+        )
+        scores.append(scorer.score(listing))
+
+    analysis = await asyncio.to_thread(ai_analyzer.analyze_batch, scores)
+    return {"total_deals": len(scores), "analysis": analysis}
 
 
 @app.get("/api/history", response_model=list[SearchRunResponse])
