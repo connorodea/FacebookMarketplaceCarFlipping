@@ -12,6 +12,19 @@ class DealQualityEnum(str, Enum):
     POOR = "Poor"
 
 
+class MultiCitySearchRequest(BaseModel):
+    locations: list[str] = Field(default=["atlanta"], description="List of cities to search")
+    search_term: str = Field(default="", description="Search keywords")
+    min_price: int = Field(default=250, ge=0)
+    max_price: int = Field(default=55000, ge=0)
+    min_year: int = Field(default=1995, ge=1980)
+    max_year: int = Field(default=2025, le=2027)
+    max_mileage: int = Field(default=200000, ge=0)
+    make: str = Field(default="")
+    model: str = Field(default="")
+    scroll_count: int = Field(default=5, ge=1, le=50)
+
+
 class SearchRequest(BaseModel):
     location: str = Field(default="atlanta", description="City for marketplace search")
     search_term: str = Field(default="", description="Search keywords")

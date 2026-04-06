@@ -1570,6 +1570,16 @@ body {
             <div class="form-group">
               <label class="form-label" for="searchLocation">Location</label>
               <input type="text" id="searchLocation" class="form-input" placeholder="atlanta" value="atlanta">
+              <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;">
+                <button type="button" onclick="window.setCity('atlanta')" style="padding:2px 8px;font-size:0.65rem;border-radius:10px;border:1px solid var(--border-color);background:transparent;color:var(--text-muted);cursor:pointer;">Atlanta</button>
+                <button type="button" onclick="window.setCity('miami')" style="padding:2px 8px;font-size:0.65rem;border-radius:10px;border:1px solid var(--border-color);background:transparent;color:var(--text-muted);cursor:pointer;">Miami</button>
+                <button type="button" onclick="window.setCity('dallas')" style="padding:2px 8px;font-size:0.65rem;border-radius:10px;border:1px solid var(--border-color);background:transparent;color:var(--text-muted);cursor:pointer;">Dallas</button>
+                <button type="button" onclick="window.setCity('houston')" style="padding:2px 8px;font-size:0.65rem;border-radius:10px;border:1px solid var(--border-color);background:transparent;color:var(--text-muted);cursor:pointer;">Houston</button>
+                <button type="button" onclick="window.setCity('phoenix')" style="padding:2px 8px;font-size:0.65rem;border-radius:10px;border:1px solid var(--border-color);background:transparent;color:var(--text-muted);cursor:pointer;">Phoenix</button>
+                <button type="button" onclick="window.setCity('chicago')" style="padding:2px 8px;font-size:0.65rem;border-radius:10px;border:1px solid var(--border-color);background:transparent;color:var(--text-muted);cursor:pointer;">Chicago</button>
+                <button type="button" onclick="window.setCity('charlotte')" style="padding:2px 8px;font-size:0.65rem;border-radius:10px;border:1px solid var(--border-color);background:transparent;color:var(--text-muted);cursor:pointer;">Charlotte</button>
+                <button type="button" onclick="window.setCity('detroit')" style="padding:2px 8px;font-size:0.65rem;border-radius:10px;border:1px solid var(--border-color);background:transparent;color:var(--text-muted);cursor:pointer;">Detroit</button>
+              </div>
             </div>
             <div class="form-group">
               <label class="form-label" for="searchTerm">Search Term</label>
@@ -1905,6 +1915,7 @@ body {
         ratio: r.ratio || 0,
         quality: r.quality || 'Unknown',
         mileage: r.mileage || null,
+        location: r.location || '',
         url: r.url || '',
         _raw: r
       };
@@ -1995,6 +2006,7 @@ body {
         ratio: d.ratio || 0,
         quality: d.quality || '',
         mileage: d.listing ? d.listing.mileage : null,
+        location: d.listing ? d.listing.location : '',
         url: d.listing ? d.listing.url : '',
         _raw: d
       };
@@ -2526,6 +2538,9 @@ body {
   window.filterDeals = filterDeals;
   window.toggleDealExpand = toggleDealExpand;
   window.closeDealExpand = closeDealExpand;
+  window.setCity = function(city) {
+    $('searchLocation').value = city;
+  };
 
   /* -----------------------------------------------------------------------
      INIT

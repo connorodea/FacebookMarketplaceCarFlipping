@@ -21,9 +21,9 @@ from fbscraper.storage import Storage, export_csv, export_json
 from fbscraper.ai_analysis import DealAnalyzer, is_ai_available
 
 from .schemas import (
-    SearchRequest, SearchResultResponse, DealResponse, ListingResponse,
-    MarketEstimateResponse, FlipEstimateResponse, SearchRunResponse,
-    QuickScoreRequest, StatsResponse,
+    SearchRequest, MultiCitySearchRequest, SearchResultResponse, DealResponse,
+    ListingResponse, MarketEstimateResponse, FlipEstimateResponse,
+    SearchRunResponse, QuickScoreRequest, StatsResponse,
 )
 
 logger = logging.getLogger(__name__)
@@ -232,6 +232,61 @@ async def run_search(request: SearchRequest):
         poor_count=sum(1 for s in scores if s.quality == DealQuality.POOR),
         deals=deals,
     )
+
+
+@app.post("/api/search/multi")
+async def run_multi_city_search(request: MultiCitySearchRequest):
+    """Search across multiple cities and combine results."""
+    if not is_playwright_available():
+        raise HTTPException(status_code=503, detail="Playwright not installed")
+    if not has_valid_session():
+        raise HTTPException(status_code=401, detail="No active Facebook session")
+
+    all_listings = []
+    city_results = {}
+
+    for city in request.locations:
+        config = SearchConfig(
+            location=city,
+            search_term=request.search_term,
+            min_price=request.min_price,
+            max_price=request.max_price,
+            min_year=request.min_year,
+            max_year=request.max_year,
+            max_mileage=request.max_mileage,
+            make=request.make,
+            model=request.model,
+            scroll_count=request.scroll_count,
+        )
+        scraper = FacebookScraper(config)
+        listings = await asyncio.to_thread(scraper.scrape)
+        all_listings.extend(listings)
+        city_results[city] = len(listings)
+
+    if not all_listings:
+        raise HTTPException(status_code=404, detail="No listings found in any city")
+
+    scores = scorer.score_batch(all_listings)
+    config_combined = SearchConfig(
+        location=",".join(request.locations),
+        search_term=request.search_term,
+        min_price=request.min_price,
+        max_price=request.max_price,
+    )
+    run_id = storage.save_search_run(config_combined, scores)
+    export_csv(scores)
+
+    deals = [deal_to_response(s) for s in scores]
+    return {
+        "run_id": run_id,
+        "total_deals": len(deals),
+        "city_breakdown": city_results,
+        "excellent_count": sum(1 for s in scores if s.quality == DealQuality.EXCELLENT),
+        "good_count": sum(1 for s in scores if s.quality == DealQuality.GOOD),
+        "fair_count": sum(1 for s in scores if s.quality == DealQuality.FAIR),
+        "poor_count": sum(1 for s in scores if s.quality == DealQuality.POOR),
+        "deals": deals,
+    }
 
 
 @app.post("/api/score", response_model=DealResponse)
