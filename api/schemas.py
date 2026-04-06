@@ -42,6 +42,18 @@ class MarketEstimateResponse(BaseModel):
     source: str
 
 
+class FlipEstimateResponse(BaseModel):
+    purchase_price: int = 0
+    estimated_repair: int = 0
+    detailing: int = 0
+    listing_fees: int = 0
+    transport: int = 0
+    total_cost: int = 0
+    sell_price: int = 0
+    net_profit: int = 0
+    roi_percent: float = 0.0
+
+
 class DealResponse(BaseModel):
     ratio: float
     quality: str
@@ -50,6 +62,7 @@ class DealResponse(BaseModel):
     notes: str
     listing: ListingResponse
     market_estimate: MarketEstimateResponse
+    flip_estimate: Optional[FlipEstimateResponse] = None
 
 
 class SearchRunResponse(BaseModel):

@@ -1503,9 +1503,16 @@ body {
             </div>
             <span class="table-count" id="tableCount">0 deals</span>
           </div>
-          <div class="table-toolbar">
-            <div class="table-search">
-              <input type="text" id="tableFilter" class="form-input" placeholder="Filter deals..." oninput="window.filterDeals()">
+          <div class="table-toolbar" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+            <div class="table-search" style="flex:1;min-width:180px;">
+              <input type="text" id="tableFilter" class="form-input" placeholder="Filter by make, model, year..." oninput="window.filterDeals()">
+            </div>
+            <div style="display:flex;gap:6px;" id="qualityFilters">
+              <button onclick="window.toggleQualityFilter('all')" class="quality-filter-btn active" data-quality="all" style="padding:4px 12px;border-radius:20px;font-size:0.72rem;font-weight:600;cursor:pointer;border:1px solid var(--border-color);background:var(--accent);color:#fff;transition:all 0.15s;">All</button>
+              <button onclick="window.toggleQualityFilter('Excellent')" class="quality-filter-btn" data-quality="Excellent" style="padding:4px 12px;border-radius:20px;font-size:0.72rem;font-weight:600;cursor:pointer;border:1px solid rgba(16,185,129,0.3);background:transparent;color:var(--emerald);transition:all 0.15s;">Excellent</button>
+              <button onclick="window.toggleQualityFilter('Good')" class="quality-filter-btn" data-quality="Good" style="padding:4px 12px;border-radius:20px;font-size:0.72rem;font-weight:600;cursor:pointer;border:1px solid rgba(59,130,246,0.3);background:transparent;color:var(--accent);transition:all 0.15s;">Good</button>
+              <button onclick="window.toggleQualityFilter('Fair')" class="quality-filter-btn" data-quality="Fair" style="padding:4px 12px;border-radius:20px;font-size:0.72rem;font-weight:600;cursor:pointer;border:1px solid rgba(245,158,11,0.3);background:transparent;color:var(--amber);transition:all 0.15s;">Fair</button>
+              <button onclick="window.toggleQualityFilter('Poor')" class="quality-filter-btn" data-quality="Poor" style="padding:4px 12px;border-radius:20px;font-size:0.72rem;font-weight:600;cursor:pointer;border:1px solid rgba(244,63,94,0.3);background:transparent;color:var(--rose);transition:all 0.15s;">Poor</button>
             </div>
           </div>
           <div class="table-wrap">
@@ -1998,14 +2005,43 @@ body {
   /* -----------------------------------------------------------------------
      DEALS TABLE
      ----------------------------------------------------------------------- */
+  var activeQualityFilter = 'all';
+
+  function toggleQualityFilter(quality) {
+    activeQualityFilter = quality;
+    // Update button styles
+    document.querySelectorAll('.quality-filter-btn').forEach(function(btn) {
+      var q = btn.getAttribute('data-quality');
+      if (q === quality) {
+        btn.style.background = q === 'all' ? 'var(--accent)' : q === 'Excellent' ? 'var(--emerald)' : q === 'Good' ? 'var(--accent)' : q === 'Fair' ? 'var(--amber)' : 'var(--rose)';
+        btn.style.color = '#fff';
+        btn.style.borderColor = 'transparent';
+      } else {
+        btn.style.background = 'transparent';
+        btn.style.color = q === 'all' ? 'var(--text-secondary)' : q === 'Excellent' ? 'var(--emerald)' : q === 'Good' ? 'var(--accent)' : q === 'Fair' ? 'var(--amber)' : 'var(--rose)';
+        btn.style.borderColor = q === 'all' ? 'var(--border-color)' : 'rgba(255,255,255,0.1)';
+      }
+    });
+    filterAndRender();
+  }
+  window.toggleQualityFilter = toggleQualityFilter;
+
   function filterAndRender() {
     var query = ($('tableFilter').value || '').toLowerCase().trim();
-    if (query) {
-      filteredDeals = allDeals.filter(function(d) {
-        return (d.make + ' ' + d.model + ' ' + d.year + ' ' + d.quality).toLowerCase().indexOf(query) >= 0;
+    filteredDeals = allDeals.slice();
+
+    // Quality filter
+    if (activeQualityFilter !== 'all') {
+      filteredDeals = filteredDeals.filter(function(d) {
+        return d.quality === activeQualityFilter;
       });
-    } else {
-      filteredDeals = allDeals.slice();
+    }
+
+    // Text filter
+    if (query) {
+      filteredDeals = filteredDeals.filter(function(d) {
+        return (d.make + ' ' + d.model + ' ' + d.year + ' ' + d.quality + ' ' + (d.location || '')).toLowerCase().indexOf(query) >= 0;
+      });
     }
     sortDeals();
     renderTable();
@@ -2177,6 +2213,24 @@ body {
 
     var poweredLabel = a.ai_powered ? 'Powered by Claude' : 'Rule-based analysis';
 
+    // Flip cost breakdown
+    var fe = (d.flip_estimate) || {};
+    var flipHtml = '';
+    if (fe.purchase_price) {
+      var netColor = fe.net_profit >= 0 ? 'var(--emerald)' : 'var(--rose)';
+      var netSign = fe.net_profit >= 0 ? '+' : '';
+      flipHtml = '<div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border-color);">'
+        + '<div style="font-size:0.78rem;font-weight:600;color:var(--text-secondary);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.05em;">Flip Cost Breakdown</div>'
+        + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">'
+        + '<div style="background:rgba(255,255,255,0.02);border-radius:8px;padding:10px;"><div style="font-size:0.7rem;color:var(--text-muted);">Purchase</div><div style="font-size:0.95rem;font-weight:600;">' + fmtDollar(fe.purchase_price) + '</div></div>'
+        + '<div style="background:rgba(255,255,255,0.02);border-radius:8px;padding:10px;"><div style="font-size:0.7rem;color:var(--text-muted);">Repairs + Detail</div><div style="font-size:0.95rem;font-weight:600;">' + fmtDollar((fe.estimated_repair || 0) + (fe.detailing || 0)) + '</div></div>'
+        + '<div style="background:rgba(255,255,255,0.02);border-radius:8px;padding:10px;"><div style="font-size:0.7rem;color:var(--text-muted);">Sell Price</div><div style="font-size:0.95rem;font-weight:600;color:var(--accent);">' + fmtDollar(fe.sell_price) + '</div></div>'
+        + '<div style="background:rgba(255,255,255,0.02);border-radius:8px;padding:10px;"><div style="font-size:0.7rem;color:var(--text-muted);">Net Profit (ROI: ' + (fe.roi_percent || 0) + '%)</div><div style="font-size:0.95rem;font-weight:700;color:' + netColor + ';">' + netSign + fmtDollar(Math.abs(fe.net_profit || 0)) + '</div></div>'
+        + '</div>'
+        + '<div style="font-size:0.7rem;color:var(--text-muted);margin-top:6px;">Total investment: ' + fmtDollar(fe.total_cost) + ' (purchase + repairs + listing fees)</div>'
+        + '</div>';
+    }
+
     el.innerHTML = '<div class="deal-expand-grid">'
       + '<div class="deal-expand-field">'
       + '<span class="deal-expand-field-label">Verdict</span>'
@@ -2211,6 +2265,7 @@ body {
       + '<span class="deal-expand-field-value">' + escHtml(a.market_insight || '') + '</span>'
       + '</div>'
       + '</div>'
+      + flipHtml
       + '<div class="ai-powered-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.5 5.5L19 10l-5.5 1.5L12 17l-1.5-5.5L5 10l5.5-1.5z"/></svg> ' + poweredLabel + '</div>';
   }
 

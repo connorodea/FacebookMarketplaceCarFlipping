@@ -154,6 +154,26 @@ class MarketEstimate:
 
 
 @dataclass
+class FlipEstimate:
+    """Estimated costs and net profit for flipping a car."""
+    purchase_price: int
+    estimated_repair: int = 0
+    detailing: int = 200
+    listing_fees: int = 50
+    transport: int = 0
+    total_cost: int = 0
+    sell_price: int = 0
+    net_profit: int = 0
+    roi_percent: float = 0.0
+
+    def __post_init__(self):
+        self.total_cost = self.purchase_price + self.estimated_repair + self.detailing + self.listing_fees + self.transport
+        self.net_profit = self.sell_price - self.total_cost
+        if self.total_cost > 0:
+            self.roi_percent = round((self.net_profit / self.total_cost) * 100, 1)
+
+
+@dataclass
 class DealScore:
     listing: CarListing
     market_estimate: MarketEstimate
@@ -161,10 +181,11 @@ class DealScore:
     ratio: float
     quality: DealQuality
     potential_profit: int
+    flip_estimate: Optional[FlipEstimate] = None
     notes: str = ""
 
     def to_dict(self) -> dict:
-        return {
+        d = {
             "ratio": round(self.ratio, 3),
             "quality": self.quality.value,
             "condition": self.condition.value,
@@ -173,6 +194,9 @@ class DealScore:
             "listing": self.listing.to_dict(),
             "market_estimate": asdict(self.market_estimate),
         }
+        if self.flip_estimate:
+            d["flip_estimate"] = asdict(self.flip_estimate)
+        return d
 
     def summary_line(self) -> str:
         """One-line summary for CLI display."""

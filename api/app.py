@@ -22,7 +22,8 @@ from fbscraper.ai_analysis import DealAnalyzer, is_ai_available
 
 from .schemas import (
     SearchRequest, SearchResultResponse, DealResponse, ListingResponse,
-    MarketEstimateResponse, SearchRunResponse, QuickScoreRequest, StatsResponse,
+    MarketEstimateResponse, FlipEstimateResponse, SearchRunResponse,
+    QuickScoreRequest, StatsResponse,
 )
 
 logger = logging.getLogger(__name__)
@@ -65,6 +66,20 @@ app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 def deal_to_response(score) -> DealResponse:
     l = score.listing
     m = score.market_estimate
+    flip = None
+    if hasattr(score, 'flip_estimate') and score.flip_estimate:
+        f = score.flip_estimate
+        flip = FlipEstimateResponse(
+            purchase_price=f.purchase_price,
+            estimated_repair=f.estimated_repair,
+            detailing=f.detailing,
+            listing_fees=f.listing_fees,
+            transport=f.transport,
+            total_cost=f.total_cost,
+            sell_price=f.sell_price,
+            net_profit=f.net_profit,
+            roi_percent=f.roi_percent,
+        )
     return DealResponse(
         ratio=round(score.ratio, 3),
         quality=score.quality.value,
@@ -86,6 +101,7 @@ def deal_to_response(score) -> DealResponse:
             dealer_retail=m.dealer_retail,
             source=m.source,
         ),
+        flip_estimate=flip,
     )
 
 

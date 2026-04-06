@@ -3,7 +3,7 @@
 import logging
 from typing import Optional
 
-from .models import CarListing, DealScore, DealQuality, MarketEstimate, MileageCondition
+from .models import CarListing, DealScore, DealQuality, FlipEstimate, MarketEstimate, MileageCondition
 from .pricing import PricingEngine
 
 logger = logging.getLogger(__name__)
@@ -50,6 +50,9 @@ class DealScorer:
         # Potential profit if bought at listing and sold at private party
         potential_profit = int(adjusted_pp - listing.price)
 
+        # Flip estimate with realistic costs
+        flip_estimate = self._estimate_flip(listing, market_estimate, condition)
+
         # Build notes
         notes_parts = []
         if market_estimate.source == "category_fallback":
@@ -68,7 +71,38 @@ class DealScorer:
             ratio=round(ratio, 3),
             quality=quality,
             potential_profit=potential_profit,
+            flip_estimate=flip_estimate,
             notes="; ".join(notes_parts),
+        )
+
+    def _estimate_flip(self, listing: CarListing, market: MarketEstimate,
+                       condition: MileageCondition) -> FlipEstimate:
+        """Estimate realistic flip costs and net profit."""
+        # Estimate repair costs based on condition and age
+        age = listing.age
+        if condition == MileageCondition.EXCELLENT:
+            repair = int(listing.price * 0.03)  # 3% for detailing/minor fixes
+        elif condition == MileageCondition.GOOD:
+            repair = int(listing.price * 0.05)  # 5%
+        elif condition == MileageCondition.FAIR:
+            repair = int(listing.price * 0.08) + (200 if age > 8 else 0)
+        elif condition in (MileageCondition.HIGH, MileageCondition.VERY_HIGH):
+            repair = int(listing.price * 0.12) + 500
+        else:
+            repair = int(listing.price * 0.07)
+
+        repair = max(150, min(repair, 3000))  # Clamp between $150-$3000
+
+        # Sell at 95% of private party (realistic quick sale)
+        sell_price = int(market.private_party * 0.95)
+
+        return FlipEstimate(
+            purchase_price=listing.price,
+            estimated_repair=repair,
+            detailing=200,
+            listing_fees=50,
+            transport=0,
+            sell_price=sell_price,
         )
 
     def score_batch(self, listings: list[CarListing]) -> list[DealScore]:

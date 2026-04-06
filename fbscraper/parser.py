@@ -20,6 +20,44 @@ BRAND_ALIASES = {
     "alfa": "Alfa Romeo",
 }
 
+# Brands that should stay UPPERCASE
+UPPERCASE_BRANDS = {"bmw", "gmc", "ram"}
+
+# Known model patterns by brand (for fuzzy matching to lookup table)
+BRAND_MODEL_NORMALIZE = {
+    "bmw": {
+        r"3\d{2}[id]?": "3 Series",
+        r"5\d{2}[id]?": "5 Series",
+        r"7\d{2}[id]?": "7 Series",
+        r"x[1-7]": "X{}",  # X3, X5, etc. - handled specially
+        r"m[2-8]": "M{}",
+    },
+    "mercedes-benz": {
+        r"c\s*\d{3}": "C-Class",
+        r"e\s*\d{3}": "E-Class",
+        r"s\s*\d{3}": "S-Class",
+        r"gl[a-z]*\s*\d{3}": "GLC",
+    },
+    "lexus": {
+        r"[eirn]s\s*\d{3}": lambda m: m.group(0)[:2].upper(),
+        r"[eirn]x\s*\d{3}": lambda m: m.group(0)[:2].upper(),
+        r"rx": "RX",
+        r"es": "ES",
+        r"is": "IS",
+        r"nx": "NX",
+    },
+    "infiniti": {
+        r"q\s*[35][05]": lambda m: m.group(0).upper().replace(" ", ""),
+        r"qx\s*\d{2}": lambda m: m.group(0).upper().replace(" ", ""),
+    },
+    "acura": {
+        r"tl[xs]?": "TLX",
+        r"ilx": "ILX",
+        r"mdx": "MDX",
+        r"rdx": "RDX",
+    },
+}
+
 # All recognized car brands (lowercase)
 CAR_BRANDS = {
     "toyota", "honda", "ford", "chevrolet", "chevy", "nissan", "hyundai",
@@ -61,7 +99,39 @@ def normalize_brand(raw: str) -> str:
     lower = raw.lower().replace("-", "").replace("_", "")
     if lower in BRAND_ALIASES:
         return BRAND_ALIASES[lower]
+    if lower in UPPERCASE_BRANDS:
+        return lower.upper()
     return raw.title()
+
+
+def normalize_model(make: str, raw_model: str) -> str:
+    """Normalize model name using brand-specific patterns.
+
+    E.g., BMW "328i" -> "3 Series", Mercedes "C300" -> "C-Class".
+    """
+    if not raw_model or raw_model == "Unknown":
+        return raw_model
+
+    make_lower = make.lower()
+    if make_lower not in BRAND_MODEL_NORMALIZE:
+        return raw_model
+
+    combined = raw_model.lower().strip()
+    patterns = BRAND_MODEL_NORMALIZE[make_lower]
+
+    for pattern, replacement in patterns.items():
+        match = re.match(pattern, combined, re.IGNORECASE)
+        if match:
+            if callable(replacement):
+                return replacement(match)
+            if "{}" in replacement:
+                # Extract the digit, e.g., "X3" -> "X3"
+                digit = re.search(r"\d", combined)
+                if digit:
+                    return replacement.replace("{}", digit.group())
+            return replacement
+
+    return raw_model
 
 
 def parse_price(tokens: list[str]) -> Optional[int]:
@@ -98,11 +168,18 @@ def parse_make_model(tokens: list[str]) -> tuple[Optional[str], Optional[str]]:
             model = None
             if i + 1 < len(tokens):
                 next_token = tokens[i + 1]
-                # Skip if next token looks like price, mileage, or noise
-                if (not next_token.startswith("$")
-                        and not next_token.isdigit()
-                        and next_token.lower() not in NON_MODEL_TOKENS
-                        and len(next_token) > 1):
+                # Allow alphanumeric models like "328i", "X5", "Q50", "CR-V", "F-150"
+                is_valid_model = (
+                    not next_token.startswith("$")
+                    and next_token.lower() not in NON_MODEL_TOKENS
+                    and len(next_token) > 1
+                    # Allow pure digits only for known patterns (e.g., BMW "328")
+                    and (not next_token.isdigit() or make.upper() in ("BMW", "FIAT", "MINI"))
+                    # Filter out mileage-like tokens (e.g., "78k", "120k", "45000")
+                    and not re.match(r"^\d+[kK]$", next_token)
+                    and not re.match(r"^\d{4,}$", next_token)  # 5+ digit numbers are likely mileage
+                )
+                if is_valid_model:
                     model = next_token.title()
 
                     # Check for multi-word model (e.g., "Grand Cherokee")
@@ -111,10 +188,15 @@ def parse_make_model(tokens: list[str]) -> tuple[Optional[str], Optional[str]]:
                         if (not extra.startswith("$")
                                 and not extra.isdigit()
                                 and extra.lower() not in NON_MODEL_TOKENS
-                                and not re.match(r"^\d", extra)
                                 and len(extra) > 1
-                                and "," not in extra):
+                                and "," not in extra
+                                and not re.match(r"^\d+[kK]$", extra)
+                                and not re.match(r"^\d{4,}$", extra)):
                             model += f" {extra.title()}"
+
+            # Normalize model to match lookup table names
+            if model:
+                model = normalize_model(make, model)
 
             return make, model
 
