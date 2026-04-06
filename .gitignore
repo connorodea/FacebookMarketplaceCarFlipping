@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Session data (contains auth cookies)
+data/sessions/
+
+# Output files
+output/
+
+# Legacy output files in root
+/*.csv
+/*.xlsx
+
+# Logs
+*.log
+
+# Environment
+.env
+.venv/
+venv/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# SQLite databases
+*.db
+
+# Archive of original files
+_archive/
+
+# Pytest cache
+.pytest_cache/
