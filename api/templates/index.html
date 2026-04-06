@@ -1,0 +1,1691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DealFinder - Car Deal Analytics</title>
+<style>
+/* =========================================================================
+   RESET & BASE
+   ========================================================================= */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-card: rgba(30, 41, 59, 0.7);
+  --bg-card-hover: rgba(30, 41, 59, 0.9);
+  --bg-input: rgba(15, 23, 42, 0.8);
+  --border-color: rgba(148, 163, 184, 0.12);
+  --border-focus: rgba(16, 185, 129, 0.5);
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --accent: #10b981;
+  --accent-hover: #059669;
+  --accent-dim: rgba(16, 185, 129, 0.12);
+  --red: #ef4444;
+  --red-dim: rgba(239, 68, 68, 0.12);
+  --blue: #3b82f6;
+  --blue-dim: rgba(59, 130, 246, 0.12);
+  --yellow: #f59e0b;
+  --yellow-dim: rgba(245, 158, 11, 0.12);
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.2);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.25);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.35);
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-pill: 999px;
+  --transition: 180ms ease;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+}
+
+html {
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* =========================================================================
+   LAYOUT
+   ========================================================================= */
+.app-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto auto 1fr;
+  min-height: 100vh;
+}
+
+.main-content {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 24px;
+  max-width: 1440px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 24px 48px;
+}
+
+.primary-column {
+  min-width: 0;
+}
+
+.sidebar {
+  min-width: 0;
+}
+
+/* =========================================================================
+   HEADER
+   ========================================================================= */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border-color);
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(12px);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-brand svg {
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.header-brand h1 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+.header-brand span {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 400;
+  margin-left: 2px;
+}
+
+.header-status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+  font-size: 0.73rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+}
+
+.status-badge .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.status-badge.active .dot { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+.status-badge.inactive .dot { background: var(--text-muted); }
+.status-badge.error .dot { background: var(--red); box-shadow: 0 0 6px var(--red); }
+
+/* =========================================================================
+   STATS BAR
+   ========================================================================= */
+.stats-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  max-width: 1440px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 24px 24px 0;
+}
+
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 20px 24px;
+  backdrop-filter: blur(8px);
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.stat-card:hover {
+  border-color: rgba(148, 163, 184, 0.2);
+  box-shadow: var(--shadow-md);
+}
+
+.stat-card .label {
+  font-size: 0.73rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 8px;
+}
+
+.stat-card .value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-card .value.accent { color: var(--accent); }
+
+.stat-card .sub {
+  font-size: 0.73rem;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+/* =========================================================================
+   SECTION SPACING
+   ========================================================================= */
+.section-gap {
+  padding: 24px 24px 0;
+  max-width: 1440px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* =========================================================================
+   CARDS (GENERIC)
+   ========================================================================= */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(8px);
+  overflow: hidden;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.card-header h2 {
+  font-size: 0.93rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.card-body {
+  padding: 20px;
+}
+
+/* =========================================================================
+   COLLAPSIBLE SEARCH PANEL
+   ========================================================================= */
+.search-panel {
+  margin-bottom: 24px;
+}
+
+.search-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.93rem;
+  font-weight: 600;
+  padding: 0;
+  width: 100%;
+  text-align: left;
+}
+
+.search-toggle svg {
+  transition: transform var(--transition);
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.search-toggle.open svg {
+  transform: rotate(180deg);
+}
+
+.search-form-container {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 350ms ease, opacity 200ms ease;
+  opacity: 0;
+}
+
+.search-form-container.open {
+  max-height: 500px;
+  opacity: 1;
+}
+
+.search-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 14px;
+  padding-top: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.form-group label {
+  font-size: 0.73rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.form-group input,
+.form-group select {
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 9px 12px;
+  font-size: 0.87rem;
+  font-family: inherit;
+  color: var(--text-primary);
+  transition: border-color var(--transition), box-shadow var(--transition);
+  outline: none;
+  width: 100%;
+}
+
+.form-group input::placeholder {
+  color: var(--text-muted);
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.search-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-top: 16px;
+}
+
+/* =========================================================================
+   BUTTONS
+   ========================================================================= */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 20px;
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 0.87rem;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: background var(--transition), box-shadow var(--transition), opacity var(--transition);
+  outline: none;
+  white-space: nowrap;
+}
+
+.btn:focus-visible {
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--bg-card);
+  color: var(--text-primary);
+}
+
+.btn-sm {
+  padding: 6px 14px;
+  font-size: 0.8rem;
+}
+
+/* =========================================================================
+   PROGRESS BAR
+   ========================================================================= */
+.progress-container {
+  display: none;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.progress-container.visible {
+  display: flex;
+}
+
+.progress-track {
+  width: 100%;
+  height: 4px;
+  background: rgba(148, 163, 184, 0.1);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--accent);
+  border-radius: var(--radius-pill);
+  transition: width 300ms ease;
+}
+
+.progress-text {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+/* =========================================================================
+   QUICK SCORE WIDGET
+   ========================================================================= */
+.quick-score {
+  margin-bottom: 24px;
+}
+
+.quick-score .card-body {
+  padding: 16px 20px;
+}
+
+.quick-score-form {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr) auto;
+  gap: 10px;
+  align-items: end;
+}
+
+.quick-score-result {
+  display: none;
+  margin-top: 14px;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  background: var(--bg-input);
+}
+
+.quick-score-result.visible {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.score-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.score-item .score-label {
+  font-size: 0.67rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.score-item .score-value {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* =========================================================================
+   DEALS TABLE
+   ========================================================================= */
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.deals-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.deals-table thead th {
+  padding: 10px 14px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+  transition: color var(--transition);
+  position: sticky;
+  top: 0;
+  background: var(--bg-card);
+  z-index: 2;
+}
+
+.deals-table thead th:hover {
+  color: var(--text-secondary);
+}
+
+.deals-table thead th.sorted-asc::after,
+.deals-table thead th.sorted-desc::after {
+  margin-left: 4px;
+  font-size: 0.6rem;
+}
+
+.deals-table thead th.sorted-asc::after { content: " \2191"; }
+.deals-table thead th.sorted-desc::after { content: " \2193"; }
+
+.deals-table tbody tr {
+  border-bottom: 1px solid rgba(148, 163, 184, 0.06);
+  cursor: pointer;
+  transition: background var(--transition);
+}
+
+.deals-table tbody tr:hover {
+  background: rgba(148, 163, 184, 0.06);
+}
+
+.deals-table td {
+  padding: 11px 14px;
+  font-size: 0.87rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.deals-table td:first-child {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.deals-table td.profit-positive { color: var(--accent); font-weight: 600; }
+.deals-table td.profit-negative { color: var(--red); font-weight: 600; }
+
+.quality-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 0.73rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.quality-excellent { background: var(--accent-dim); color: var(--accent); }
+.quality-good { background: var(--blue-dim); color: var(--blue); }
+.quality-fair { background: var(--yellow-dim); color: var(--yellow); }
+.quality-poor { background: var(--red-dim); color: var(--red); }
+
+.table-empty {
+  text-align: center;
+  padding: 64px 24px;
+  color: var(--text-muted);
+}
+
+.table-empty p:first-child {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.table-empty p:last-child {
+  font-size: 0.87rem;
+}
+
+/* Table filter bar */
+.table-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.table-toolbar input {
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 7px 12px 7px 34px;
+  font-size: 0.8rem;
+  font-family: inherit;
+  color: var(--text-primary);
+  width: 240px;
+  outline: none;
+  transition: border-color var(--transition);
+}
+
+.table-toolbar input:focus {
+  border-color: var(--border-focus);
+}
+
+.table-toolbar .filter-wrapper {
+  position: relative;
+}
+
+.table-toolbar .filter-wrapper svg {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.table-toolbar .deal-count {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+}
+
+/* =========================================================================
+   SIDEBAR - HISTORY
+   ========================================================================= */
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.history-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background var(--transition);
+  border: 1px solid transparent;
+}
+
+.history-item:hover {
+  background: rgba(148, 163, 184, 0.06);
+}
+
+.history-item.active {
+  background: var(--accent-dim);
+  border-color: rgba(16, 185, 129, 0.2);
+}
+
+.history-item .run-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.history-item .run-location {
+  font-size: 0.87rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  text-transform: capitalize;
+}
+
+.history-item .run-count {
+  font-size: 0.73rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.history-item .run-time {
+  font-size: 0.73rem;
+  color: var(--text-muted);
+}
+
+.history-item .run-term {
+  font-size: 0.73rem;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.history-empty {
+  padding: 32px 16px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.87rem;
+}
+
+/* =========================================================================
+   SKELETON LOADING
+   ========================================================================= */
+@keyframes shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, var(--bg-secondary) 25%, rgba(148,163,184,0.08) 50%, var(--bg-secondary) 75%);
+  background-size: 800px 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-sm);
+}
+
+.skeleton-text {
+  height: 14px;
+  width: 80%;
+  margin-bottom: 8px;
+}
+
+.skeleton-value {
+  height: 28px;
+  width: 50%;
+}
+
+/* =========================================================================
+   ANIMATIONS
+   ========================================================================= */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeIn 250ms ease forwards;
+}
+
+/* =========================================================================
+   SCROLLBAR
+   ========================================================================= */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.15);
+  border-radius: var(--radius-pill);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.25);
+}
+
+/* =========================================================================
+   RESPONSIVE
+   ========================================================================= */
+@media (max-width: 1024px) {
+  .main-content {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    order: -1;
+  }
+
+  .stats-bar {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .quick-score-form {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .app-header {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .stats-bar {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .search-form {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .quick-score-form {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .main-content {
+    padding: 0 16px 32px;
+  }
+
+  .stats-bar {
+    padding: 16px 16px 0;
+  }
+
+  .section-gap {
+    padding: 16px 16px 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .stats-bar {
+    grid-template-columns: 1fr;
+  }
+
+  .search-form {
+    grid-template-columns: 1fr;
+  }
+
+  .quick-score-form {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================================================
+   UTILITY
+   ========================================================================= */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  border: 0;
+}
+
+.text-accent { color: var(--accent); }
+.text-red { color: var(--red); }
+.text-blue { color: var(--blue); }
+.text-yellow { color: var(--yellow); }
+.text-muted { color: var(--text-muted); }
+</style>
+</head>
+<body>
+
+<div class="app-container">
+
+  <!-- ===================================================================
+       HEADER
+       =================================================================== -->
+  <header class="app-header" role="banner">
+    <div class="header-brand">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-2-2.2-3.5C13 5.5 12 5 11 5H5c-1.1 0-2.1.6-2.6 1.5L1 9v7c0 .6.4 1 1 1h2"/>
+        <circle cx="7" cy="17" r="2"/>
+        <circle cx="17" cy="17" r="2"/>
+        <path d="M5 17H3"/>
+        <path d="M19 17h-2"/>
+        <path d="M9 17h6"/>
+      </svg>
+      <h1>DealFinder <span>Car Deal Analytics</span></h1>
+    </div>
+    <div class="header-status">
+      <div id="badge-session" class="status-badge inactive">
+        <span class="dot"></span>
+        <span>Session: Checking...</span>
+      </div>
+      <div id="badge-playwright" class="status-badge inactive">
+        <span class="dot"></span>
+        <span>Playwright: Checking...</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===================================================================
+       STATS BAR
+       =================================================================== -->
+  <div class="stats-bar" role="region" aria-label="Key Metrics">
+    <div class="stat-card" id="stat-total">
+      <div class="label">Total Deals Analyzed</div>
+      <div class="value"><span class="skeleton skeleton-value"></span></div>
+      <div class="sub" id="stat-total-sub">&nbsp;</div>
+    </div>
+    <div class="stat-card" id="stat-avg">
+      <div class="label">Avg Deal Ratio</div>
+      <div class="value accent"><span class="skeleton skeleton-value"></span></div>
+      <div class="sub">Higher is better</div>
+    </div>
+    <div class="stat-card" id="stat-best">
+      <div class="label">Best Deal Ratio</div>
+      <div class="value accent"><span class="skeleton skeleton-value"></span></div>
+      <div class="sub">Top score found</div>
+    </div>
+    <div class="stat-card" id="stat-session">
+      <div class="label">System Status</div>
+      <div class="value" id="stat-session-value"><span class="skeleton skeleton-value"></span></div>
+      <div class="sub" id="stat-session-sub">&nbsp;</div>
+    </div>
+  </div>
+
+  <!-- ===================================================================
+       MAIN GRID
+       =================================================================== -->
+  <div class="section-gap">
+    <div class="main-content">
+
+      <!-- PRIMARY COLUMN -->
+      <div class="primary-column">
+
+        <!-- SEARCH PANEL -->
+        <div class="search-panel card">
+          <div class="card-header">
+            <button class="search-toggle" id="search-toggle" type="button" aria-expanded="false" aria-controls="search-form-wrap">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+              <span>Marketplace Search</span>
+            </button>
+          </div>
+          <div class="card-body">
+            <div class="search-form-container" id="search-form-wrap">
+              <form class="search-form" id="search-form" autocomplete="off">
+                <div class="form-group">
+                  <label for="sf-location">Location</label>
+                  <input type="text" id="sf-location" value="atlanta" placeholder="City name">
+                </div>
+                <div class="form-group">
+                  <label for="sf-term">Search Term</label>
+                  <input type="text" id="sf-term" value="" placeholder="e.g. sedan, truck">
+                </div>
+                <div class="form-group">
+                  <label for="sf-make">Make</label>
+                  <input type="text" id="sf-make" value="" placeholder="e.g. Toyota">
+                </div>
+                <div class="form-group">
+                  <label for="sf-model">Model</label>
+                  <input type="text" id="sf-model" value="" placeholder="e.g. Camry">
+                </div>
+                <div class="form-group">
+                  <label for="sf-min-price">Min Price</label>
+                  <input type="number" id="sf-min-price" value="250" min="0">
+                </div>
+                <div class="form-group">
+                  <label for="sf-max-price">Max Price</label>
+                  <input type="number" id="sf-max-price" value="55000" min="0">
+                </div>
+                <div class="form-group">
+                  <label for="sf-min-year">Min Year</label>
+                  <input type="number" id="sf-min-year" value="1995" min="1980" max="2027">
+                </div>
+                <div class="form-group">
+                  <label for="sf-max-year">Max Year</label>
+                  <input type="number" id="sf-max-year" value="2025" min="1980" max="2027">
+                </div>
+                <div class="form-group">
+                  <label for="sf-mileage">Max Mileage</label>
+                  <input type="number" id="sf-mileage" value="200000" min="0">
+                </div>
+                <div class="form-group">
+                  <label for="sf-scrolls">Scroll Count</label>
+                  <input type="number" id="sf-scrolls" value="10" min="1" max="50">
+                </div>
+              </form>
+              <div class="search-actions">
+                <button type="button" class="btn btn-primary" id="btn-search">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                  Search Marketplace
+                </button>
+                <button type="button" class="btn btn-secondary" id="btn-cancel-search" style="display:none;">Cancel</button>
+              </div>
+              <div class="progress-container" id="search-progress">
+                <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+                <div class="progress-text" id="progress-text">Preparing search...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- QUICK SCORE -->
+        <div class="quick-score card">
+          <div class="card-header">
+            <h2>Score a Deal</h2>
+          </div>
+          <div class="card-body">
+            <form class="quick-score-form" id="qs-form" autocomplete="off">
+              <div class="form-group">
+                <label for="qs-price">Price ($)</label>
+                <input type="number" id="qs-price" placeholder="14500" min="1" required>
+              </div>
+              <div class="form-group">
+                <label for="qs-year">Year</label>
+                <input type="number" id="qs-year" placeholder="2018" min="1980" max="2027" required>
+              </div>
+              <div class="form-group">
+                <label for="qs-make">Make</label>
+                <input type="text" id="qs-make" placeholder="Honda" required>
+              </div>
+              <div class="form-group">
+                <label for="qs-model">Model</label>
+                <input type="text" id="qs-model" placeholder="Civic" required>
+              </div>
+              <div class="form-group">
+                <label for="qs-mileage">Mileage</label>
+                <input type="number" id="qs-mileage" placeholder="65000" min="0">
+              </div>
+              <div class="form-group" style="align-self: end;">
+                <button type="submit" class="btn btn-primary btn-sm" id="btn-score">Score</button>
+              </div>
+            </form>
+            <div class="quick-score-result" id="qs-result"></div>
+          </div>
+        </div>
+
+        <!-- DEALS TABLE -->
+        <div class="card" id="deals-card">
+          <div class="table-toolbar">
+            <div class="filter-wrapper">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" id="table-filter" placeholder="Filter deals..." aria-label="Filter deals table">
+            </div>
+            <span class="deal-count" id="deal-count">0 deals</span>
+          </div>
+          <div class="table-wrapper" style="max-height: 560px; overflow-y: auto;">
+            <table class="deals-table" id="deals-table" role="grid">
+              <thead>
+                <tr>
+                  <th data-key="index" aria-sort="none">#</th>
+                  <th data-key="year" aria-sort="none">Year</th>
+                  <th data-key="make" aria-sort="none">Make</th>
+                  <th data-key="model" aria-sort="none">Model</th>
+                  <th data-key="price" aria-sort="none">Price</th>
+                  <th data-key="market" aria-sort="none">Market Value</th>
+                  <th data-key="profit" aria-sort="none">Profit</th>
+                  <th data-key="ratio" aria-sort="none">Ratio</th>
+                  <th data-key="quality" aria-sort="none">Quality</th>
+                  <th data-key="mileage" aria-sort="none">Mileage</th>
+                  <th data-key="source" aria-sort="none">Source</th>
+                </tr>
+              </thead>
+              <tbody id="deals-body">
+                <tr><td colspan="11" class="table-empty">
+                  <p>No deals loaded</p>
+                  <p>Run a search or select a past run from history</p>
+                </td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- SIDEBAR -->
+      <aside class="sidebar">
+        <div class="card" style="position: sticky; top: 80px;">
+          <div class="card-header">
+            <h2>Search History</h2>
+          </div>
+          <div class="card-body" style="padding: 8px; max-height: 600px; overflow-y: auto;">
+            <div class="history-list" id="history-list">
+              <div class="history-empty">Loading history...</div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- =======================================================================
+     JAVASCRIPT
+     ======================================================================= -->
+<script>
+(function() {
+  'use strict';
+
+  /* -------------------------------------------------------------------
+     CONFIG
+     ------------------------------------------------------------------- */
+  var API_BASE = window.location.origin;
+  var WS_BASE = (window.location.protocol === 'https:' ? 'wss://' : 'ws://') + window.location.host;
+
+  /* -------------------------------------------------------------------
+     STATE
+     ------------------------------------------------------------------- */
+  var state = {
+    deals: [],
+    sortKey: 'ratio',
+    sortDir: 'desc',
+    filterText: '',
+    activeRunId: null,
+    ws: null,
+    searching: false
+  };
+
+  /* -------------------------------------------------------------------
+     HELPERS
+     ------------------------------------------------------------------- */
+  function $(sel) { return document.querySelector(sel); }
+  function $$(sel) { return document.querySelectorAll(sel); }
+
+  function fmt(n) {
+    if (n == null) return '--';
+    return n.toLocaleString('en-US');
+  }
+
+  function fmtDollar(n) {
+    if (n == null) return '--';
+    var sign = n < 0 ? '-' : '';
+    return sign + '$' + Math.abs(n).toLocaleString('en-US');
+  }
+
+  function fmtRatio(n) {
+    if (n == null || n === 0) return '--';
+    return n.toFixed(3);
+  }
+
+  function qualityClass(q) {
+    if (!q) return 'quality-poor';
+    var lower = q.toLowerCase();
+    if (lower === 'excellent') return 'quality-excellent';
+    if (lower === 'good') return 'quality-good';
+    if (lower === 'fair') return 'quality-fair';
+    return 'quality-poor';
+  }
+
+  function relativeTime(ts) {
+    try {
+      var d = new Date(ts);
+      var now = new Date();
+      var diff = Math.floor((now - d) / 1000);
+      if (diff < 60) return 'Just now';
+      if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+      if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+      if (diff < 604800) return Math.floor(diff / 86400) + 'd ago';
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    } catch(e) {
+      return ts;
+    }
+  }
+
+  async function apiFetch(path, opts) {
+    var resp = await fetch(API_BASE + path, opts);
+    if (!resp.ok) {
+      var body;
+      try { body = await resp.json(); } catch(e) { body = {}; }
+      throw new Error(body.detail || 'API error ' + resp.status);
+    }
+    return resp.json();
+  }
+
+  /* -------------------------------------------------------------------
+     STATUS
+     ------------------------------------------------------------------- */
+  async function loadStatus() {
+    try {
+      var data = await apiFetch('/api/status');
+      var sBadge = $('#badge-session');
+      var pBadge = $('#badge-playwright');
+
+      if (data.session_active) {
+        sBadge.className = 'status-badge active';
+        sBadge.querySelector('span:last-child').textContent = 'Session: Active';
+      } else {
+        sBadge.className = 'status-badge inactive';
+        sBadge.querySelector('span:last-child').textContent = 'Session: Inactive';
+      }
+
+      if (data.playwright_available) {
+        pBadge.className = 'status-badge active';
+        pBadge.querySelector('span:last-child').textContent = 'Playwright: Ready';
+      } else {
+        pBadge.className = 'status-badge error';
+        pBadge.querySelector('span:last-child').textContent = 'Playwright: Not Installed';
+      }
+    } catch(e) {
+      $('#badge-session').className = 'status-badge error';
+      $('#badge-session').querySelector('span:last-child').textContent = 'API: Offline';
+      $('#badge-playwright').className = 'status-badge error';
+      $('#badge-playwright').querySelector('span:last-child').textContent = 'Playwright: Unknown';
+    }
+  }
+
+  /* -------------------------------------------------------------------
+     STATS
+     ------------------------------------------------------------------- */
+  async function loadStats() {
+    try {
+      var data = await apiFetch('/api/stats');
+      var totalCard = $('#stat-total');
+      totalCard.querySelector('.value').textContent = fmt(data.total_listings);
+      totalCard.querySelector('.sub').textContent = data.total_runs + ' search run' + (data.total_runs !== 1 ? 's' : '');
+
+      $('#stat-avg').querySelector('.value').textContent = fmtRatio(data.avg_deal_ratio);
+      $('#stat-best').querySelector('.value').textContent = fmtRatio(data.best_deal_ratio);
+
+      var sessionVal = $('#stat-session-value');
+      var sessionSub = $('#stat-session-sub');
+      sessionVal.textContent = data.total_runs > 0 ? 'Active' : 'Ready';
+      sessionVal.classList.add('accent');
+      sessionSub.textContent = data.top_makes.length > 0
+        ? 'Top make: ' + data.top_makes[0].make + ' (' + data.top_makes[0].count + ')'
+        : 'No data yet';
+    } catch(e) {
+      $('#stat-total').querySelector('.value').textContent = '--';
+      $('#stat-avg').querySelector('.value').textContent = '--';
+      $('#stat-best').querySelector('.value').textContent = '--';
+      $('#stat-session-value').textContent = 'Offline';
+      $('#stat-session-value').className = 'value text-red';
+    }
+  }
+
+  /* -------------------------------------------------------------------
+     HISTORY
+     ------------------------------------------------------------------- */
+  async function loadHistory() {
+    var container = $('#history-list');
+    try {
+      var runs = await apiFetch('/api/history?limit=20');
+      if (!runs.length) {
+        container.innerHTML = '<div class="history-empty">No search runs yet. Run your first search above.</div>';
+        return;
+      }
+
+      container.innerHTML = '';
+      runs.forEach(function(run) {
+        var item = document.createElement('div');
+        item.className = 'history-item' + (state.activeRunId === run.id ? ' active' : '');
+        item.setAttribute('data-run-id', run.id);
+        item.setAttribute('role', 'button');
+        item.setAttribute('tabindex', '0');
+        item.setAttribute('aria-label', 'Load run from ' + run.location + ', ' + run.listing_count + ' deals');
+
+        var termHtml = run.search_term ? '<div class="run-term">' + escapeHtml(run.search_term) + '</div>' : '';
+
+        item.innerHTML =
+          '<div class="run-meta">' +
+            '<span class="run-location">' + escapeHtml(run.location || 'Unknown') + '</span>' +
+            '<span class="run-count">' + run.listing_count + ' deals</span>' +
+          '</div>' +
+          '<div class="run-time">' + relativeTime(run.timestamp) + '</div>' +
+          termHtml;
+
+        item.addEventListener('click', function() { loadRun(run.id); });
+        item.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); loadRun(run.id); }
+        });
+
+        container.appendChild(item);
+      });
+
+      // Auto-load most recent run if no deals loaded
+      if (!state.deals.length && runs.length) {
+        loadRun(runs[0].id);
+      }
+    } catch(e) {
+      container.innerHTML = '<div class="history-empty">Could not load history</div>';
+    }
+  }
+
+  async function loadRun(runId) {
+    state.activeRunId = runId;
+
+    // Update active state in sidebar
+    $$('.history-item').forEach(function(el) {
+      el.classList.toggle('active', parseInt(el.getAttribute('data-run-id')) === runId);
+    });
+
+    try {
+      var data = await apiFetch('/api/history/' + runId);
+      state.deals = normalizeDealRows(data.deals || []);
+      renderTable();
+    } catch(e) {
+      state.deals = [];
+      renderTable();
+    }
+  }
+
+  /* -------------------------------------------------------------------
+     NORMALIZE DATA
+     ------------------------------------------------------------------- */
+  function normalizeDealRows(rows) {
+    return rows.map(function(r) {
+      // Handle both API formats:
+      // 1. From /api/search or /api/score: nested listing/market_estimate
+      // 2. From /api/history/{id}: flat dict from storage
+      if (r.listing) {
+        return {
+          year: r.listing.year,
+          make: r.listing.make,
+          model: r.listing.model,
+          price: r.listing.price,
+          mileage: r.listing.mileage,
+          url: r.listing.url || '',
+          location: r.listing.location || '',
+          market: r.market_estimate ? r.market_estimate.private_party : 0,
+          source: r.market_estimate ? r.market_estimate.source : '',
+          profit: r.potential_profit || 0,
+          ratio: r.ratio || 0,
+          quality: r.quality || 'Unknown'
+        };
+      }
+      return {
+        year: r.year || 0,
+        make: r.make || '',
+        model: r.model || '',
+        price: r.price || 0,
+        mileage: r.mileage,
+        url: r.url || '',
+        location: r.location || '',
+        market: r.private_party || r.market_value || 0,
+        source: r.pricing_source || r.source || '',
+        profit: r.potential_profit || 0,
+        ratio: r.ratio || 0,
+        quality: r.quality || 'Unknown'
+      };
+    });
+  }
+
+  /* -------------------------------------------------------------------
+     TABLE RENDERING
+     ------------------------------------------------------------------- */
+  function renderTable() {
+    var filtered = getFilteredDeals();
+    var sorted = getSortedDeals(filtered);
+    var tbody = $('#deals-body');
+    var countEl = $('#deal-count');
+
+    countEl.textContent = sorted.length + ' deal' + (sorted.length !== 1 ? 's' : '');
+
+    if (!sorted.length) {
+      tbody.innerHTML = '<tr><td colspan="11" class="table-empty">' +
+        '<p>No deals found</p>' +
+        '<p>' + (state.filterText ? 'Try adjusting your filter' : 'Run a search or select a past run') + '</p>' +
+        '</td></tr>';
+      return;
+    }
+
+    var html = '';
+    sorted.forEach(function(deal, i) {
+      var profitClass = deal.profit >= 0 ? 'profit-positive' : 'profit-negative';
+      var qClass = qualityClass(deal.quality);
+      var rowUrl = deal.url ? ' onclick="window.open(\'' + escapeAttr(deal.url) + '\', \'_blank\')"' : '';
+
+      html += '<tr class="fade-in" style="animation-delay:' + (i * 20) + 'ms"' + rowUrl + '>' +
+        '<td>' + (i + 1) + '</td>' +
+        '<td>' + (deal.year || '--') + '</td>' +
+        '<td>' + escapeHtml(deal.make) + '</td>' +
+        '<td>' + escapeHtml(deal.model) + '</td>' +
+        '<td>' + fmtDollar(deal.price) + '</td>' +
+        '<td>' + fmtDollar(deal.market) + '</td>' +
+        '<td class="' + profitClass + '">' + fmtDollar(deal.profit) + '</td>' +
+        '<td>' + fmtRatio(deal.ratio) + '</td>' +
+        '<td><span class="quality-pill ' + qClass + '">' + escapeHtml(deal.quality) + '</span></td>' +
+        '<td>' + (deal.mileage != null ? fmt(deal.mileage) + ' mi' : '--') + '</td>' +
+        '<td>' + escapeHtml(deal.source) + '</td>' +
+        '</tr>';
+    });
+
+    tbody.innerHTML = html;
+  }
+
+  function getFilteredDeals() {
+    var q = state.filterText.toLowerCase();
+    if (!q) return state.deals;
+    return state.deals.filter(function(d) {
+      return (d.make + ' ' + d.model + ' ' + d.year + ' ' + d.quality + ' ' + d.source)
+        .toLowerCase().indexOf(q) !== -1;
+    });
+  }
+
+  function getSortedDeals(deals) {
+    var key = state.sortKey;
+    var dir = state.sortDir === 'asc' ? 1 : -1;
+    return deals.slice().sort(function(a, b) {
+      var va = a[key];
+      var vb = b[key];
+      if (va == null) va = key === 'mileage' ? Infinity : '';
+      if (vb == null) vb = key === 'mileage' ? Infinity : '';
+      if (typeof va === 'string') va = va.toLowerCase();
+      if (typeof vb === 'string') vb = vb.toLowerCase();
+      if (va < vb) return -1 * dir;
+      if (va > vb) return 1 * dir;
+      return 0;
+    });
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    var div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function escapeAttr(str) {
+    if (!str) return '';
+    return str.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+  }
+
+  /* -------------------------------------------------------------------
+     SORTING
+     ------------------------------------------------------------------- */
+  function initSorting() {
+    $$('.deals-table thead th').forEach(function(th) {
+      th.addEventListener('click', function() {
+        var key = this.getAttribute('data-key');
+        if (!key) return;
+
+        if (state.sortKey === key) {
+          state.sortDir = state.sortDir === 'asc' ? 'desc' : 'asc';
+        } else {
+          state.sortKey = key;
+          state.sortDir = 'desc';
+        }
+
+        // Update header classes
+        $$('.deals-table thead th').forEach(function(h) {
+          h.classList.remove('sorted-asc', 'sorted-desc');
+          h.setAttribute('aria-sort', 'none');
+        });
+        this.classList.add(state.sortDir === 'asc' ? 'sorted-asc' : 'sorted-desc');
+        this.setAttribute('aria-sort', state.sortDir === 'asc' ? 'ascending' : 'descending');
+
+        renderTable();
+      });
+    });
+  }
+
+  /* -------------------------------------------------------------------
+     FILTER
+     ------------------------------------------------------------------- */
+  function initFilter() {
+    var input = $('#table-filter');
+    var timer = null;
+    input.addEventListener('input', function() {
+      clearTimeout(timer);
+      timer = setTimeout(function() {
+        state.filterText = input.value;
+        renderTable();
+      }, 150);
+    });
+  }
+
+  /* -------------------------------------------------------------------
+     SEARCH PANEL TOGGLE
+     ------------------------------------------------------------------- */
+  function initSearchToggle() {
+    var toggle = $('#search-toggle');
+    var wrap = $('#search-form-wrap');
+
+    toggle.addEventListener('click', function() {
+      var isOpen = wrap.classList.contains('open');
+      wrap.classList.toggle('open');
+      toggle.classList.toggle('open');
+      toggle.setAttribute('aria-expanded', !isOpen);
+    });
+
+    // Start expanded
+    wrap.classList.add('open');
+    toggle.classList.add('open');
+    toggle.setAttribute('aria-expanded', 'true');
+  }
+
+  /* -------------------------------------------------------------------
+     WEBSOCKET SEARCH
+     ------------------------------------------------------------------- */
+  function initSearch() {
+    $('#btn-search').addEventListener('click', startSearch);
+    $('#btn-cancel-search').addEventListener('click', cancelSearch);
+  }
+
+  function startSearch() {
+    if (state.searching) return;
+
+    var payload = {
+      location: $('#sf-location').value || 'atlanta',
+      search_term: $('#sf-term').value,
+      make: $('#sf-make').value,
+      model: $('#sf-model').value,
+      min_price: parseInt($('#sf-min-price').value) || 250,
+      max_price: parseInt($('#sf-max-price').value) || 55000,
+      min_year: parseInt($('#sf-min-year').value) || 1995,
+      max_year: parseInt($('#sf-max-year').value) || 2025,
+      max_mileage: parseInt($('#sf-mileage').value) || 200000,
+      scroll_count: parseInt($('#sf-scrolls').value) || 10
+    };
+
+    state.searching = true;
+    $('#btn-search').disabled = true;
+    $('#btn-cancel-search').style.display = '';
+    $('#search-progress').classList.add('visible');
+    $('#progress-fill').style.width = '0%';
+    $('#progress-text').textContent = 'Connecting...';
+
+    try {
+      state.ws = new WebSocket(WS_BASE + '/ws/search');
+    } catch(e) {
+      searchError('Could not connect to WebSocket');
+      return;
+    }
+
+    state.ws.onopen = function() {
+      state.ws.send(JSON.stringify(payload));
+    };
+
+    state.ws.onmessage = function(event) {
+      var msg;
+      try { msg = JSON.parse(event.data); } catch(e) { return; }
+
+      if (msg.type === 'progress') {
+        $('#progress-fill').style.width = (msg.percent || 0) + '%';
+        $('#progress-text').textContent = msg.message || 'Working...';
+      } else if (msg.type === 'results') {
+        state.deals = normalizeDealRows(msg.deals || []);
+        renderTable();
+        searchComplete(msg.total_deals);
+        // Refresh stats and history
+        loadStats();
+        loadHistory();
+      } else if (msg.type === 'error') {
+        searchError(msg.message);
+      }
+    };
+
+    state.ws.onerror = function() {
+      searchError('WebSocket connection error');
+    };
+
+    state.ws.onclose = function() {
+      if (state.searching) {
+        searchReset();
+      }
+    };
+  }
+
+  function cancelSearch() {
+    if (state.ws) {
+      state.ws.close();
+      state.ws = null;
+    }
+    searchReset();
+    $('#progress-text').textContent = 'Search cancelled';
+  }
+
+  function searchComplete(total) {
+    searchReset();
+    $('#progress-fill').style.width = '100%';
+    $('#progress-text').textContent = 'Found ' + total + ' deals';
+    $('#search-progress').classList.add('visible');
+
+    setTimeout(function() {
+      $('#search-progress').classList.remove('visible');
+    }, 3000);
+  }
+
+  function searchError(msg) {
+    searchReset();
+    $('#progress-text').textContent = 'Error: ' + msg;
+    $('#progress-fill').style.width = '0%';
+    $('#search-progress').classList.add('visible');
+
+    setTimeout(function() {
+      $('#search-progress').classList.remove('visible');
+    }, 5000);
+  }
+
+  function searchReset() {
+    state.searching = false;
+    $('#btn-search').disabled = false;
+    $('#btn-cancel-search').style.display = 'none';
+    if (state.ws) {
+      state.ws.close();
+      state.ws = null;
+    }
+  }
+
+  /* -------------------------------------------------------------------
+     QUICK SCORE
+     ------------------------------------------------------------------- */
+  function initQuickScore() {
+    $('#qs-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      var price = parseInt($('#qs-price').value);
+      var year = parseInt($('#qs-year').value);
+      var make = $('#qs-make').value.trim();
+      var model = $('#qs-model').value.trim();
+      var mileage = $('#qs-mileage').value ? parseInt($('#qs-mileage').value) : null;
+
+      if (!price || !year || !make || !model) return;
+
+      var btn = $('#btn-score');
+      btn.disabled = true;
+      btn.textContent = 'Scoring...';
+
+      var resultEl = $('#qs-result');
+
+      try {
+        var payload = { price: price, year: year, make: make, model: model };
+        if (mileage != null) payload.mileage = mileage;
+
+        var data = await apiFetch('/api/score', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        var qClass = qualityClass(data.quality);
+        var profitColor = data.potential_profit >= 0 ? 'text-accent' : 'text-red';
+        var marketVal = data.market_estimate ? data.market_estimate.private_party : 0;
+
+        resultEl.innerHTML =
+          '<div class="score-item">' +
+            '<span class="score-label">Quality</span>' +
+            '<span class="score-value"><span class="quality-pill ' + qClass + '">' + escapeHtml(data.quality) + '</span></span>' +
+          '</div>' +
+          '<div class="score-item">' +
+            '<span class="score-label">Ratio</span>' +
+            '<span class="score-value">' + fmtRatio(data.ratio) + '</span>' +
+          '</div>' +
+          '<div class="score-item">' +
+            '<span class="score-label">Market Value</span>' +
+            '<span class="score-value">' + fmtDollar(marketVal) + '</span>' +
+          '</div>' +
+          '<div class="score-item">' +
+            '<span class="score-label">Potential Profit</span>' +
+            '<span class="score-value ' + profitColor + '">' + fmtDollar(data.potential_profit) + '</span>' +
+          '</div>' +
+          '<div class="score-item">' +
+            '<span class="score-label">Condition</span>' +
+            '<span class="score-value">' + escapeHtml(data.condition) + '</span>' +
+          '</div>';
+
+        resultEl.classList.add('visible');
+      } catch(e) {
+        resultEl.innerHTML =
+          '<div class="score-item">' +
+            '<span class="score-label">Error</span>' +
+            '<span class="score-value text-red">' + escapeHtml(e.message) + '</span>' +
+          '</div>';
+        resultEl.classList.add('visible');
+      }
+
+      btn.disabled = false;
+      btn.textContent = 'Score';
+    });
+  }
+
+  /* -------------------------------------------------------------------
+     INIT
+     ------------------------------------------------------------------- */
+  function init() {
+    initSearchToggle();
+    initSorting();
+    initFilter();
+    initSearch();
+    initQuickScore();
+
+    // Load data in parallel
+    loadStatus();
+    loadStats();
+    loadHistory();
+
+    // Refresh status every 30s
+    setInterval(loadStatus, 30000);
+  }
+
+  // Run when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+})();
+</script>
+</body>
+</html>
