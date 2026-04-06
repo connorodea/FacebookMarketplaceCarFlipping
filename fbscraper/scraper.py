@@ -172,31 +172,42 @@ class FacebookScraper:
             context = browser.new_context(**context_opts)
             page = context.new_page()
 
-            self._progress("Navigating to Facebook login...", 20)
+            self._progress("Navigating to Facebook...", 20)
             page.goto("https://www.facebook.com/login", wait_until="domcontentloaded", timeout=30000)
 
             self._progress("Please log in to Facebook in the browser window...", 30)
-            self._progress("Waiting for login to complete (timeout: 5 minutes)...", 30)
+            self._progress("Waiting for login (you have 5 minutes)...", 30)
 
-            # Wait for the user to log in (detected by URL change or element)
-            try:
-                page.wait_for_url(
-                    "**/facebook.com/?**",
-                    timeout=300000,  # 5 minutes
-                )
-                login_success = True
-            except Exception:
-                # Check if we're on any page that isn't the login page
-                current_url = page.url
-                login_success = "/login" not in current_url and "facebook.com" in current_url
+            # Poll for login completion instead of using wait_for_url
+            # Facebook redirects to many different URLs after login
+            login_success = False
+            start_time = time.time()
+            timeout_seconds = 300  # 5 minutes
+
+            while time.time() - start_time < timeout_seconds:
+                try:
+                    current_url = page.url
+                    # Login is complete when we're no longer on a login/checkpoint page
+                    if ("facebook.com" in current_url
+                            and "/login" not in current_url
+                            and "/checkpoint" not in current_url
+                            and "/recover" not in current_url):
+                        login_success = True
+                        break
+                    time.sleep(2)
+                except Exception:
+                    # Browser may have been closed by user
+                    break
 
             if login_success:
+                # Give page a moment to fully load cookies
+                time.sleep(2)
                 self._progress("Login detected! Saving session...", 80)
                 self._save_session(context)
                 self._progress("Session saved successfully!", 100)
                 return True
             else:
-                self._progress("Login timed out or failed", 100)
+                self._progress("Login timed out or browser was closed", 100)
                 return False
 
         except Exception as e:

@@ -159,6 +159,105 @@ body {
 .status-badge.inactive .dot { background: var(--text-muted); }
 .status-badge.error .dot { background: var(--red); box-shadow: 0 0 6px var(--red); }
 
+/* Login Button */
+.btn-login {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 16px;
+  border-radius: var(--radius-pill);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--accent);
+  background: transparent;
+  color: var(--accent);
+  transition: all 0.18s ease;
+}
+.btn-login:hover {
+  background: var(--accent);
+  color: #fff;
+}
+.btn-login:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  border-color: var(--text-muted);
+  color: var(--text-muted);
+}
+.btn-login:disabled:hover {
+  background: transparent;
+  color: var(--text-muted);
+}
+.btn-login.logging-in {
+  border-color: var(--yellow);
+  color: var(--yellow);
+  animation: pulse-glow 1.5s ease-in-out infinite;
+}
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(234, 179, 8, 0); }
+  50% { box-shadow: 0 0 10px 2px rgba(234, 179, 8, 0.25); }
+}
+.btn-login .btn-login-icon {
+  width: 14px;
+  height: 14px;
+}
+
+/* Login Modal Overlay */
+.login-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
+  justify-content: center;
+  align-items: center;
+}
+.login-modal.open { display: flex; }
+.login-modal-content {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 32px 40px;
+  max-width: 440px;
+  width: 90%;
+  text-align: center;
+}
+.login-modal-content h3 {
+  margin: 0 0 8px;
+  font-size: 1.2rem;
+  color: var(--text-primary);
+}
+.login-modal-content p {
+  margin: 0 0 20px;
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+.login-modal-content .login-status-text {
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-bottom: 16px;
+}
+.login-modal-content .login-status-text.waiting { color: var(--yellow); }
+.login-modal-content .login-status-text.success { color: var(--accent); }
+.login-modal-content .login-status-text.failed { color: var(--red); }
+.login-modal-content .btn-close-modal {
+  padding: 8px 24px;
+  border-radius: var(--radius-pill);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  transition: all 0.18s ease;
+}
+.login-modal-content .btn-close-modal:hover {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+}
+
 /* =========================================================================
    STATS BAR
    ========================================================================= */
@@ -883,8 +982,26 @@ body {
         <span class="dot"></span>
         <span>Playwright: Checking...</span>
       </div>
+      <button id="btn-login" class="btn-login" onclick="startLogin()">
+        <svg class="btn-login-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+          <polyline points="10 17 15 12 10 7"/>
+          <line x1="15" y1="12" x2="3" y2="12"/>
+        </svg>
+        Login to Facebook
+      </button>
     </div>
   </header>
+
+  <!-- Login Modal -->
+  <div id="login-modal" class="login-modal" onclick="if(event.target===this)closeLoginModal()">
+    <div class="login-modal-content">
+      <h3>Facebook Login</h3>
+      <p id="login-modal-desc">A browser window will open on your machine. Log in to your Facebook account there. Your session will be saved for future scraping.</p>
+      <div id="login-status-text" class="login-status-text waiting" style="display:none;"></div>
+      <button class="btn-close-modal" onclick="closeLoginModal()">Close</button>
+    </div>
+  </div>
 
   <!-- ===================================================================
        STATS BAR
@@ -1171,12 +1288,25 @@ body {
       var sBadge = $('#badge-session');
       var pBadge = $('#badge-playwright');
 
+      var loginBtn = $('#btn-login');
       if (data.session_active) {
         sBadge.className = 'status-badge active';
         sBadge.querySelector('span:last-child').textContent = 'Session: Active';
+        loginBtn.textContent = 'Session Active';
+        loginBtn.disabled = true;
+        loginBtn.classList.remove('logging-in');
+      } else if (data.login_in_progress) {
+        sBadge.className = 'status-badge inactive';
+        sBadge.querySelector('span:last-child').textContent = 'Session: Logging in...';
+        loginBtn.classList.add('logging-in');
+        loginBtn.textContent = 'Logging in...';
+        loginBtn.disabled = true;
       } else {
         sBadge.className = 'status-badge inactive';
         sBadge.querySelector('span:last-child').textContent = 'Session: Inactive';
+        loginBtn.textContent = 'Login to Facebook';
+        loginBtn.disabled = false;
+        loginBtn.classList.remove('logging-in');
       }
 
       if (data.playwright_available) {
@@ -1192,6 +1322,88 @@ body {
       $('#badge-playwright').className = 'status-badge error';
       $('#badge-playwright').querySelector('span:last-child').textContent = 'Playwright: Unknown';
     }
+  }
+
+  /* -------------------------------------------------------------------
+     LOGIN
+     ------------------------------------------------------------------- */
+  var loginPollTimer = null;
+
+  window.startLogin = startLogin;
+  window.closeLoginModal = closeLoginModal;
+
+  async function startLogin() {
+    var modal = $('#login-modal');
+    var statusText = $('#login-status-text');
+    var desc = $('#login-modal-desc');
+    var btn = $('#btn-login');
+
+    modal.classList.add('open');
+    statusText.style.display = 'block';
+    statusText.className = 'login-status-text waiting';
+    statusText.textContent = 'Launching browser...';
+    desc.textContent = 'A Chromium browser window will open. Log in to your Facebook account there. Your session will be saved automatically.';
+    btn.classList.add('logging-in');
+    btn.textContent = 'Logging in...';
+    btn.disabled = true;
+
+    try {
+      var resp = await fetch('/api/login', { method: 'POST' });
+      var data = await resp.json();
+
+      if (!resp.ok) {
+        statusText.className = 'login-status-text failed';
+        statusText.textContent = data.detail || 'Failed to start login';
+        btn.disabled = false;
+        btn.classList.remove('logging-in');
+        btn.textContent = 'Login to Facebook';
+        return;
+      }
+
+      statusText.textContent = 'Browser opened -- please log in to Facebook...';
+
+      // Poll for login completion
+      loginPollTimer = setInterval(async function() {
+        try {
+          var status = await apiFetch('/api/login/status');
+          if (status.status === 'completed' && status.success) {
+            clearInterval(loginPollTimer);
+            statusText.className = 'login-status-text success';
+            statusText.textContent = 'Login successful! Session saved.';
+            btn.disabled = true;
+            btn.classList.remove('logging-in');
+            btn.textContent = 'Session Active';
+            loadStatus();
+          } else if (status.status === 'failed') {
+            clearInterval(loginPollTimer);
+            statusText.className = 'login-status-text failed';
+            statusText.textContent = 'Login failed or timed out. Try again.';
+            btn.disabled = false;
+            btn.classList.remove('logging-in');
+            btn.textContent = 'Login to Facebook';
+          }
+          // else still in_progress, keep polling
+        } catch(e) {
+          // ignore poll errors
+        }
+      }, 2000);
+
+    } catch(e) {
+      statusText.className = 'login-status-text failed';
+      statusText.textContent = 'Error: ' + e.message;
+      btn.disabled = false;
+      btn.classList.remove('logging-in');
+      btn.textContent = 'Login to Facebook';
+    }
+  }
+
+  function closeLoginModal() {
+    $('#login-modal').classList.remove('open');
+    if (loginPollTimer) {
+      clearInterval(loginPollTimer);
+      loginPollTimer = null;
+    }
+    loadStatus();
   }
 
   /* -------------------------------------------------------------------

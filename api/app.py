@@ -112,6 +112,53 @@ async def get_status():
         "playwright_available": is_playwright_available(),
         "session_active": has_valid_session(),
         "active_jobs": len(active_jobs),
+        "login_in_progress": active_jobs.get("login", {}).get("status") == "in_progress",
+    }
+
+
+@app.post("/api/login")
+async def start_login():
+    """Launch interactive Facebook login in a visible browser window.
+
+    Opens a Chromium browser on the server machine. The user logs in
+    manually, and the session is saved for future headless scraping.
+    """
+    if not is_playwright_available():
+        raise HTTPException(status_code=503, detail="Playwright not installed")
+
+    if active_jobs.get("login", {}).get("status") == "in_progress":
+        raise HTTPException(status_code=409, detail="Login already in progress")
+
+    active_jobs["login"] = {"status": "in_progress", "started_at": datetime.now().isoformat()}
+
+    async def do_login():
+        try:
+            config = SearchConfig()
+            scraper = FacebookScraper(config, headless=False)
+            success = await asyncio.to_thread(scraper.login_interactive)
+            active_jobs["login"] = {
+                "status": "completed" if success else "failed",
+                "success": success,
+                "finished_at": datetime.now().isoformat(),
+            }
+        except Exception as e:
+            active_jobs["login"] = {"status": "failed", "error": str(e)}
+
+    asyncio.create_task(do_login())
+
+    return {
+        "message": "Login browser launched. Log in to Facebook in the browser window that just opened.",
+        "status": "in_progress",
+    }
+
+
+@app.get("/api/login/status")
+async def get_login_status():
+    """Check the status of an in-progress login."""
+    login_state = active_jobs.get("login", {"status": "idle"})
+    return {
+        **login_state,
+        "session_active": has_valid_session(),
     }
 
 
