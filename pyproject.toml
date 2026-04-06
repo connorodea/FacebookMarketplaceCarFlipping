@@ -1,0 +1,16 @@
+[project]
+name = "fbscraper"
+version = "1.0.0"
+description = "Facebook Marketplace Car Scraper - Find the best car deals"
+requires-python = ">=3.10"
+dependencies = [
+    "playwright>=1.40",
+    "rich>=13.0",
+]
+
+[project.scripts]
+fbscraper = "fbscraper.__main__:main"
+
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"

@@ -1,1 +1,2 @@
-playwright
+playwright>=1.40
+rich>=13.0
