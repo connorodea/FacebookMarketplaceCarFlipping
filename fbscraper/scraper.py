@@ -20,6 +20,7 @@ except ImportError:
 
 SESSION_DIR = Path(__file__).parent.parent / "data" / "sessions"
 SESSION_FILE = SESSION_DIR / "facebook_session.json"
+PROFILE_DIR = Path(__file__).parent.parent / "data" / "chrome_profile"
 SESSION_MAX_AGE = 86400  # 24 hours
 
 # CSS selectors to find marketplace listing links (tried in order)
@@ -36,11 +37,15 @@ def is_playwright_available() -> bool:
 
 
 def has_valid_session() -> bool:
-    """Check if a saved Facebook session exists and is fresh enough."""
-    if not SESSION_FILE.exists():
-        return False
-    age = time.time() - SESSION_FILE.stat().st_mtime
-    return age < SESSION_MAX_AGE
+    """Check if a persistent Chrome profile with login state exists."""
+    # Check persistent profile directory (primary method)
+    if PROFILE_DIR.exists() and any(PROFILE_DIR.iterdir()):
+        return True
+    # Fallback: check legacy session file
+    if SESSION_FILE.exists() and SESSION_FILE.stat().st_size > 100:
+        age = time.time() - SESSION_FILE.stat().st_mtime
+        return age < SESSION_MAX_AGE
+    return False
 
 
 class FacebookScraper:
@@ -62,17 +67,19 @@ class FacebookScraper:
 
     @contextmanager
     def _browser_context(self, timeout: int = 45):
-        """Create a Playwright browser context with optional session loading."""
+        """Create a persistent Playwright browser context that retains login state."""
         if not PLAYWRIGHT_AVAILABLE:
             raise RuntimeError("Playwright is not installed. Run: pip install playwright && playwright install chromium")
 
         playwright = None
-        browser = None
         context = None
 
         try:
             playwright = sync_playwright().start()
-            browser = playwright.chromium.launch(
+            PROFILE_DIR.mkdir(parents=True, exist_ok=True)
+
+            context = playwright.chromium.launch_persistent_context(
+                str(PROFILE_DIR),
                 headless=self.headless,
                 args=[
                     "--no-sandbox",
@@ -83,24 +90,16 @@ class FacebookScraper:
                     "--no-first-run",
                     "--disable-default-apps",
                 ],
-                timeout=timeout * 1000,
-            )
-
-            context_opts = {
-                "user_agent": (
+                user_agent=(
                     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
                     "AppleWebKit/537.36 (KHTML, like Gecko) "
                     "Chrome/122.0.0.0 Safari/537.36"
                 ),
-                "viewport": {"width": 1920, "height": 1080},
-                "locale": "en-US",
-            }
-
-            if has_valid_session():
-                context_opts["storage_state"] = str(SESSION_FILE)
-                logger.info("Loaded saved Facebook session")
-
-            context = browser.new_context(**context_opts)
+                viewport={"width": 1920, "height": 1080},
+                locale="en-US",
+                timeout=timeout * 1000,
+            )
+            logger.info("Launched persistent browser context")
             yield context
 
         except Exception as e:
@@ -110,11 +109,6 @@ class FacebookScraper:
             if context:
                 try:
                     context.close()
-                except Exception:
-                    pass
-            if browser:
-                try:
-                    browser.close()
                 except Exception:
                     pass
             if playwright:
@@ -147,30 +141,25 @@ class FacebookScraper:
 
         try:
             playwright = sync_playwright().start()
-            browser = playwright.chromium.launch(
+            PROFILE_DIR.mkdir(parents=True, exist_ok=True)
+
+            context = playwright.chromium.launch_persistent_context(
+                str(PROFILE_DIR),
                 headless=False,  # Always visible for interactive login
                 args=[
                     "--no-sandbox",
                     "--disable-blink-features=AutomationControlled",
                 ],
-            )
-
-            context_opts = {
-                "user_agent": (
+                user_agent=(
                     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
                     "AppleWebKit/537.36 (KHTML, like Gecko) "
                     "Chrome/122.0.0.0 Safari/537.36"
                 ),
-                "viewport": {"width": 1280, "height": 900},
-                "locale": "en-US",
-            }
+                viewport={"width": 1280, "height": 900},
+                locale="en-US",
+            )
 
-            # Load existing session if available
-            if has_valid_session():
-                context_opts["storage_state"] = str(SESSION_FILE)
-
-            context = browser.new_context(**context_opts)
-            page = context.new_page()
+            page = context.pages[0] if context.pages else context.new_page()
 
             self._progress("Navigating to Facebook...", 20)
             page.goto("https://www.facebook.com/login", wait_until="domcontentloaded", timeout=30000)
@@ -219,11 +208,6 @@ class FacebookScraper:
                     context.close()
                 except Exception:
                     pass
-            if browser:
-                try:
-                    browser.close()
-                except Exception:
-                    pass
             if playwright:
                 try:
                     playwright.stop()
@@ -244,7 +228,7 @@ class FacebookScraper:
 
         try:
             with self._browser_context() as context:
-                page = context.new_page()
+                page = context.pages[0] if context.pages else context.new_page()
                 page.set_default_timeout(30000)
 
                 # Navigate to marketplace
@@ -285,8 +269,6 @@ class FacebookScraper:
 
                 if listings:
                     self._progress(f"Successfully extracted {len(listings)} car listings", 95)
-                    # Save session on success (keeps it fresh)
-                    self._save_session(context)
                 else:
                     self._progress("Could not extract data from listings", 100)
 
@@ -300,9 +282,17 @@ class FacebookScraper:
     def _is_login_required(self, page: Page) -> bool:
         """Check if Facebook is showing a login page."""
         try:
-            page_text = page.inner_text("body")
-            lower = page_text.lower()
-            return "log in" in lower and ("create new account" in lower or "sign up" in lower)
+            url = page.url.lower()
+            if "/login" in url:
+                return True
+            page_text = page.inner_text("body")[:1000].lower()
+            # Only flag as login-required if it looks like an actual login page
+            # (not just a "log in" link in the nav of an authenticated page)
+            is_login_page = ("log in" in page_text and "create new account" in page_text)
+            # If we see user-specific content, we're logged in
+            has_user_content = ("marketplace" in page_text or "notification" in page_text
+                                or "what's on your mind" in page_text)
+            return is_login_page and not has_user_content
         except Exception:
             return False
 
