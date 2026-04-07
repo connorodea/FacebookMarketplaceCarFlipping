@@ -9,6 +9,7 @@ build/
 
 # Session data (contains auth cookies)
 data/sessions/
+data/chrome_profile/
 
 # Output files
 output/

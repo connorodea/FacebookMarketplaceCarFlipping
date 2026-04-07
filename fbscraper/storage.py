@@ -66,11 +66,31 @@ class Storage:
                     FOREIGN KEY (listing_id) REFERENCES listings(id)
                 );
 
+                CREATE TABLE IF NOT EXISTS watchlist (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    listing_url TEXT NOT NULL,
+                    price INTEGER,
+                    year INTEGER,
+                    make TEXT,
+                    model TEXT,
+                    mileage INTEGER,
+                    location TEXT,
+                    stage TEXT DEFAULT 'watching',
+                    notes TEXT DEFAULT '',
+                    added_at TEXT NOT NULL,
+                    updated_at TEXT,
+                    purchase_price INTEGER,
+                    repair_cost INTEGER,
+                    sell_price INTEGER,
+                    UNIQUE(listing_url)
+                );
+
                 CREATE INDEX IF NOT EXISTS idx_listings_make_model ON listings(make, model);
                 CREATE INDEX IF NOT EXISTS idx_listings_year ON listings(year);
                 CREATE INDEX IF NOT EXISTS idx_listings_scraped ON listings(scraped_at);
                 CREATE INDEX IF NOT EXISTS idx_scores_ratio ON deal_scores(ratio);
                 CREATE INDEX IF NOT EXISTS idx_scores_quality ON deal_scores(quality);
+                CREATE INDEX IF NOT EXISTS idx_watchlist_stage ON watchlist(stage);
             """)
 
     def _connect(self) -> sqlite3.Connection:
@@ -160,6 +180,120 @@ class Storage:
                 (run_id,),
             ).fetchall()
             return [dict(r) for r in rows]
+
+    # ------------------------------------------------------------------
+    # Watchlist / Deal Pipeline
+    # ------------------------------------------------------------------
+
+    def add_to_watchlist(self, url: str, price: int, year: int, make: str,
+                         model: str, mileage: Optional[int], location: str) -> int:
+        """Add a listing to the watchlist. Returns watchlist id. Ignores if already exists."""
+        with self._connect() as conn:
+            try:
+                cursor = conn.execute(
+                    "INSERT OR IGNORE INTO watchlist "
+                    "(listing_url, price, year, make, model, mileage, location, added_at) "
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                    (url, price, year, make, model, mileage, location, datetime.now().isoformat()),
+                )
+                conn.commit()
+                if cursor.lastrowid:
+                    return cursor.lastrowid
+                # Already existed — fetch existing id
+                row = conn.execute(
+                    "SELECT id FROM watchlist WHERE listing_url = ?", (url,)
+                ).fetchone()
+                return row[0] if row else 0
+            except Exception as e:
+                logger.error("Failed to add to watchlist: %s", e)
+                raise
+
+    def update_watchlist_stage(self, watchlist_id: int, stage: str, notes: str = '') -> None:
+        """Update the stage (and optionally notes) for a watchlist item."""
+        with self._connect() as conn:
+            conn.execute(
+                "UPDATE watchlist SET stage = ?, notes = ?, updated_at = ? WHERE id = ?",
+                (stage, notes, datetime.now().isoformat(), watchlist_id),
+            )
+            conn.commit()
+
+    def update_watchlist_financials(self, watchlist_id: int, purchase_price: Optional[int] = None,
+                                    repair_cost: Optional[int] = None,
+                                    sell_price: Optional[int] = None) -> None:
+        """Update financial fields for a watchlist item."""
+        updates = []
+        params: list = []
+        if purchase_price is not None:
+            updates.append("purchase_price = ?")
+            params.append(purchase_price)
+        if repair_cost is not None:
+            updates.append("repair_cost = ?")
+            params.append(repair_cost)
+        if sell_price is not None:
+            updates.append("sell_price = ?")
+            params.append(sell_price)
+        if not updates:
+            return
+        updates.append("updated_at = ?")
+        params.append(datetime.now().isoformat())
+        params.append(watchlist_id)
+        with self._connect() as conn:
+            conn.execute(
+                f"UPDATE watchlist SET {', '.join(updates)} WHERE id = ?", params,
+            )
+            conn.commit()
+
+    def get_watchlist(self, stage: Optional[str] = None) -> list[dict]:
+        """Return watchlist items, optionally filtered by stage."""
+        with self._connect() as conn:
+            conn.row_factory = sqlite3.Row
+            if stage:
+                rows = conn.execute(
+                    "SELECT * FROM watchlist WHERE stage = ? ORDER BY added_at DESC", (stage,)
+                ).fetchall()
+            else:
+                rows = conn.execute(
+                    "SELECT * FROM watchlist ORDER BY added_at DESC"
+                ).fetchall()
+            return [dict(r) for r in rows]
+
+    def remove_from_watchlist(self, watchlist_id: int) -> None:
+        """Remove a watchlist item by id."""
+        with self._connect() as conn:
+            conn.execute("DELETE FROM watchlist WHERE id = ?", (watchlist_id,))
+            conn.commit()
+
+    def get_watchlist_stats(self) -> dict:
+        """Return aggregate watchlist statistics."""
+        with self._connect() as conn:
+            conn.row_factory = sqlite3.Row
+            rows = conn.execute("SELECT * FROM watchlist").fetchall()
+            items = [dict(r) for r in rows]
+
+        by_stage: dict[str, int] = {}
+        total_invested = 0
+        total_revenue = 0
+        for item in items:
+            stage = item.get("stage", "watching")
+            by_stage[stage] = by_stage.get(stage, 0) + 1
+            if item.get("purchase_price"):
+                total_invested += item["purchase_price"]
+            if item.get("repair_cost"):
+                total_invested += item["repair_cost"]
+            if item.get("sell_price"):
+                total_revenue += item["sell_price"]
+
+        return {
+            "total": len(items),
+            "by_stage": by_stage,
+            "total_invested": total_invested,
+            "total_revenue": total_revenue,
+            "total_profit": total_revenue - total_invested,
+        }
+
+    # ------------------------------------------------------------------
+    # Search / Listings
+    # ------------------------------------------------------------------
 
     def search_listings(self, make: str = "", model: str = "", max_price: int = 0,
                         min_year: int = 0, days_back: int = 30) -> list[dict]:

@@ -1,0 +1,3290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DealFinder Pro - AI Car Deal Analytics</title>
+<style>
+/* =========================================================================
+   RESET & CUSTOM PROPERTIES
+   ========================================================================= */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-deep: #0a0a0f;
+  --bg-surface: rgba(255,255,255,0.03);
+  --bg-surface-hover: rgba(255,255,255,0.06);
+  --bg-input: rgba(255,255,255,0.04);
+  --bg-overlay: rgba(10,10,15,0.85);
+  --border: rgba(255,255,255,0.06);
+  --border-hover: rgba(255,255,255,0.10);
+  --border-focus: rgba(59,130,246,0.5);
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #475569;
+  --blue: #3b82f6;
+  --blue-dim: rgba(59,130,246,0.12);
+  --blue-glow: rgba(59,130,246,0.20);
+  --emerald: #10b981;
+  --emerald-dim: rgba(16,185,129,0.12);
+  --rose: #f43f5e;
+  --rose-dim: rgba(244,63,94,0.12);
+  --amber: #f59e0b;
+  --amber-dim: rgba(245,158,11,0.12);
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.5);
+  --shadow-glow: 0 0 20px rgba(59,130,246,0.15);
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  --radius-pill: 999px;
+  --transition-fast: 150ms ease;
+  --transition: 200ms ease;
+  --transition-slow: 300ms ease;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+}
+
+html {
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--bg-deep);
+  background-image: radial-gradient(ellipse at 50% 0%, rgba(59,130,246,0.04) 0%, transparent 60%);
+  color: var(--text-primary);
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* =========================================================================
+   UTILITY CLASSES
+   ========================================================================= */
+.sr-only {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0,0,0,0); border: 0;
+}
+
+/* =========================================================================
+   SCROLLBAR
+   ========================================================================= */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.14); }
+
+/* =========================================================================
+   APP LAYOUT
+   ========================================================================= */
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* =========================================================================
+   TOP NAV
+   ========================================================================= */
+.topnav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  height: 56px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(10,10,15,0.80);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.topnav-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.topnav-brand svg {
+  width: 26px;
+  height: 26px;
+  color: var(--blue);
+}
+
+.topnav-brand-name {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+.topnav-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--blue);
+  background: var(--blue-dim);
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(59,130,246,0.18);
+}
+
+.topnav-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
+  color: var(--text-muted);
+  transition: all var(--transition);
+}
+
+.status-pill .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  transition: background var(--transition);
+}
+
+.status-pill.active {
+  color: var(--emerald);
+  border-color: rgba(16,185,129,0.2);
+  background: var(--emerald-dim);
+}
+
+.status-pill.active .dot {
+  background: var(--emerald);
+  box-shadow: 0 0 6px rgba(16,185,129,0.4);
+}
+
+.status-pill.warning {
+  color: var(--amber);
+  border-color: rgba(245,158,11,0.2);
+  background: var(--amber-dim);
+}
+
+.status-pill.warning .dot {
+  background: var(--amber);
+}
+
+.status-pill.error {
+  color: var(--rose);
+  border-color: rgba(244,63,94,0.2);
+  background: var(--rose-dim);
+}
+
+.status-pill.error .dot {
+  background: var(--rose);
+}
+
+.btn-connect {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(59,130,246,0.3);
+  background: transparent;
+  color: var(--blue);
+  cursor: pointer;
+  transition: all var(--transition);
+  font-family: var(--font-sans);
+}
+
+.btn-connect:hover {
+  background: var(--blue-dim);
+  border-color: rgba(59,130,246,0.5);
+}
+
+.btn-connect:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+
+.btn-connect.connected {
+  color: var(--emerald);
+  border-color: rgba(16,185,129,0.3);
+  cursor: default;
+}
+
+.btn-connect.connected:hover {
+  background: var(--emerald-dim);
+}
+
+/* =========================================================================
+   MAIN CONTENT
+   ========================================================================= */
+.main-wrap {
+  max-width: 1440px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+/* Stats row */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+/* =========================================================================
+   GLASS CARD
+   ========================================================================= */
+.card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px 24px;
+  transition: border-color var(--transition), background var(--transition);
+}
+
+.card:hover {
+  border-color: var(--border-hover);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);
+}
+
+.card-title svg {
+  width: 16px;
+  height: 16px;
+  opacity: 0.6;
+}
+
+/* =========================================================================
+   STAT CARDS
+   ========================================================================= */
+.stat-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-card .stat-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.stat-card .stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-card .stat-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.stat-value.emerald { color: var(--emerald); }
+.stat-value.blue { color: var(--blue); }
+.stat-value.amber { color: var(--amber); }
+.stat-value.rose { color: var(--rose); }
+
+/* AI status dot */
+.ai-status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+.ai-status-dot.on {
+  background: var(--emerald);
+  box-shadow: 0 0 8px rgba(16,185,129,0.5);
+}
+.ai-status-dot.off {
+  background: var(--text-muted);
+}
+
+/* =========================================================================
+   TWO-COLUMN LAYOUT
+   ========================================================================= */
+.content-grid {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 24px;
+}
+
+.left-col {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+}
+
+.right-col {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+}
+
+/* =========================================================================
+   AI MARKET INSIGHTS
+   ========================================================================= */
+.ai-panel {
+  position: relative;
+  overflow: hidden;
+}
+
+.ai-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--blue), transparent);
+  opacity: 0.4;
+}
+
+.ai-panel .card-title {
+  color: var(--blue);
+}
+
+.ai-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.ai-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ai-field.full {
+  grid-column: 1 / -1;
+}
+
+.ai-field-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.ai-field-value {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.trend-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-radius: var(--radius-pill);
+}
+
+.trend-badge.hot {
+  color: var(--emerald);
+  background: var(--emerald-dim);
+}
+
+.trend-badge.cold {
+  color: var(--rose);
+  background: var(--rose-dim);
+}
+
+.trend-badge.neutral {
+  color: var(--amber);
+  background: var(--amber-dim);
+}
+
+.ai-empty {
+  text-align: center;
+  padding: 32px 16px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.ai-empty svg {
+  display: block;
+  margin: 0 auto 12px;
+  width: 32px;
+  height: 32px;
+  opacity: 0.3;
+}
+
+/* =========================================================================
+   QUICK SCORE + AI ANALYZE
+   ========================================================================= */
+.score-panel-inner {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 24px;
+}
+
+.score-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.score-form .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.score-results {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.score-result-section {
+  padding: 16px;
+  border-radius: var(--radius-md);
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border);
+}
+
+.score-result-section h4 {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.score-result-section h4 svg {
+  width: 14px;
+  height: 14px;
+}
+
+.score-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.score-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.score-metric-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.score-metric-value {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+}
+
+/* AI Analysis result */
+.ai-result {
+  position: relative;
+}
+
+.ai-result::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--blue);
+  border-radius: 1px;
+  opacity: 0.5;
+}
+
+.verdict-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-radius: var(--radius-pill);
+}
+
+.verdict-badge.buy {
+  color: var(--emerald);
+  background: var(--emerald-dim);
+  border: 1px solid rgba(16,185,129,0.2);
+}
+
+.verdict-badge.pass {
+  color: var(--rose);
+  background: var(--rose-dim);
+  border: 1px solid rgba(244,63,94,0.2);
+}
+
+.verdict-badge.negotiate {
+  color: var(--amber);
+  background: var(--amber-dim);
+  border: 1px solid rgba(245,158,11,0.2);
+}
+
+/* Confidence dots */
+.confidence-meter {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.confidence-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.06);
+  transition: background var(--transition-fast);
+}
+
+.confidence-dot.filled {
+  background: var(--blue);
+  box-shadow: 0 0 4px rgba(59,130,246,0.3);
+}
+
+.ai-text {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.ai-risks {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ai-risks li {
+  font-size: 13px;
+  color: var(--text-secondary);
+  padding-left: 16px;
+  position: relative;
+}
+
+.ai-risks li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 7px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--rose);
+  opacity: 0.6;
+}
+
+.ai-powered-label {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-muted);
+  letter-spacing: 0.03em;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.ai-powered-label svg {
+  width: 12px;
+  height: 12px;
+  opacity: 0.5;
+}
+
+.score-empty, .ai-analysis-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+/* =========================================================================
+   DEALS TABLE
+   ========================================================================= */
+.table-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  gap: 12px;
+}
+
+.table-count {
+  font-size: 13px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.table-search {
+  flex: 1;
+  max-width: 280px;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+}
+
+.deals-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.deals-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.deals-table th {
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  background: rgba(255,255,255,0.03);
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  user-select: none;
+  transition: color var(--transition-fast);
+  white-space: nowrap;
+}
+
+.deals-table th:hover {
+  color: var(--text-secondary);
+}
+
+.deals-table th.sorted {
+  color: var(--blue);
+}
+
+.deals-table th .sort-arrow {
+  display: inline-block;
+  margin-left: 4px;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+  font-size: 10px;
+}
+
+.deals-table th.sorted .sort-arrow {
+  opacity: 1;
+}
+
+.deals-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.deals-table tbody tr {
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.deals-table tbody tr:hover {
+  background: rgba(59,130,246,0.04);
+}
+
+.deals-table tbody tr:hover td {
+  color: var(--text-primary);
+}
+
+.deals-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Quality pills in table */
+.quality-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: var(--radius-pill);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.quality-pill.excellent { color: var(--emerald); background: var(--emerald-dim); }
+.quality-pill.good { color: var(--blue); background: var(--blue-dim); }
+.quality-pill.fair { color: var(--amber); background: var(--amber-dim); }
+.quality-pill.poor { color: var(--rose); background: var(--rose-dim); }
+
+.profit-positive { color: var(--emerald); }
+.profit-negative { color: var(--rose); }
+
+.table-empty {
+  text-align: center;
+  padding: 48px 16px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.table-empty svg {
+  display: block;
+  margin: 0 auto 12px;
+  width: 40px;
+  height: 40px;
+  opacity: 0.2;
+}
+
+/* Inline row expansion */
+.deal-expand-row td {
+  padding: 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.deal-expand-inner {
+  padding: 20px 24px;
+  background: rgba(59,130,246,0.02);
+  border-top: 1px solid rgba(59,130,246,0.08);
+  animation: slideDown 200ms ease;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; max-height: 0; padding-top: 0; padding-bottom: 0; }
+  to { opacity: 1; max-height: 500px; }
+}
+
+.deal-expand-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.deal-expand-header h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.deal-expand-close {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: rgba(255,255,255,0.04);
+  color: var(--text-muted);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 16px;
+  transition: all var(--transition-fast);
+}
+
+.deal-expand-close:hover {
+  background: rgba(255,255,255,0.08);
+  color: var(--text-primary);
+}
+
+.deal-expand-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+}
+
+.deal-expand-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.deal-expand-field.full {
+  grid-column: 1 / -1;
+}
+
+.deal-expand-field-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.deal-expand-field-value {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* =========================================================================
+   FORMS & INPUTS
+   ========================================================================= */
+.form-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 9px 12px;
+  font-size: 13px;
+  font-family: var(--font-sans);
+  color: var(--text-primary);
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  outline: none;
+}
+
+.form-input::placeholder {
+  color: var(--text-muted);
+}
+
+.form-input:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+}
+
+.form-input:hover:not(:focus) {
+  border-color: var(--border-hover);
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+/* =========================================================================
+   BUTTONS
+   ========================================================================= */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition);
+  outline: none;
+  white-space: nowrap;
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--blue);
+  color: #fff;
+  box-shadow: 0 1px 3px rgba(59,130,246,0.3);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #2563eb;
+  box-shadow: 0 2px 8px rgba(59,130,246,0.4);
+}
+
+.btn-ghost {
+  background: rgba(255,255,255,0.04);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background: rgba(255,255,255,0.06);
+  color: var(--text-primary);
+  border-color: var(--border-hover);
+}
+
+.btn-sm {
+  padding: 6px 14px;
+  font-size: 12px;
+}
+
+.btn-full {
+  width: 100%;
+}
+
+.btn-row {
+  display: flex;
+  gap: 8px;
+}
+
+/* =========================================================================
+   SEARCH PANEL (RIGHT COL)
+   ========================================================================= */
+.search-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.progress-section {
+  margin-top: 12px;
+}
+
+.progress-bar-track {
+  width: 100%;
+  height: 4px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: var(--blue);
+  border-radius: 2px;
+  width: 0%;
+  transition: width 300ms ease;
+}
+
+.progress-text {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* =========================================================================
+   HISTORY PANEL (RIGHT COL)
+   ========================================================================= */
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.history-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: rgba(255,255,255,0.02);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.history-item:hover {
+  background: rgba(255,255,255,0.04);
+  border-color: var(--border);
+}
+
+.history-item-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.history-item-loc {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.history-item-time {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.history-item-count {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: rgba(255,255,255,0.04);
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+}
+
+.history-empty {
+  text-align: center;
+  padding: 24px 8px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* =========================================================================
+   LOGIN MODAL
+   ========================================================================= */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-overlay);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-slow);
+}
+
+.modal-overlay.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal {
+  width: 100%;
+  max-width: 420px;
+  background: #111118;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 32px;
+  box-shadow: var(--shadow-lg);
+  transform: translateY(8px) scale(0.98);
+  transition: transform var(--transition-slow);
+}
+
+.modal-overlay.visible .modal {
+  transform: translateY(0) scale(1);
+}
+
+.modal-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--text-primary);
+}
+
+.modal-desc {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+
+.modal-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  min-height: 50px;
+}
+
+.modal-status .spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255,255,255,0.1);
+  border-top-color: var(--blue);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.modal-status.success {
+  color: var(--emerald);
+  border-color: rgba(16,185,129,0.2);
+  background: var(--emerald-dim);
+}
+
+.modal-status.error {
+  color: var(--rose);
+  border-color: rgba(244,63,94,0.2);
+  background: var(--rose-dim);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* =========================================================================
+   SKELETON LOADING
+   ========================================================================= */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: rgba(255,255,255,0.04);
+  border-radius: var(--radius-sm);
+}
+
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent);
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.skeleton-line {
+  height: 14px;
+  margin-bottom: 8px;
+  border-radius: 4px;
+}
+
+.skeleton-line.w60 { width: 60%; }
+.skeleton-line.w80 { width: 80%; }
+.skeleton-line.w40 { width: 40%; }
+.skeleton-line.w100 { width: 100%; }
+.skeleton-block { height: 48px; width: 100%; border-radius: var(--radius-sm); }
+
+/* =========================================================================
+   ANIMATIONS
+   ========================================================================= */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeInUp 400ms ease forwards;
+  opacity: 0;
+}
+
+.fade-in-d1 { animation-delay: 50ms; }
+.fade-in-d2 { animation-delay: 100ms; }
+.fade-in-d3 { animation-delay: 150ms; }
+.fade-in-d4 { animation-delay: 200ms; }
+.fade-in-d5 { animation-delay: 250ms; }
+.fade-in-d6 { animation-delay: 300ms; }
+
+/* Count-up animation for stat values */
+.counting {
+  transition: none;
+}
+
+/* =========================================================================
+   RESPONSIVE
+   ========================================================================= */
+@media (max-width: 1024px) {
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+  .right-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  .score-panel-inner {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .topnav {
+    padding: 0 16px;
+  }
+  .topnav .status-pill span:not(.dot) {
+    display: none;
+  }
+  .main-wrap {
+    padding: 16px;
+  }
+  .stats-row {
+    grid-template-columns: 1fr 1fr;
+  }
+  .right-col {
+    grid-template-columns: 1fr;
+  }
+  .ai-grid {
+    grid-template-columns: 1fr;
+  }
+  .score-metrics {
+    grid-template-columns: 1fr 1fr;
+  }
+  .deal-expand-grid {
+    grid-template-columns: 1fr;
+  }
+  .stat-card .stat-value {
+    font-size: 22px;
+  }
+}
+
+@media (max-width: 640px) {
+  .stats-row {
+    grid-template-columns: 1fr;
+  }
+  .table-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .table-search {
+    max-width: 100%;
+  }
+}
+
+/* =========================================================================
+   SAVE TO WATCHLIST BUTTON
+   ========================================================================= */
+.btn-save-deal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  position: relative;
+  flex-shrink: 0;
+}
+
+.btn-save-deal:hover {
+  background: var(--blue-dim);
+  border-color: rgba(59,130,246,0.3);
+  color: var(--blue);
+}
+
+.btn-save-deal:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+
+.btn-save-deal.saved {
+  background: var(--blue-dim);
+  border-color: rgba(59,130,246,0.3);
+  color: var(--blue);
+  cursor: default;
+}
+
+.btn-save-deal.saved:hover {
+  background: var(--blue-dim);
+}
+
+.save-tooltip {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--blue);
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+  pointer-events: none;
+  animation: fadeInUp 150ms ease forwards;
+  z-index: 10;
+}
+
+/* =========================================================================
+   EXPORT DROPDOWN
+   ========================================================================= */
+.export-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.export-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 160px;
+  background: #16161e;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  z-index: 50;
+  overflow: hidden;
+  animation: fadeInUp 150ms ease forwards;
+}
+
+.export-dropdown a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: all var(--transition-fast);
+}
+
+.export-dropdown a:hover {
+  background: rgba(255,255,255,0.04);
+  color: var(--text-primary);
+}
+
+.export-dropdown a + a {
+  border-top: 1px solid var(--border);
+}
+
+/* =========================================================================
+   DEAL PIPELINE / WATCHLIST SECTION
+   ========================================================================= */
+.pipeline-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.pipeline-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: var(--radius-pill);
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+
+.pipeline-stat .p-val {
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.watchlist-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.watchlist-table th {
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  background: rgba(255,255,255,0.03);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.watchlist-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.watchlist-table tbody tr {
+  transition: background var(--transition-fast);
+}
+
+.watchlist-table tbody tr:hover {
+  background: rgba(59,130,246,0.04);
+}
+
+.watchlist-table tbody tr:hover td {
+  color: var(--text-primary);
+}
+
+.watchlist-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Stage pills */
+.stage-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: var(--radius-pill);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.stage-pill.watching { color: var(--blue); background: var(--blue-dim); }
+.stage-pill.contacted { color: #eab308; background: rgba(234,179,8,0.12); }
+.stage-pill.negotiating { color: var(--amber); background: var(--amber-dim); }
+.stage-pill.purchased { color: var(--emerald); background: var(--emerald-dim); }
+.stage-pill.sold { color: #34d399; background: rgba(52,211,153,0.12); }
+.stage-pill.passed { color: var(--text-muted); background: rgba(255,255,255,0.04); }
+
+.stage-select {
+  padding: 4px 8px;
+  font-size: 12px;
+  font-family: var(--font-sans);
+  color: var(--text-primary);
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+  outline: none;
+}
+
+.stage-select:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+}
+
+.btn-delete-watch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 14px;
+  transition: all var(--transition-fast);
+}
+
+.btn-delete-watch:hover {
+  background: var(--rose-dim);
+  border-color: rgba(244,63,94,0.3);
+  color: var(--rose);
+}
+
+.btn-delete-watch:focus-visible {
+  outline: 2px solid var(--rose);
+  outline-offset: 2px;
+}
+
+.watchlist-empty {
+  text-align: center;
+  padding: 32px 16px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.watchlist-notes {
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* =========================================================================
+   SELLER MESSAGES SECTION
+   ========================================================================= */
+.messages-section {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.messages-section-title {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.messages-section-title svg {
+  width: 14px;
+  height: 14px;
+}
+
+.messages-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 768px) {
+  .messages-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.message-card {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: border-color var(--transition-fast);
+}
+
+.message-card:hover {
+  border-color: var(--border-hover);
+}
+
+.message-card-title {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);
+}
+
+.message-card-text {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  flex: 1;
+}
+
+.btn-copy-msg {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-copy-msg:hover {
+  background: rgba(255,255,255,0.04);
+  color: var(--text-primary);
+  border-color: var(--border-hover);
+}
+
+.btn-copy-msg:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+
+.btn-copy-msg.copied {
+  color: var(--emerald);
+  border-color: rgba(16,185,129,0.3);
+}
+
+.messages-skeleton {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 768px) {
+  .messages-skeleton {
+    grid-template-columns: 1fr;
+  }
+}
+
+.msg-skeleton-card {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px;
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ====================================================================
+       TOP NAV
+       ==================================================================== -->
+  <nav class="topnav" role="navigation" aria-label="Main navigation">
+    <div class="topnav-brand">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9L18 10l-2-4H8L6 10l-2.5 1.1C2.7 11.3 2 12.1 2 13v3c0 .6.4 1 1 1h2"/>
+        <circle cx="7" cy="17" r="2"/>
+        <circle cx="17" cy="17" r="2"/>
+        <path d="M9 17h6"/>
+      </svg>
+      <span class="topnav-brand-name">DealFinder</span>
+      <span class="topnav-badge">Pro</span>
+    </div>
+    <div class="topnav-right">
+      <div id="statusAI" class="status-pill" aria-label="AI status">
+        <span class="dot"></span>
+        <span>AI</span>
+      </div>
+      <div id="statusSession" class="status-pill" aria-label="Session status">
+        <span class="dot"></span>
+        <span>Session</span>
+      </div>
+      <div id="statusPlaywright" class="status-pill" aria-label="Playwright status">
+        <span class="dot"></span>
+        <span>Playwright</span>
+      </div>
+      <button id="connectBtn" class="btn-connect" onclick="window.openLoginModal()" aria-label="Connect to Facebook">
+        Connect Facebook
+      </button>
+    </div>
+  </nav>
+
+  <!-- ====================================================================
+       MAIN CONTENT
+       ==================================================================== -->
+  <main class="main-wrap">
+
+    <!-- Stats Row -->
+    <section class="stats-row" aria-label="Statistics overview">
+      <div class="card stat-card fade-in fade-in-d1">
+        <span class="stat-label">Deals Analyzed</span>
+        <span class="stat-value" id="statTotal">--</span>
+        <span class="stat-sub" id="statRuns">across 0 runs</span>
+      </div>
+      <div class="card stat-card fade-in fade-in-d2">
+        <span class="stat-label">Best Ratio</span>
+        <span class="stat-value" id="statBestRatio">--</span>
+        <span class="stat-sub">higher is better</span>
+      </div>
+      <div class="card stat-card fade-in fade-in-d3">
+        <span class="stat-label">Avg Profit</span>
+        <span class="stat-value" id="statAvgProfit">--</span>
+        <span class="stat-sub">per deal</span>
+      </div>
+      <div class="card stat-card fade-in fade-in-d4">
+        <span class="stat-label">AI Engine</span>
+        <span class="stat-value" id="statAI" style="font-size:18px;"><span class="ai-status-dot off" id="aiDot"></span> Checking...</span>
+        <span class="stat-sub">Claude-powered analysis</span>
+      </div>
+    </section>
+
+    <!-- Two column layout -->
+    <div class="content-grid">
+
+      <!-- LEFT COLUMN -->
+      <div class="left-col">
+
+        <!-- AI Market Insights -->
+        <section class="card ai-panel fade-in fade-in-d5" aria-label="AI Market Intelligence">
+          <div class="card-header">
+            <div class="card-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M12 3l1.5 5.5L19 10l-5.5 1.5L12 17l-1.5-5.5L5 10l5.5-1.5z"/>
+                <path d="M18 2l.6 2.1L20.8 5l-2.1.6L18 8l-.6-2.4L15.2 5l2.1-.9z"/>
+              </svg>
+              AI Market Intelligence
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="window.refreshBatchAnalysis()" aria-label="Refresh analysis">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 12a9 9 0 11-2.63-6.37"/>
+                <path d="M21 3v6h-6"/>
+              </svg>
+              Refresh
+            </button>
+          </div>
+          <div id="batchInsights">
+            <div class="ai-empty">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M12 3l1.5 5.5L19 10l-5.5 1.5L12 17l-1.5-5.5L5 10l5.5-1.5z"/>
+              </svg>
+              Run a search to get AI market insights
+            </div>
+          </div>
+        </section>
+
+        <!-- Quick Score + AI Analyze -->
+        <section class="card fade-in fade-in-d6" aria-label="Quick deal scoring">
+          <div class="card-header">
+            <div class="card-title">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+              </svg>
+              Quick Score + AI Analysis
+            </div>
+          </div>
+          <div class="score-panel-inner">
+            <div class="score-form">
+              <div class="form-group">
+                <label class="form-label" for="scorePrice">Price ($)</label>
+                <input type="number" id="scorePrice" class="form-input" placeholder="15000" min="1">
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="scoreYear">Year</label>
+                  <input type="number" id="scoreYear" class="form-input" placeholder="2018" min="1980" max="2027">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="scoreMileage">Mileage</label>
+                  <input type="number" id="scoreMileage" class="form-input" placeholder="85000" min="0">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="scoreMake">Make</label>
+                  <input type="text" id="scoreMake" class="form-input" placeholder="Toyota">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="scoreModel">Model</label>
+                  <input type="text" id="scoreModel" class="form-input" placeholder="Camry">
+                </div>
+              </div>
+              <div class="btn-row">
+                <button class="btn btn-primary btn-sm" onclick="window.quickScore()" id="btnScore">Score Deal</button>
+                <button class="btn btn-ghost btn-sm" onclick="window.aiAnalyze()" id="btnAnalyze">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 3l1.5 5.5L19 10l-5.5 1.5L12 17l-1.5-5.5L5 10l5.5-1.5z"/>
+                  </svg>
+                  AI Analyze
+                </button>
+              </div>
+            </div>
+            <div class="score-results">
+              <div id="scoreResult" class="score-result-section" style="display:none;">
+                <h4>
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 20V10"/>
+                    <path d="M18 20V4"/>
+                    <path d="M6 20v-4"/>
+                  </svg>
+                  Deal Score
+                </h4>
+                <div id="scoreResultContent"></div>
+              </div>
+              <div id="aiResult" class="score-result-section ai-result" style="display:none;">
+                <h4>
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 3l1.5 5.5L19 10l-5.5 1.5L12 17l-1.5-5.5L5 10l5.5-1.5z"/>
+                  </svg>
+                  AI Analysis
+                </h4>
+                <div id="aiResultContent"></div>
+              </div>
+              <div id="scoreEmpty" class="score-empty">Enter deal details and click Score or AI Analyze</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Deals Table -->
+        <section class="card" aria-label="Deals table">
+          <div class="card-header">
+            <div class="card-title">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <path d="M3 9h18"/>
+                <path d="M9 21V9"/>
+              </svg>
+              Deals
+            </div>
+            <span class="table-count" id="tableCount">0 deals</span>
+          </div>
+          <div class="table-toolbar" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+            <div class="table-search" style="flex:1;min-width:180px;">
+              <input type="text" id="tableFilter" class="form-input" placeholder="Filter by make, model, year..." oninput="window.filterDeals()">
+            </div>
+            <div style="display:flex;gap:6px;" id="qualityFilters">
+              <button onclick="window.toggleQualityFilter('all')" class="quality-filter-btn active" data-quality="all" style="padding:4px 12px;border-radius:20px;font-size:0.72rem;font-weight:600;cursor:pointer;border:1px solid var(--border-color);background:var(--accent);color:#fff;transition:all 0.15s;">All</button>
+              <button onclick="window.toggleQualityFilter('Excellent')" class="quality-filter-btn" data-quality="Excellent" style="padding:4px 12px;border-radius:20px;font-size:0.72rem;font-weight:600;cursor:pointer;border:1px solid rgba(16,185,129,0.3);background:transparent;color:var(--emerald);transition:all 0.15s;">Excellent</button>
+              <button onclick="window.toggleQualityFilter('Good')" class="quality-filter-btn" data-quality="Good" style="padding:4px 12px;border-radius:20px;font-size:0.72rem;font-weight:600;cursor:pointer;border:1px solid rgba(59,130,246,0.3);background:transparent;color:var(--accent);transition:all 0.15s;">Good</button>
+              <button onclick="window.toggleQualityFilter('Fair')" class="quality-filter-btn" data-quality="Fair" style="padding:4px 12px;border-radius:20px;font-size:0.72rem;font-weight:600;cursor:pointer;border:1px solid rgba(245,158,11,0.3);background:transparent;color:var(--amber);transition:all 0.15s;">Fair</button>
+              <button onclick="window.toggleQualityFilter('Poor')" class="quality-filter-btn" data-quality="Poor" style="padding:4px 12px;border-radius:20px;font-size:0.72rem;font-weight:600;cursor:pointer;border:1px solid rgba(244,63,94,0.3);background:transparent;color:var(--rose);transition:all 0.15s;">Poor</button>
+            </div>
+            <div class="export-wrap" id="exportWrap">
+              <button class="btn btn-ghost btn-sm" onclick="window.toggleExportDropdown(event)" aria-label="Export deals" style="display:inline-flex;align-items:center;gap:5px;">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="7 10 12 15 17 10"/>
+                  <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                Export
+              </button>
+              <div class="export-dropdown" id="exportDropdown" style="display:none;">
+                <a href="/api/export/csv" target="_blank" rel="noopener">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                  Download CSV
+                </a>
+                <a href="/api/export/json" target="_blank" rel="noopener">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                  Download JSON
+                </a>
+              </div>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table class="deals-table" id="dealsTable" role="grid">
+              <thead>
+                <tr>
+                  <th data-col="index" aria-sort="none"># <span class="sort-arrow"></span></th>
+                  <th data-col="year" aria-sort="none">Year <span class="sort-arrow"></span></th>
+                  <th data-col="make" aria-sort="none">Make <span class="sort-arrow"></span></th>
+                  <th data-col="model" aria-sort="none">Model <span class="sort-arrow"></span></th>
+                  <th data-col="price" aria-sort="none">Price <span class="sort-arrow"></span></th>
+                  <th data-col="market" aria-sort="none">Market Value <span class="sort-arrow"></span></th>
+                  <th data-col="profit" aria-sort="none">Profit <span class="sort-arrow"></span></th>
+                  <th data-col="ratio" aria-sort="none">Ratio <span class="sort-arrow"></span></th>
+                  <th data-col="quality" aria-sort="none">Quality <span class="sort-arrow"></span></th>
+                  <th data-col="mileage" aria-sort="none">Mileage <span class="sort-arrow"></span></th>
+                  <th style="width:100px">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="dealsBody">
+                <tr>
+                  <td colspan="11">
+                    <div class="table-empty">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <rect x="3" y="3" width="18" height="18" rx="2"/>
+                        <path d="M3 9h18"/>
+                        <path d="M9 21V9"/>
+                      </svg>
+                      No deals yet. Run a search to populate results.
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Deal Pipeline / Watchlist -->
+        <section class="card" aria-label="Deal pipeline" id="pipelineSection">
+          <div class="card-header">
+            <div class="card-title">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+              </svg>
+              Deal Pipeline
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="window.refreshWatchlist()" aria-label="Refresh pipeline">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 12a9 9 0 11-2.63-6.37"/>
+                <path d="M21 3v6h-6"/>
+              </svg>
+              Refresh
+            </button>
+          </div>
+          <div id="pipelineStats" class="pipeline-stats"></div>
+          <div class="table-wrap">
+            <table class="watchlist-table" id="watchlistTable" role="grid">
+              <thead>
+                <tr>
+                  <th>Year</th>
+                  <th>Make</th>
+                  <th>Model</th>
+                  <th>Price</th>
+                  <th>Stage</th>
+                  <th>Location</th>
+                  <th>Notes</th>
+                  <th style="width:140px">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="watchlistBody">
+                <tr><td colspan="8"><div class="watchlist-empty">No deals in pipeline yet. Save deals from the table above.</div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- RIGHT COLUMN -->
+      <div class="right-col">
+
+        <!-- Search Panel -->
+        <section class="card" aria-label="Search marketplace">
+          <div class="card-header">
+            <div class="card-title">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="11" cy="11" r="8"/>
+                <path d="M21 21l-4.35-4.35"/>
+              </svg>
+              Search Marketplace
+            </div>
+          </div>
+          <div class="search-form">
+            <div class="form-group">
+              <label class="form-label" for="searchLocation">Location</label>
+              <input type="text" id="searchLocation" class="form-input" placeholder="atlanta" value="atlanta">
+              <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;">
+                <button type="button" onclick="window.setCity('atlanta')" style="padding:2px 8px;font-size:0.65rem;border-radius:10px;border:1px solid var(--border-color);background:transparent;color:var(--text-muted);cursor:pointer;">Atlanta</button>
+                <button type="button" onclick="window.setCity('miami')" style="padding:2px 8px;font-size:0.65rem;border-radius:10px;border:1px solid var(--border-color);background:transparent;color:var(--text-muted);cursor:pointer;">Miami</button>
+                <button type="button" onclick="window.setCity('dallas')" style="padding:2px 8px;font-size:0.65rem;border-radius:10px;border:1px solid var(--border-color);background:transparent;color:var(--text-muted);cursor:pointer;">Dallas</button>
+                <button type="button" onclick="window.setCity('houston')" style="padding:2px 8px;font-size:0.65rem;border-radius:10px;border:1px solid var(--border-color);background:transparent;color:var(--text-muted);cursor:pointer;">Houston</button>
+                <button type="button" onclick="window.setCity('phoenix')" style="padding:2px 8px;font-size:0.65rem;border-radius:10px;border:1px solid var(--border-color);background:transparent;color:var(--text-muted);cursor:pointer;">Phoenix</button>
+                <button type="button" onclick="window.setCity('chicago')" style="padding:2px 8px;font-size:0.65rem;border-radius:10px;border:1px solid var(--border-color);background:transparent;color:var(--text-muted);cursor:pointer;">Chicago</button>
+                <button type="button" onclick="window.setCity('charlotte')" style="padding:2px 8px;font-size:0.65rem;border-radius:10px;border:1px solid var(--border-color);background:transparent;color:var(--text-muted);cursor:pointer;">Charlotte</button>
+                <button type="button" onclick="window.setCity('detroit')" style="padding:2px 8px;font-size:0.65rem;border-radius:10px;border:1px solid var(--border-color);background:transparent;color:var(--text-muted);cursor:pointer;">Detroit</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="searchTerm">Search Term</label>
+              <input type="text" id="searchTerm" class="form-input" placeholder="car, truck, SUV...">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="searchMinPrice">Min Price</label>
+                <input type="number" id="searchMinPrice" class="form-input" placeholder="250" value="250" min="0">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="searchMaxPrice">Max Price</label>
+                <input type="number" id="searchMaxPrice" class="form-input" placeholder="55000" value="55000" min="0">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="searchMinYear">Min Year</label>
+                <input type="number" id="searchMinYear" class="form-input" placeholder="1995" value="1995" min="1980">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="searchMaxYear">Max Year</label>
+                <input type="number" id="searchMaxYear" class="form-input" placeholder="2025" value="2025" max="2027">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="searchMaxMileage">Max Mileage</label>
+                <input type="number" id="searchMaxMileage" class="form-input" placeholder="200000" value="200000" min="0">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="searchScrollCount">Scroll Count</label>
+                <input type="number" id="searchScrollCount" class="form-input" placeholder="10" value="10" min="1" max="50">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="searchMake">Make</label>
+                <input type="text" id="searchMake" class="form-input" placeholder="Any">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="searchModel">Model</label>
+                <input type="text" id="searchModel" class="form-input" placeholder="Any">
+              </div>
+            </div>
+            <button class="btn btn-primary btn-full" onclick="window.startSearch()" id="btnSearch">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="11" cy="11" r="8"/>
+                <path d="M21 21l-4.35-4.35"/>
+              </svg>
+              Search Marketplace
+            </button>
+            <div id="searchProgress" class="progress-section" style="display:none;">
+              <div class="progress-bar-track">
+                <div class="progress-bar-fill" id="progressBar"></div>
+              </div>
+              <div class="progress-text" id="progressText">Preparing...</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- History Panel -->
+        <section class="card" aria-label="Search history">
+          <div class="card-header">
+            <div class="card-title">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+              </svg>
+              History
+            </div>
+          </div>
+          <div id="historyList" class="history-list">
+            <div class="history-empty">No past searches</div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ====================================================================
+       LOGIN MODAL
+       ==================================================================== -->
+  <div class="modal-overlay" id="loginModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal">
+      <h2 class="modal-title" id="modalTitle">Connect Facebook</h2>
+      <p class="modal-desc">
+        This will open a Chromium browser window on the server. Log in to your Facebook account in that window. Your session will be saved for future headless scraping.
+      </p>
+      <div class="modal-status" id="loginStatus">
+        Click "Start Login" to begin.
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="window.closeLoginModal()">Close</button>
+        <button class="btn btn-primary" onclick="window.startLogin()" id="btnLogin">Start Login</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ====================================================================
+     JAVASCRIPT
+     ==================================================================== -->
+<script>
+(function() {
+  'use strict';
+
+  /* -----------------------------------------------------------------------
+     STATE
+     ----------------------------------------------------------------------- */
+  let allDeals = [];
+  let filteredDeals = [];
+  let sortCol = 'ratio';
+  let sortDir = 'desc';
+  let expandedRow = null;
+  let loginPollTimer = null;
+  let ws = null;
+  let aiAvailable = false;
+
+  /* -----------------------------------------------------------------------
+     HELPERS
+     ----------------------------------------------------------------------- */
+  function $(id) { return document.getElementById(id); }
+
+  function fmt(n) {
+    if (n == null || isNaN(n)) return '--';
+    return Number(n).toLocaleString('en-US');
+  }
+
+  function fmtDollar(n) {
+    if (n == null || isNaN(n)) return '--';
+    var abs = Math.abs(n);
+    var prefix = n < 0 ? '-$' : '$';
+    return prefix + abs.toLocaleString('en-US');
+  }
+
+  function fmtRatio(n) {
+    if (n == null || isNaN(n)) return '--';
+    return Number(n).toFixed(2);
+  }
+
+  function qualityClass(q) {
+    if (!q) return '';
+    return q.toLowerCase();
+  }
+
+  function ratioColor(r) {
+    if (r >= 1.3) return 'emerald';
+    if (r >= 1.1) return 'blue';
+    if (r >= 0.95) return 'amber';
+    return 'rose';
+  }
+
+  function escHtml(s) {
+    var d = document.createElement('div');
+    d.textContent = s || '';
+    return d.innerHTML;
+  }
+
+  function relTime(ts) {
+    if (!ts) return '';
+    var d = new Date(ts);
+    var now = Date.now();
+    var diff = (now - d.getTime()) / 1000;
+    if (diff < 60) return 'just now';
+    if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+    if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+    return Math.floor(diff / 86400) + 'd ago';
+  }
+
+  async function api(url, opts) {
+    var resp = await fetch(url, opts);
+    if (!resp.ok) {
+      var errBody;
+      try { errBody = await resp.json(); } catch(e) { errBody = {}; }
+      throw new Error(errBody.detail || resp.statusText || 'Request failed');
+    }
+    return resp.json();
+  }
+
+  /* -----------------------------------------------------------------------
+     COUNT-UP ANIMATION
+     ----------------------------------------------------------------------- */
+  function countUp(el, target, prefix, suffix, decimals) {
+    prefix = prefix || '';
+    suffix = suffix || '';
+    decimals = decimals || 0;
+    var start = 0;
+    var dur = 600;
+    var startTime = null;
+
+    function step(ts) {
+      if (!startTime) startTime = ts;
+      var progress = Math.min((ts - startTime) / dur, 1);
+      var ease = 1 - Math.pow(1 - progress, 3);
+      var current = start + (target - start) * ease;
+      if (decimals > 0) {
+        el.textContent = prefix + current.toFixed(decimals) + suffix;
+      } else {
+        el.textContent = prefix + Math.round(current).toLocaleString('en-US') + suffix;
+      }
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      }
+    }
+    requestAnimationFrame(step);
+  }
+
+  /* -----------------------------------------------------------------------
+     STATUS POLLING
+     ----------------------------------------------------------------------- */
+  async function fetchStatus() {
+    try {
+      var data = await api('/api/status');
+      updateStatusPills(data);
+      aiAvailable = data.ai_available;
+    } catch(e) {
+      console.warn('Status fetch failed:', e);
+    }
+  }
+
+  function updateStatusPills(data) {
+    var aiPill = $('statusAI');
+    var sessPill = $('statusSession');
+    var pwPill = $('statusPlaywright');
+    var connectBtn = $('connectBtn');
+
+    aiPill.className = 'status-pill ' + (data.ai_available ? 'active' : '');
+    sessPill.className = 'status-pill ' + (data.session_active ? 'active' : (data.login_in_progress ? 'warning' : ''));
+    pwPill.className = 'status-pill ' + (data.playwright_available ? 'active' : 'error');
+
+    if (data.session_active) {
+      connectBtn.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Connected';
+      connectBtn.classList.add('connected');
+    } else {
+      connectBtn.innerHTML = 'Connect Facebook';
+      connectBtn.classList.remove('connected');
+    }
+
+    // AI stat card
+    var aiDot = $('aiDot');
+    var statAI = $('statAI');
+    if (data.ai_available) {
+      aiDot.className = 'ai-status-dot on';
+      statAI.innerHTML = '<span class="ai-status-dot on" id="aiDot"></span> Active';
+    } else {
+      aiDot.className = 'ai-status-dot off';
+      statAI.innerHTML = '<span class="ai-status-dot off" id="aiDot"></span> Unavailable';
+    }
+  }
+
+  /* -----------------------------------------------------------------------
+     STATS
+     ----------------------------------------------------------------------- */
+  async function fetchStats() {
+    try {
+      var data = await api('/api/stats');
+      countUp($('statTotal'), data.total_listings || 0, '', '');
+      $('statRuns').textContent = 'across ' + (data.total_runs || 0) + ' runs';
+
+      var bestR = data.best_deal_ratio || 0;
+      $('statBestRatio').textContent = fmtRatio(bestR);
+      $('statBestRatio').className = 'stat-value ' + ratioColor(bestR);
+
+      // Compute avg profit from excellent deals
+      var excellents = data.recent_excellent_deals || [];
+      var avgProfit = 0;
+      if (excellents.length > 0) {
+        var sum = excellents.reduce(function(a, d) { return a + (d.potential_profit || 0); }, 0);
+        avgProfit = Math.round(sum / excellents.length);
+      }
+      var profitEl = $('statAvgProfit');
+      countUp(profitEl, avgProfit, '$', '');
+      profitEl.className = 'stat-value ' + (avgProfit >= 0 ? 'emerald' : 'rose');
+    } catch(e) {
+      console.warn('Stats fetch failed:', e);
+    }
+  }
+
+  /* -----------------------------------------------------------------------
+     HISTORY
+     ----------------------------------------------------------------------- */
+  async function fetchHistory() {
+    try {
+      var runs = await api('/api/history?limit=20');
+      renderHistory(runs);
+    } catch(e) {
+      console.warn('History fetch failed:', e);
+    }
+  }
+
+  function renderHistory(runs) {
+    var list = $('historyList');
+    if (!runs || runs.length === 0) {
+      list.innerHTML = '<div class="history-empty">No past searches</div>';
+      return;
+    }
+    list.innerHTML = runs.map(function(r) {
+      return '<div class="history-item" onclick="window.loadRun(' + r.id + ')" tabindex="0" role="button" aria-label="Load search run from ' + escHtml(r.location) + '">'
+        + '<div class="history-item-left">'
+        + '<span class="history-item-loc">' + escHtml(r.location || 'Unknown') + (r.search_term ? ' - ' + escHtml(r.search_term) : '') + '</span>'
+        + '<span class="history-item-time">' + relTime(r.timestamp) + '</span>'
+        + '</div>'
+        + '<span class="history-item-count">' + r.listing_count + '</span>'
+        + '</div>';
+    }).join('');
+  }
+
+  async function loadRun(runId) {
+    try {
+      var data = await api('/api/history/' + runId);
+      if (data && data.deals) {
+        loadDealsFromHistory(data.deals);
+      }
+    } catch(e) {
+      console.warn('Failed to load run:', e);
+    }
+  }
+
+  function loadDealsFromHistory(rows) {
+    allDeals = rows.map(function(r, i) {
+      return {
+        index: i + 1,
+        year: r.year || 0,
+        make: r.make || '',
+        model: r.model || '',
+        price: r.price || 0,
+        market: r.private_party || r.dealer_retail || 0,
+        profit: r.potential_profit || 0,
+        ratio: r.ratio || 0,
+        quality: r.quality || 'Unknown',
+        mileage: r.mileage || null,
+        location: r.location || '',
+        url: r.url || '',
+        _raw: r
+      };
+    });
+    filterAndRender();
+  }
+
+  /* -----------------------------------------------------------------------
+     SEARCH (WEBSOCKET)
+     ----------------------------------------------------------------------- */
+  function startSearch() {
+    var btn = $('btnSearch');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner" style="width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;display:inline-block;"></span> Searching...';
+
+    $('searchProgress').style.display = 'block';
+    $('progressBar').style.width = '0%';
+    $('progressText').textContent = 'Connecting...';
+
+    var proto = location.protocol === 'https:' ? 'wss' : 'ws';
+    ws = new WebSocket(proto + '://' + location.host + '/ws/search');
+
+    ws.onopen = function() {
+      var payload = {
+        location: $('searchLocation').value || 'atlanta',
+        search_term: $('searchTerm').value || '',
+        min_price: parseInt($('searchMinPrice').value) || 250,
+        max_price: parseInt($('searchMaxPrice').value) || 55000,
+        min_year: parseInt($('searchMinYear').value) || 1995,
+        max_year: parseInt($('searchMaxYear').value) || 2025,
+        max_mileage: parseInt($('searchMaxMileage').value) || 200000,
+        make: $('searchMake').value || '',
+        model: $('searchModel').value || '',
+        scroll_count: parseInt($('searchScrollCount').value) || 10
+      };
+      ws.send(JSON.stringify(payload));
+    };
+
+    ws.onmessage = function(ev) {
+      var msg;
+      try { msg = JSON.parse(ev.data); } catch(e) { return; }
+
+      if (msg.type === 'progress') {
+        $('progressBar').style.width = (msg.percent || 0) + '%';
+        $('progressText').textContent = msg.message || '';
+      }
+      else if (msg.type === 'results') {
+        loadSearchResults(msg);
+        resetSearchBtn();
+        fetchHistory();
+        fetchStats();
+      }
+      else if (msg.type === 'error') {
+        $('progressText').textContent = 'Error: ' + (msg.message || 'Unknown');
+        $('progressBar').style.width = '0%';
+        $('progressBar').style.background = 'var(--rose)';
+        resetSearchBtn();
+      }
+    };
+
+    ws.onerror = function() {
+      $('progressText').textContent = 'Connection error';
+      resetSearchBtn();
+    };
+
+    ws.onclose = function() {
+      resetSearchBtn();
+    };
+  }
+
+  function resetSearchBtn() {
+    var btn = $('btnSearch');
+    btn.disabled = false;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg> Search Marketplace';
+  }
+
+  function loadSearchResults(msg) {
+    var deals = msg.deals || [];
+    allDeals = deals.map(function(d, i) {
+      return {
+        index: i + 1,
+        year: d.listing ? d.listing.year : 0,
+        make: d.listing ? d.listing.make : '',
+        model: d.listing ? d.listing.model : '',
+        price: d.listing ? d.listing.price : 0,
+        market: d.market_estimate ? d.market_estimate.private_party : 0,
+        profit: d.potential_profit || 0,
+        ratio: d.ratio || 0,
+        quality: d.quality || '',
+        mileage: d.listing ? d.listing.mileage : null,
+        location: d.listing ? d.listing.location : '',
+        url: d.listing ? d.listing.url : '',
+        _raw: d
+      };
+    });
+    filterAndRender();
+  }
+
+  /* -----------------------------------------------------------------------
+     DEALS TABLE
+     ----------------------------------------------------------------------- */
+  var activeQualityFilter = 'all';
+
+  function toggleQualityFilter(quality) {
+    activeQualityFilter = quality;
+    // Update button styles
+    document.querySelectorAll('.quality-filter-btn').forEach(function(btn) {
+      var q = btn.getAttribute('data-quality');
+      if (q === quality) {
+        btn.style.background = q === 'all' ? 'var(--accent)' : q === 'Excellent' ? 'var(--emerald)' : q === 'Good' ? 'var(--accent)' : q === 'Fair' ? 'var(--amber)' : 'var(--rose)';
+        btn.style.color = '#fff';
+        btn.style.borderColor = 'transparent';
+      } else {
+        btn.style.background = 'transparent';
+        btn.style.color = q === 'all' ? 'var(--text-secondary)' : q === 'Excellent' ? 'var(--emerald)' : q === 'Good' ? 'var(--accent)' : q === 'Fair' ? 'var(--amber)' : 'var(--rose)';
+        btn.style.borderColor = q === 'all' ? 'var(--border-color)' : 'rgba(255,255,255,0.1)';
+      }
+    });
+    filterAndRender();
+  }
+  window.toggleQualityFilter = toggleQualityFilter;
+
+  function filterAndRender() {
+    var query = ($('tableFilter').value || '').toLowerCase().trim();
+    filteredDeals = allDeals.slice();
+
+    // Quality filter
+    if (activeQualityFilter !== 'all') {
+      filteredDeals = filteredDeals.filter(function(d) {
+        return d.quality === activeQualityFilter;
+      });
+    }
+
+    // Text filter
+    if (query) {
+      filteredDeals = filteredDeals.filter(function(d) {
+        return (d.make + ' ' + d.model + ' ' + d.year + ' ' + d.quality + ' ' + (d.location || '')).toLowerCase().indexOf(query) >= 0;
+      });
+    }
+    sortDeals();
+    renderTable();
+    $('tableCount').textContent = filteredDeals.length + ' deal' + (filteredDeals.length !== 1 ? 's' : '');
+  }
+
+  function sortDeals() {
+    var col = sortCol;
+    var dir = sortDir === 'asc' ? 1 : -1;
+    filteredDeals.sort(function(a, b) {
+      var va = a[col];
+      var vb = b[col];
+      if (typeof va === 'string') va = va.toLowerCase();
+      if (typeof vb === 'string') vb = vb.toLowerCase();
+      if (va < vb) return -1 * dir;
+      if (va > vb) return 1 * dir;
+      return 0;
+    });
+  }
+
+  function renderTable() {
+    var tbody = $('dealsBody');
+    expandedRow = null;
+    if (filteredDeals.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="11"><div class="table-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>No deals yet. Run a search to populate results.</div></td></tr>';
+      return;
+    }
+    tbody.innerHTML = filteredDeals.map(function(d, i) {
+      var profitClass = d.profit >= 0 ? 'profit-positive' : 'profit-negative';
+      var profitStr = d.profit >= 0 ? '+' + fmtDollar(d.profit) : '-' + fmtDollar(Math.abs(d.profit));
+      if (d.profit >= 0) profitStr = '+' + fmtDollar(d.profit);
+      else profitStr = fmtDollar(d.profit);
+      return '<tr data-idx="' + i + '" onclick="window.toggleDealExpand(' + i + ')" tabindex="0" role="row" aria-label="' + d.year + ' ' + escHtml(d.make) + ' ' + escHtml(d.model) + '">'
+        + '<td>' + d.index + '</td>'
+        + '<td>' + d.year + '</td>'
+        + '<td>' + escHtml(d.make) + '</td>'
+        + '<td>' + escHtml(d.model) + '</td>'
+        + '<td>' + fmtDollar(d.price) + '</td>'
+        + '<td>' + fmtDollar(d.market) + '</td>'
+        + '<td class="' + profitClass + '">' + profitStr + '</td>'
+        + '<td style="color:var(--' + ratioColor(d.ratio) + ')">' + fmtRatio(d.ratio) + '</td>'
+        + '<td><span class="quality-pill ' + qualityClass(d.quality) + '">' + escHtml(d.quality) + '</span></td>'
+        + '<td>' + (d.mileage ? fmt(d.mileage) : '--') + '</td>'
+        + '<td><div style="display:flex;align-items:center;gap:6px;">'
+        + (d.url ? '<a href="' + escHtml(d.url) + '" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="display:inline-flex;align-items:center;gap:4px;color:var(--blue);text-decoration:none;font-size:0.78rem;font-weight:600;padding:4px 10px;border:1px solid var(--blue);border-radius:6px;transition:all 0.15s ease;" onmouseover="this.style.background=\'var(--blue)\';this.style.color=\'#fff\'" onmouseout="this.style.background=\'transparent\';this.style.color=\'var(--blue)\'"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>View</a>' : '--')
+        + '<button class="btn-save-deal" id="saveBtn' + i + '" onclick="event.stopPropagation();window.saveDeal(' + i + ')" aria-label="Save to watchlist" title="Save to watchlist"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>'
+        + '</div></td>'
+        + '</tr>';
+    }).join('');
+
+    // Update sort headers
+    document.querySelectorAll('.deals-table th').forEach(function(th) {
+      var col = th.getAttribute('data-col');
+      if (col === sortCol) {
+        th.classList.add('sorted');
+        th.querySelector('.sort-arrow').textContent = sortDir === 'asc' ? '\u25B2' : '\u25BC';
+        th.setAttribute('aria-sort', sortDir === 'asc' ? 'ascending' : 'descending');
+      } else {
+        th.classList.remove('sorted');
+        th.querySelector('.sort-arrow').textContent = '';
+        th.setAttribute('aria-sort', 'none');
+      }
+    });
+  }
+
+  function handleSort(e) {
+    var th = e.target.closest('th');
+    if (!th) return;
+    var col = th.getAttribute('data-col');
+    if (!col) return;
+    if (col === sortCol) {
+      sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+    } else {
+      sortCol = col;
+      sortDir = 'desc';
+    }
+    filterAndRender();
+  }
+
+  function filterDeals() {
+    filterAndRender();
+  }
+
+  /* -----------------------------------------------------------------------
+     DEAL ROW EXPANSION (INLINE AI ANALYSIS)
+     ----------------------------------------------------------------------- */
+  function toggleDealExpand(idx) {
+    var tbody = $('dealsBody');
+    var existingExpand = tbody.querySelector('.deal-expand-row');
+
+    // If clicking the same row, collapse
+    if (existingExpand && parseInt(existingExpand.getAttribute('data-expand-idx')) === idx) {
+      existingExpand.remove();
+      expandedRow = null;
+      return;
+    }
+
+    // Remove any existing expansion
+    if (existingExpand) existingExpand.remove();
+
+    expandedRow = idx;
+    var deal = filteredDeals[idx];
+    if (!deal) return;
+
+    var dataRow = tbody.querySelector('tr[data-idx="' + idx + '"]');
+    if (!dataRow) return;
+
+    var expandTr = document.createElement('tr');
+    expandTr.className = 'deal-expand-row';
+    expandTr.setAttribute('data-expand-idx', idx);
+    expandTr.innerHTML = '<td colspan="11"><div class="deal-expand-inner">'
+      + '<div class="deal-expand-header">'
+      + '<h4><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.5 5.5L19 10l-5.5 1.5L12 17l-1.5-5.5L5 10l5.5-1.5z"/></svg> AI Analysis: ' + deal.year + ' ' + escHtml(deal.make) + ' ' + escHtml(deal.model) + '</h4>'
+      + '<button class="deal-expand-close" onclick="event.stopPropagation();window.closeDealExpand()" aria-label="Close analysis">&times;</button>'
+      + '</div>'
+      + '<div id="dealExpandContent"><div class="skeleton skeleton-line w80"></div><div class="skeleton skeleton-line w60"></div><div class="skeleton skeleton-line w100"></div></div>'
+      + '</div></td>';
+    dataRow.after(expandTr);
+
+    // Fetch AI analysis
+    fetchDealAnalysis(deal, idx);
+  }
+
+  async function fetchDealAnalysis(deal, idx) {
+    var contentEl = $('dealExpandContent');
+    if (!contentEl) return;
+
+    var raw = deal._raw || {};
+    var price = raw.price || deal.price;
+    var year = raw.year || deal.year;
+    var make = raw.make || deal.make;
+    var model = raw.model || deal.model;
+    var mileage = raw.mileage || deal.mileage;
+    if (raw.listing) {
+      price = raw.listing.price || price;
+      year = raw.listing.year || year;
+      make = raw.listing.make || make;
+      model = raw.listing.model || model;
+      mileage = raw.listing.mileage || mileage;
+    }
+
+    try {
+      var data = await api('/api/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ price: price, year: year, make: make, model: model, mileage: mileage || null })
+      });
+      renderDealExpand(data, contentEl, deal);
+    } catch(e) {
+      contentEl.innerHTML = '<div style="color:var(--rose);font-size:13px;">Analysis failed: ' + escHtml(e.message) + '</div>';
+    }
+  }
+
+  function renderDealExpand(data, el, originalDeal) {
+    var a = data.analysis || {};
+    var d = data.deal || {};
+
+    var verdictClass = (a.verdict || '').toLowerCase();
+    if (verdictClass === 'buy') verdictClass = 'buy';
+    else if (verdictClass === 'pass') verdictClass = 'pass';
+    else verdictClass = 'negotiate';
+
+    var confDots = '';
+    for (var i = 1; i <= 10; i++) {
+      confDots += '<span class="confidence-dot' + (i <= (a.confidence || 0) ? ' filled' : '') + '"></span>';
+    }
+
+    var risksHtml = '';
+    if (a.risks && a.risks.length) {
+      risksHtml = '<ul class="ai-risks">' + a.risks.map(function(r) { return '<li>' + escHtml(r) + '</li>'; }).join('') + '</ul>';
+    }
+
+    var poweredLabel = a.ai_powered ? 'Powered by Claude' : 'Rule-based analysis';
+
+    // Flip cost breakdown
+    var fe = (d && d.flip_estimate) ? d.flip_estimate : null;
+    var flipHtml = '';
+    if (fe && fe.purchase_price) {
+      var netColor = fe.net_profit >= 0 ? 'var(--emerald)' : 'var(--rose)';
+      var netSign = fe.net_profit >= 0 ? '+' : '';
+      flipHtml = '<div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border-color);">'
+        + '<div style="font-size:0.78rem;font-weight:600;color:var(--text-secondary);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.05em;">Flip Cost Breakdown</div>'
+        + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">'
+        + '<div style="background:rgba(255,255,255,0.02);border-radius:8px;padding:10px;"><div style="font-size:0.7rem;color:var(--text-muted);">Purchase</div><div style="font-size:0.95rem;font-weight:600;">' + fmtDollar(fe.purchase_price) + '</div></div>'
+        + '<div style="background:rgba(255,255,255,0.02);border-radius:8px;padding:10px;"><div style="font-size:0.7rem;color:var(--text-muted);">Repairs + Detail</div><div style="font-size:0.95rem;font-weight:600;">' + fmtDollar((fe.estimated_repair || 0) + (fe.detailing || 0)) + '</div></div>'
+        + '<div style="background:rgba(255,255,255,0.02);border-radius:8px;padding:10px;"><div style="font-size:0.7rem;color:var(--text-muted);">Sell Price</div><div style="font-size:0.95rem;font-weight:600;color:var(--accent);">' + fmtDollar(fe.sell_price) + '</div></div>'
+        + '<div style="background:rgba(255,255,255,0.02);border-radius:8px;padding:10px;"><div style="font-size:0.7rem;color:var(--text-muted);">Net Profit (ROI: ' + (fe.roi_percent || 0) + '%)</div><div style="font-size:0.95rem;font-weight:700;color:' + netColor + ';">' + netSign + fmtDollar(Math.abs(fe.net_profit || 0)) + '</div></div>'
+        + '</div>'
+        + '<div style="font-size:0.7rem;color:var(--text-muted);margin-top:6px;">Total investment: ' + fmtDollar(fe.total_cost) + ' (purchase + repairs + listing fees)</div>'
+        + '</div>';
+    }
+
+    // Seller messages container ID (unique per expand)
+    var msgContainerId = 'sellerMessages_' + Date.now();
+
+    el.innerHTML = '<div class="deal-expand-grid">'
+      + '<div class="deal-expand-field">'
+      + '<span class="deal-expand-field-label">Verdict</span>'
+      + '<span class="deal-expand-field-value"><span class="verdict-badge ' + verdictClass + '">' + escHtml(a.verdict || '--') + '</span></span>'
+      + '</div>'
+      + '<div class="deal-expand-field">'
+      + '<span class="deal-expand-field-label">Confidence</span>'
+      + '<span class="deal-expand-field-value"><div class="confidence-meter">' + confDots + '</div></span>'
+      + '</div>'
+      + '<div class="deal-expand-field">'
+      + '<span class="deal-expand-field-label">Est. Flip Profit</span>'
+      + '<span class="deal-expand-field-value" style="color:var(--emerald);font-weight:600;">' + fmtDollar(a.estimated_flip_profit) + '</span>'
+      + '</div>'
+      + '<div class="deal-expand-field full">'
+      + '<span class="deal-expand-field-label">Summary</span>'
+      + '<span class="deal-expand-field-value">' + escHtml(a.summary || '') + '</span>'
+      + '</div>'
+      + '<div class="deal-expand-field full">'
+      + '<span class="deal-expand-field-label">Flip Potential</span>'
+      + '<span class="deal-expand-field-value">' + escHtml(a.flip_potential || '') + '</span>'
+      + '</div>'
+      + '<div class="deal-expand-field">'
+      + '<span class="deal-expand-field-label">Risks</span>'
+      + '<span class="deal-expand-field-value">' + (risksHtml || '--') + '</span>'
+      + '</div>'
+      + '<div class="deal-expand-field" style="grid-column:span 2;">'
+      + '<span class="deal-expand-field-label">Negotiation Tip</span>'
+      + '<span class="deal-expand-field-value">' + escHtml(a.negotiation_tip || '') + '</span>'
+      + '</div>'
+      + '<div class="deal-expand-field full">'
+      + '<span class="deal-expand-field-label">Market Insight</span>'
+      + '<span class="deal-expand-field-value">' + escHtml(a.market_insight || '') + '</span>'
+      + '</div>'
+      + '</div>'
+      + flipHtml
+      + '<div class="messages-section" id="' + msgContainerId + '">'
+      + '<div class="messages-section-title">'
+      + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>'
+      + ' Seller Messages'
+      + '</div>'
+      + '<div class="messages-skeleton">'
+      + '<div class="msg-skeleton-card"><div class="skeleton skeleton-line w60"></div><div class="skeleton skeleton-line w100"></div><div class="skeleton skeleton-line w80"></div></div>'
+      + '<div class="msg-skeleton-card"><div class="skeleton skeleton-line w60"></div><div class="skeleton skeleton-line w100"></div><div class="skeleton skeleton-line w80"></div></div>'
+      + '<div class="msg-skeleton-card"><div class="skeleton skeleton-line w60"></div><div class="skeleton skeleton-line w100"></div><div class="skeleton skeleton-line w80"></div></div>'
+      + '</div>'
+      + '</div>'
+      + '<div class="ai-powered-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.5 5.5L19 10l-5.5 1.5L12 17l-1.5-5.5L5 10l5.5-1.5z"/></svg> ' + poweredLabel + '</div>';
+
+    // Fetch seller messages asynchronously using the original deal data
+    fetchSellerMessages(originalDeal || d, msgContainerId);
+  }
+
+  function closeDealExpand() {
+    var existing = document.querySelector('.deal-expand-row');
+    if (existing) existing.remove();
+    expandedRow = null;
+  }
+
+  /* -----------------------------------------------------------------------
+     QUICK SCORE
+     ----------------------------------------------------------------------- */
+  function getScoreInputs() {
+    return {
+      price: parseInt($('scorePrice').value) || 0,
+      year: parseInt($('scoreYear').value) || 0,
+      make: $('scoreMake').value.trim(),
+      model: $('scoreModel').value.trim(),
+      mileage: parseInt($('scoreMileage').value) || null
+    };
+  }
+
+  async function quickScore() {
+    var inputs = getScoreInputs();
+    if (!inputs.price || !inputs.year || !inputs.make || !inputs.model) return;
+
+    $('scoreEmpty').style.display = 'none';
+    $('scoreResult').style.display = 'block';
+    $('scoreResultContent').innerHTML = '<div class="skeleton skeleton-block"></div>';
+
+    try {
+      var data = await api('/api/score', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(inputs)
+      });
+      renderScoreResult(data);
+    } catch(e) {
+      $('scoreResultContent').innerHTML = '<div style="color:var(--rose);font-size:13px;">' + escHtml(e.message) + '</div>';
+    }
+  }
+
+  function renderScoreResult(data) {
+    var qClass = qualityClass(data.quality);
+    var rColor = ratioColor(data.ratio);
+    var market = data.market_estimate ? data.market_estimate.private_party : 0;
+    var profitStr = data.potential_profit >= 0 ? fmtDollar(data.potential_profit) : fmtDollar(data.potential_profit);
+    var profitColor = data.potential_profit >= 0 ? 'emerald' : 'rose';
+
+    $('scoreResultContent').innerHTML = '<div class="score-metrics">'
+      + '<div class="score-metric"><span class="score-metric-label">Quality</span><span class="score-metric-value"><span class="quality-pill ' + qClass + '">' + escHtml(data.quality) + '</span></span></div>'
+      + '<div class="score-metric"><span class="score-metric-label">Ratio</span><span class="score-metric-value" style="color:var(--' + rColor + ')">' + fmtRatio(data.ratio) + '</span></div>'
+      + '<div class="score-metric"><span class="score-metric-label">Market Value</span><span class="score-metric-value">' + fmtDollar(market) + '</span></div>'
+      + '<div class="score-metric"><span class="score-metric-label">Profit</span><span class="score-metric-value" style="color:var(--' + profitColor + ')">' + profitStr + '</span></div>'
+      + '</div>';
+  }
+
+  /* -----------------------------------------------------------------------
+     AI ANALYZE (SINGLE DEAL FROM FORM)
+     ----------------------------------------------------------------------- */
+  async function aiAnalyze() {
+    var inputs = getScoreInputs();
+    if (!inputs.price || !inputs.year || !inputs.make || !inputs.model) return;
+
+    $('scoreEmpty').style.display = 'none';
+    $('aiResult').style.display = 'block';
+    $('aiResultContent').innerHTML = '<div class="skeleton skeleton-line w80"></div><div class="skeleton skeleton-line w60"></div><div class="skeleton skeleton-line w100"></div>';
+
+    // Also score it
+    $('scoreResult').style.display = 'block';
+    $('scoreResultContent').innerHTML = '<div class="skeleton skeleton-block"></div>';
+
+    try {
+      var data = await api('/api/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(inputs)
+      });
+      if (data.deal) renderScoreResult(data.deal);
+      renderAiResult(data.analysis || {});
+    } catch(e) {
+      $('aiResultContent').innerHTML = '<div style="color:var(--rose);font-size:13px;">' + escHtml(e.message) + '</div>';
+    }
+  }
+
+  function renderAiResult(a) {
+    var verdictClass = (a.verdict || '').toLowerCase();
+    if (verdictClass !== 'buy' && verdictClass !== 'pass') verdictClass = 'negotiate';
+
+    var confDots = '';
+    for (var i = 1; i <= 10; i++) {
+      confDots += '<span class="confidence-dot' + (i <= (a.confidence || 0) ? ' filled' : '') + '"></span>';
+    }
+
+    var risksHtml = '';
+    if (a.risks && a.risks.length) {
+      risksHtml = '<ul class="ai-risks">' + a.risks.map(function(r) { return '<li>' + escHtml(r) + '</li>'; }).join('') + '</ul>';
+    }
+
+    var poweredLabel = a.ai_powered ? 'Powered by Claude' : 'Rule-based analysis';
+
+    $('aiResultContent').innerHTML = '<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">'
+      + '<span class="verdict-badge ' + verdictClass + '">' + escHtml(a.verdict || '--') + '</span>'
+      + '<div class="confidence-meter">' + confDots + '</div>'
+      + '</div>'
+      + '<div class="ai-text" style="margin-bottom:8px;">' + escHtml(a.summary || '') + '</div>'
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">'
+      + '<div><span class="deal-expand-field-label">Flip Potential</span><div class="ai-text">' + escHtml(a.flip_potential || '') + '</div></div>'
+      + '<div><span class="deal-expand-field-label">Est. Flip Profit</span><div class="ai-text" style="color:var(--emerald);font-weight:600;">' + fmtDollar(a.estimated_flip_profit) + '</div></div>'
+      + '</div>'
+      + '<div style="margin-bottom:10px;"><span class="deal-expand-field-label">Risks</span>' + (risksHtml || '<div class="ai-text">--</div>') + '</div>'
+      + '<div style="margin-bottom:10px;"><span class="deal-expand-field-label">Negotiation Tip</span><div class="ai-text">' + escHtml(a.negotiation_tip || '') + '</div></div>'
+      + '<div style="margin-bottom:8px;"><span class="deal-expand-field-label">Market Insight</span><div class="ai-text">' + escHtml(a.market_insight || '') + '</div></div>'
+      + '<div class="ai-powered-label"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.5 5.5L19 10l-5.5 1.5L12 17l-1.5-5.5L5 10l5.5-1.5z"/></svg> ' + poweredLabel + '</div>';
+  }
+
+  /* -----------------------------------------------------------------------
+     BATCH AI ANALYSIS (MARKET INSIGHTS)
+     ----------------------------------------------------------------------- */
+  async function refreshBatchAnalysis() {
+    var container = $('batchInsights');
+    container.innerHTML = '<div style="padding:16px;"><div class="skeleton skeleton-line w80"></div><div class="skeleton skeleton-line w60"></div><div class="skeleton skeleton-line w100"></div><div class="skeleton skeleton-line w40"></div></div>';
+
+    try {
+      var data = await api('/api/analyze/batch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: '{}'
+      });
+      renderBatchInsights(data);
+    } catch(e) {
+      container.innerHTML = '<div class="ai-empty">' + escHtml(e.message) + '</div>';
+    }
+  }
+
+  function renderBatchInsights(data) {
+    var a = data.analysis || {};
+    var trendClass = (a.market_trend || 'neutral').toLowerCase();
+    var trendLabel = trendClass.charAt(0).toUpperCase() + trendClass.slice(1) + ' Market';
+    var poweredLabel = a.ai_powered ? 'Powered by Claude' : 'Rule-based';
+
+    $('batchInsights').innerHTML = '<div class="ai-grid">'
+      + '<div class="ai-field full">'
+      + '<span class="ai-field-label">Market Summary</span>'
+      + '<span class="ai-field-value">' + escHtml(a.market_summary || '') + '</span>'
+      + '</div>'
+      + '<div class="ai-field">'
+      + '<span class="ai-field-label">Top Pick</span>'
+      + '<span class="ai-field-value">' + escHtml(a.top_pick || '') + '</span>'
+      + '</div>'
+      + '<div class="ai-field">'
+      + '<span class="ai-field-label">Market Trend</span>'
+      + '<span class="ai-field-value"><span class="trend-badge ' + trendClass + '">' + trendLabel + '</span></span>'
+      + '</div>'
+      + '<div class="ai-field full">'
+      + '<span class="ai-field-label">Strategy</span>'
+      + '<span class="ai-field-value">' + escHtml(a.strategy || '') + '</span>'
+      + '</div>'
+      + '<div class="ai-field">'
+      + '<span class="ai-field-label">Best Value Segment</span>'
+      + '<span class="ai-field-value">' + escHtml(a.best_value_segment || '') + '</span>'
+      + '</div>'
+      + '<div class="ai-field">'
+      + '<span class="ai-field-label">Avoid</span>'
+      + '<span class="ai-field-value">' + escHtml(a.avoid || '') + '</span>'
+      + '</div>'
+      + '</div>'
+      + '<div class="ai-powered-label" style="margin-top:12px;"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.5 5.5L19 10l-5.5 1.5L12 17l-1.5-5.5L5 10l5.5-1.5z"/></svg> ' + poweredLabel + ' -- ' + (data.total_deals || 0) + ' deals analyzed</div>';
+  }
+
+  /* -----------------------------------------------------------------------
+     LOGIN MODAL
+     ----------------------------------------------------------------------- */
+  function openLoginModal() {
+    $('loginModal').classList.add('visible');
+    $('loginStatus').className = 'modal-status';
+    $('loginStatus').innerHTML = 'Click "Start Login" to begin.';
+    $('btnLogin').disabled = false;
+  }
+
+  function closeLoginModal() {
+    $('loginModal').classList.remove('visible');
+    if (loginPollTimer) {
+      clearInterval(loginPollTimer);
+      loginPollTimer = null;
+    }
+  }
+
+  async function startLogin() {
+    $('btnLogin').disabled = true;
+    $('loginStatus').className = 'modal-status';
+    $('loginStatus').innerHTML = '<div class="spinner"></div> Launching browser...';
+
+    try {
+      await api('/api/login', { method: 'POST' });
+      $('loginStatus').innerHTML = '<div class="spinner"></div> Log in to Facebook in the browser window...';
+      pollLoginStatus();
+    } catch(e) {
+      $('loginStatus').className = 'modal-status error';
+      $('loginStatus').innerHTML = 'Failed: ' + escHtml(e.message);
+      $('btnLogin').disabled = false;
+    }
+  }
+
+  function pollLoginStatus() {
+    loginPollTimer = setInterval(async function() {
+      try {
+        var data = await api('/api/login/status');
+        if (data.status === 'completed' && data.session_active) {
+          clearInterval(loginPollTimer);
+          loginPollTimer = null;
+          $('loginStatus').className = 'modal-status success';
+          $('loginStatus').innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Connected successfully!';
+          $('btnLogin').disabled = true;
+          fetchStatus();
+        } else if (data.status === 'failed') {
+          clearInterval(loginPollTimer);
+          loginPollTimer = null;
+          $('loginStatus').className = 'modal-status error';
+          $('loginStatus').innerHTML = 'Login failed. ' + (data.error || 'Try again.');
+          $('btnLogin').disabled = false;
+        }
+      } catch(e) {
+        // continue polling
+      }
+    }, 2000);
+  }
+
+  /* -----------------------------------------------------------------------
+     SAVE TO WATCHLIST
+     ----------------------------------------------------------------------- */
+  async function saveDeal(idx) {
+    var deal = filteredDeals[idx];
+    if (!deal) return;
+
+    var btn = document.getElementById('saveBtn' + idx);
+    if (!btn || btn.classList.contains('saved')) return;
+
+    var raw = deal._raw || {};
+    var payload = {
+      year: deal.year,
+      make: deal.make,
+      model: deal.model,
+      price: deal.price,
+      market_value: deal.market,
+      profit: deal.profit,
+      ratio: deal.ratio,
+      quality: deal.quality,
+      mileage: deal.mileage,
+      location: deal.location,
+      url: deal.url,
+      stage: 'watching',
+      notes: ''
+    };
+
+    try {
+      await api('/api/watchlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      btn.classList.add('saved');
+      btn.disabled = true;
+      btn.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" stroke="currentColor" stroke-width="0"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>';
+
+      // Show tooltip
+      var tooltip = document.createElement('span');
+      tooltip.className = 'save-tooltip';
+      tooltip.textContent = 'Saved!';
+      btn.appendChild(tooltip);
+      setTimeout(function() { if (tooltip.parentNode) tooltip.remove(); }, 1500);
+
+      // Refresh the pipeline
+      refreshWatchlist();
+    } catch(e) {
+      console.warn('Save to watchlist failed:', e);
+      // Brief error flash
+      btn.style.borderColor = 'var(--rose)';
+      btn.style.color = 'var(--rose)';
+      setTimeout(function() {
+        btn.style.borderColor = '';
+        btn.style.color = '';
+      }, 1500);
+    }
+  }
+
+  /* -----------------------------------------------------------------------
+     WATCHLIST / DEAL PIPELINE
+     ----------------------------------------------------------------------- */
+  var watchlistData = [];
+
+  async function refreshWatchlist() {
+    try {
+      var items = await api('/api/watchlist');
+      watchlistData = items || [];
+      renderWatchlist();
+    } catch(e) {
+      console.warn('Watchlist fetch failed:', e);
+    }
+
+    try {
+      var stats = await api('/api/watchlist/stats');
+      renderPipelineStats(stats);
+    } catch(e) {
+      console.warn('Watchlist stats fetch failed:', e);
+    }
+  }
+
+  function renderPipelineStats(stats) {
+    var container = document.getElementById('pipelineStats');
+    if (!container || !stats) return;
+
+    container.innerHTML = ''
+      + '<div class="pipeline-stat"><span class="p-val">' + (stats.watching || 0) + '</span> Watching</div>'
+      + '<div class="pipeline-stat"><span class="p-val">' + (stats.in_progress || 0) + '</span> In Progress</div>'
+      + '<div class="pipeline-stat"><span class="p-val">' + (stats.purchased || 0) + '</span> Purchased</div>'
+      + '<div class="pipeline-stat"><span class="p-val" style="color:var(--amber);">' + fmtDollar(stats.total_invested || 0) + '</span> Invested</div>'
+      + '<div class="pipeline-stat"><span class="p-val" style="color:var(--emerald);">' + fmtDollar(stats.total_profit || 0) + '</span> Profit</div>';
+  }
+
+  function renderWatchlist() {
+    var tbody = document.getElementById('watchlistBody');
+    if (!tbody) return;
+
+    if (!watchlistData || watchlistData.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="8"><div class="watchlist-empty">No deals in pipeline yet. Save deals from the table above.</div></td></tr>';
+      return;
+    }
+
+    var stages = ['watching', 'contacted', 'negotiating', 'purchased', 'sold', 'passed'];
+
+    tbody.innerHTML = watchlistData.map(function(item, i) {
+      var stageClass = (item.stage || 'watching').toLowerCase();
+      var stageLabel = stageClass.charAt(0).toUpperCase() + stageClass.slice(1);
+
+      var optionsHtml = stages.map(function(s) {
+        var sel = s === stageClass ? ' selected' : '';
+        return '<option value="' + s + '"' + sel + '>' + s.charAt(0).toUpperCase() + s.slice(1) + '</option>';
+      }).join('');
+
+      return '<tr>'
+        + '<td>' + (item.year || '--') + '</td>'
+        + '<td>' + escHtml(item.make || '') + '</td>'
+        + '<td>' + escHtml(item.model || '') + '</td>'
+        + '<td>' + fmtDollar(item.price) + '</td>'
+        + '<td><span class="stage-pill ' + stageClass + '">' + stageLabel + '</span></td>'
+        + '<td>' + escHtml(item.location || '--') + '</td>'
+        + '<td><span class="watchlist-notes" title="' + escHtml(item.notes || '') + '">' + escHtml(item.notes || '--') + '</span></td>'
+        + '<td><div style="display:flex;align-items:center;gap:6px;">'
+        + '<select class="stage-select" onchange="window.updateWatchlistStage(' + (item.id || i) + ', this.value)" aria-label="Change stage">' + optionsHtml + '</select>'
+        + '<button class="btn-delete-watch" onclick="window.deleteWatchlistItem(' + (item.id || i) + ')" aria-label="Remove from pipeline" title="Remove">&times;</button>'
+        + '</div></td>'
+        + '</tr>';
+    }).join('');
+  }
+
+  async function updateWatchlistStage(id, stage) {
+    try {
+      await api('/api/watchlist/' + id, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ stage: stage })
+      });
+      refreshWatchlist();
+    } catch(e) {
+      console.warn('Update watchlist stage failed:', e);
+    }
+  }
+
+  async function deleteWatchlistItem(id) {
+    try {
+      await api('/api/watchlist/' + id, { method: 'DELETE' });
+      refreshWatchlist();
+    } catch(e) {
+      console.warn('Delete watchlist item failed:', e);
+    }
+  }
+
+  /* -----------------------------------------------------------------------
+     SELLER MESSAGES
+     ----------------------------------------------------------------------- */
+  async function fetchSellerMessages(dealData, containerId) {
+    var container = document.getElementById(containerId);
+    if (!container) return;
+
+    var price = dealData.price || 0;
+    var year = dealData.year || 0;
+    var make = dealData.make || '';
+    var model = dealData.model || '';
+    var mileage = dealData.mileage || null;
+
+    // If dealData came from listing, try to resolve from nested fields
+    if (dealData.listing) {
+      price = dealData.listing.price || price;
+      year = dealData.listing.year || year;
+      make = dealData.listing.make || make;
+      model = dealData.listing.model || model;
+      mileage = dealData.listing.mileage || mileage;
+    }
+
+    try {
+      var data = await api('/api/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ price: price, year: year, make: make, model: model, mileage: mileage })
+      });
+
+      var messages = data.messages || [];
+      if (messages.length === 0) {
+        container.innerHTML = '<div class="messages-section-title">'
+          + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>'
+          + ' Seller Messages</div>'
+          + '<div style="color:var(--text-muted);font-size:13px;">No messages generated.</div>';
+        return;
+      }
+
+      var titles = ['Eager Buyer', 'Value Negotiator', 'Quick Cash'];
+      // Store messages in a global array for safe access from onclick
+      if (!window._sellerMessages) window._sellerMessages = {};
+      window._sellerMessages[containerId] = messages;
+
+      var cardsHtml = messages.map(function(msg, i) {
+        var title = titles[i] || ('Message ' + (i + 1));
+        var uniqueCopyId = containerId + '_copy_' + i;
+        return '<div class="message-card">'
+          + '<div class="message-card-title">' + escHtml(title) + '</div>'
+          + '<div class="message-card-text">' + escHtml(msg) + '</div>'
+          + '<button class="btn-copy-msg" id="' + uniqueCopyId + '" onclick="event.stopPropagation();window.copyMessageByRef(\'' + containerId + '\',' + i + ',\'' + uniqueCopyId + '\')" aria-label="Copy message">'
+          + '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>'
+          + ' Copy</button>'
+          + '</div>';
+      }).join('');
+
+      container.innerHTML = '<div class="messages-section-title">'
+        + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>'
+        + ' Seller Messages</div>'
+        + '<div class="messages-grid">' + cardsHtml + '</div>';
+    } catch(e) {
+      container.innerHTML = '<div class="messages-section-title">'
+        + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>'
+        + ' Seller Messages</div>'
+        + '<div style="color:var(--text-muted);font-size:13px;">Could not generate messages.</div>';
+    }
+  }
+
+  function copyMessageByRef(containerId, msgIndex, btnId) {
+    var msgs = (window._sellerMessages || {})[containerId];
+    if (!msgs || !msgs[msgIndex]) return;
+    copyMessage(btnId, msgs[msgIndex]);
+  }
+
+  function copyMessage(btnId, text) {
+    var btn = document.getElementById(btnId);
+    if (!btn) return;
+
+    navigator.clipboard.writeText(text).then(function() {
+      btn.classList.add('copied');
+      btn.innerHTML = '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Copied!';
+      setTimeout(function() {
+        btn.classList.remove('copied');
+        btn.innerHTML = '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy';
+      }, 2000);
+    }).catch(function() {
+      // Fallback: select text in a temp textarea
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      ta.remove();
+
+      btn.classList.add('copied');
+      btn.innerHTML = '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Copied!';
+      setTimeout(function() {
+        btn.classList.remove('copied');
+        btn.innerHTML = '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy';
+      }, 2000);
+    });
+  }
+
+  /* -----------------------------------------------------------------------
+     EXPORT DROPDOWN
+     ----------------------------------------------------------------------- */
+  var exportOpen = false;
+
+  function toggleExportDropdown(e) {
+    e.stopPropagation();
+    var dropdown = document.getElementById('exportDropdown');
+    if (!dropdown) return;
+    exportOpen = !exportOpen;
+    dropdown.style.display = exportOpen ? 'block' : 'none';
+  }
+
+  // Close export dropdown when clicking outside
+  document.addEventListener('click', function(e) {
+    var wrap = document.getElementById('exportWrap');
+    if (wrap && !wrap.contains(e.target)) {
+      exportOpen = false;
+      var dropdown = document.getElementById('exportDropdown');
+      if (dropdown) dropdown.style.display = 'none';
+    }
+  });
+
+  /* -----------------------------------------------------------------------
+     TABLE HEADER SORT
+     ----------------------------------------------------------------------- */
+  document.querySelector('.deals-table thead').addEventListener('click', handleSort);
+
+  // Close modal on overlay click
+  $('loginModal').addEventListener('click', function(e) {
+    if (e.target === $('loginModal')) closeLoginModal();
+  });
+
+  // Close modal on Escape
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      closeLoginModal();
+      closeDealExpand();
+    }
+  });
+
+  /* -----------------------------------------------------------------------
+     EXPOSE TO WINDOW (ONCLICK HANDLERS)
+     ----------------------------------------------------------------------- */
+  window.startSearch = startSearch;
+  window.quickScore = quickScore;
+  window.aiAnalyze = aiAnalyze;
+  window.refreshBatchAnalysis = refreshBatchAnalysis;
+  window.openLoginModal = openLoginModal;
+  window.closeLoginModal = closeLoginModal;
+  window.startLogin = startLogin;
+  window.loadRun = loadRun;
+  window.filterDeals = filterDeals;
+  window.toggleDealExpand = toggleDealExpand;
+  window.closeDealExpand = closeDealExpand;
+  window.saveDeal = saveDeal;
+  window.refreshWatchlist = refreshWatchlist;
+  window.updateWatchlistStage = updateWatchlistStage;
+  window.deleteWatchlistItem = deleteWatchlistItem;
+  window.copyMessage = copyMessage;
+  window.copyMessageByRef = copyMessageByRef;
+  window.toggleExportDropdown = toggleExportDropdown;
+  window.setCity = function(city) {
+    $('searchLocation').value = city;
+  };
+
+  /* -----------------------------------------------------------------------
+     INIT
+     ----------------------------------------------------------------------- */
+  fetchStatus();
+  fetchStats();
+  fetchHistory();
+  refreshWatchlist();
+  setInterval(fetchStatus, 15000);
+
+})();
+</script>
+</body>
+</html>
