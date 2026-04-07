@@ -24,6 +24,9 @@ from .schemas import (
     SearchRequest, MultiCitySearchRequest, SearchResultResponse, DealResponse,
     ListingResponse, MarketEstimateResponse, FlipEstimateResponse,
     SearchRunResponse, QuickScoreRequest, StatsResponse,
+    WatchlistAddRequest, WatchlistUpdateRequest, WatchlistFinancialsRequest,
+    WatchlistItemResponse, WatchlistStatsResponse,
+    MessageGenerateRequest, MessageGenerateResponse,
 )
 
 logger = logging.getLogger(__name__)
@@ -473,6 +476,198 @@ async def get_stats():
         best_deal_ratio=round(best_ratio, 3),
         top_makes=top_makes,
         recent_excellent_deals=excellent_responses,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Watchlist / Deal Pipeline
+# ---------------------------------------------------------------------------
+
+VALID_STAGES = {"watching", "contacted", "inspecting", "negotiating", "purchased", "listed", "sold", "passed"}
+
+
+@app.post("/api/watchlist", response_model=WatchlistItemResponse)
+async def add_to_watchlist(request: WatchlistAddRequest):
+    """Add a deal to the watchlist."""
+    wid = storage.add_to_watchlist(
+        url=request.url,
+        price=request.price,
+        year=request.year,
+        make=request.make,
+        model=request.model,
+        mileage=request.mileage,
+        location=request.location,
+    )
+    items = storage.get_watchlist()
+    item = next((i for i in items if i["id"] == wid), None)
+    if not item:
+        raise HTTPException(status_code=500, detail="Failed to retrieve watchlist item")
+    return WatchlistItemResponse(**item)
+
+
+@app.get("/api/watchlist/stats", response_model=WatchlistStatsResponse)
+async def get_watchlist_stats():
+    """Get pipeline statistics."""
+    stats = storage.get_watchlist_stats()
+    return WatchlistStatsResponse(**stats)
+
+
+@app.get("/api/watchlist", response_model=list[WatchlistItemResponse])
+async def get_watchlist(stage: Optional[str] = Query(default=None)):
+    """Get all watchlist items, optionally filtered by stage."""
+    if stage and stage not in VALID_STAGES:
+        raise HTTPException(status_code=400, detail=f"Invalid stage. Must be one of: {', '.join(sorted(VALID_STAGES))}")
+    items = storage.get_watchlist(stage=stage)
+    return [WatchlistItemResponse(**i) for i in items]
+
+
+@app.put("/api/watchlist/{watchlist_id}", response_model=WatchlistItemResponse)
+async def update_watchlist_item(watchlist_id: int, request: WatchlistUpdateRequest):
+    """Update stage and/or notes for a watchlist item."""
+    if request.stage and request.stage not in VALID_STAGES:
+        raise HTTPException(status_code=400, detail=f"Invalid stage. Must be one of: {', '.join(sorted(VALID_STAGES))}")
+    if request.stage is not None or request.notes is not None:
+        # Get existing item to preserve current stage if not being updated
+        existing = storage.get_watchlist()
+        existing_item = next((i for i in existing if i["id"] == watchlist_id), None)
+        if not existing_item:
+            raise HTTPException(status_code=404, detail="Watchlist item not found")
+        stage = request.stage if request.stage is not None else existing_item["stage"]
+        notes = request.notes if request.notes is not None else existing_item.get("notes", "")
+        storage.update_watchlist_stage(watchlist_id, stage, notes)
+    items = storage.get_watchlist()
+    item = next((i for i in items if i["id"] == watchlist_id), None)
+    if not item:
+        raise HTTPException(status_code=404, detail="Watchlist item not found")
+    return WatchlistItemResponse(**item)
+
+
+@app.put("/api/watchlist/{watchlist_id}/financials", response_model=WatchlistItemResponse)
+async def update_watchlist_financials(watchlist_id: int, request: WatchlistFinancialsRequest):
+    """Update purchase_price, repair_cost, and/or sell_price."""
+    storage.update_watchlist_financials(
+        watchlist_id,
+        purchase_price=request.purchase_price,
+        repair_cost=request.repair_cost,
+        sell_price=request.sell_price,
+    )
+    items = storage.get_watchlist()
+    item = next((i for i in items if i["id"] == watchlist_id), None)
+    if not item:
+        raise HTTPException(status_code=404, detail="Watchlist item not found")
+    return WatchlistItemResponse(**item)
+
+
+@app.delete("/api/watchlist/{watchlist_id}")
+async def remove_from_watchlist(watchlist_id: int):
+    """Remove a deal from the watchlist."""
+    storage.remove_from_watchlist(watchlist_id)
+    return {"detail": "removed", "id": watchlist_id}
+
+
+# ---------------------------------------------------------------------------
+# Seller Messages
+# ---------------------------------------------------------------------------
+
+@app.post("/api/messages", response_model=MessageGenerateResponse)
+async def generate_messages(request: MessageGenerateRequest):
+    """Generate seller message templates for a listing."""
+    listing = CarListing(
+        price=request.price,
+        year=request.year,
+        make=request.make,
+        model=request.model,
+        mileage=request.mileage,
+    )
+    score = scorer.score(listing)
+    result = await asyncio.to_thread(ai_analyzer.generate_seller_message, score)
+    return MessageGenerateResponse(**result)
+
+
+# ---------------------------------------------------------------------------
+# Export Endpoints
+# ---------------------------------------------------------------------------
+
+OUTPUT_DIR = Path(__file__).parent.parent / "output"
+
+
+@app.get("/api/export/csv")
+async def export_csv_endpoint(run_id: Optional[int] = Query(default=None)):
+    """Download CSV file for a specific run (or latest if no run_id)."""
+    target_run_id = run_id
+    if target_run_id is None:
+        runs = storage.get_recent_runs(1)
+        if not runs:
+            raise HTTPException(status_code=404, detail="No search runs found")
+        target_run_id = runs[0]["id"]
+
+    rows = storage.get_run_scores(target_run_id)
+    if not rows:
+        raise HTTPException(status_code=404, detail=f"No data for run {target_run_id}")
+
+    # Build CSV in output dir
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    import csv
+    filename = f"run_{target_run_id}.csv"
+    filepath = OUTPUT_DIR / filename
+
+    with open(filepath, "w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow([
+            "Deal_Ratio", "Quality", "Condition", "Potential_Profit",
+            "Price", "Year", "Make", "Model", "Mileage", "Location",
+            "Market_TradeIn", "Market_PrivateParty", "Market_DealerRetail",
+            "Pricing_Source", "Facebook_URL", "Notes",
+        ])
+        for r in rows:
+            writer.writerow([
+                r.get("ratio", ""), r.get("quality", ""), r.get("condition", ""),
+                r.get("potential_profit", ""),
+                r.get("price", ""), r.get("year", ""), r.get("make", ""), r.get("model", ""),
+                r.get("mileage", ""), r.get("location", ""),
+                r.get("trade_in", ""), r.get("private_party", ""), r.get("dealer_retail", ""),
+                r.get("pricing_source", ""), r.get("url", ""), r.get("notes", ""),
+            ])
+
+    return FileResponse(
+        path=str(filepath),
+        media_type="text/csv",
+        filename=filename,
+    )
+
+
+@app.get("/api/export/json")
+async def export_json_endpoint(run_id: Optional[int] = Query(default=None)):
+    """Download JSON file for a specific run (or latest if no run_id)."""
+    target_run_id = run_id
+    if target_run_id is None:
+        runs = storage.get_recent_runs(1)
+        if not runs:
+            raise HTTPException(status_code=404, detail="No search runs found")
+        target_run_id = runs[0]["id"]
+
+    rows = storage.get_run_scores(target_run_id)
+    if not rows:
+        raise HTTPException(status_code=404, detail=f"No data for run {target_run_id}")
+
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    filename = f"run_{target_run_id}.json"
+    filepath = OUTPUT_DIR / filename
+
+    data = {
+        "run_id": target_run_id,
+        "exported_at": datetime.now().isoformat(),
+        "total_deals": len(rows),
+        "deals": rows,
+    }
+
+    with open(filepath, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2)
+
+    return FileResponse(
+        path=str(filepath),
+        media_type="application/json",
+        filename=filename,
     )
 
 

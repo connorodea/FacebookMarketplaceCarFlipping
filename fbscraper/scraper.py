@@ -65,11 +65,32 @@ class FacebookScraper:
         if self._progress_callback:
             self._progress_callback(message, percent)
 
+    def _cleanup_stale_lock(self) -> None:
+        """Check for and remove stale Playwright lock files in PROFILE_DIR."""
+        if not PROFILE_DIR.exists():
+            return
+        for lock_file in PROFILE_DIR.glob("*.lock"):
+            try:
+                lock_file.unlink()
+                logger.info("Removed stale lock file: %s", lock_file)
+            except OSError as e:
+                logger.debug("Could not remove lock file %s: %s", lock_file, e)
+        # Also check for SingletonLock (Chromium-specific)
+        singleton_lock = PROFILE_DIR / "SingletonLock"
+        if singleton_lock.exists():
+            try:
+                singleton_lock.unlink()
+                logger.info("Removed stale SingletonLock")
+            except OSError as e:
+                logger.debug("Could not remove SingletonLock: %s", e)
+
     @contextmanager
     def _browser_context(self, timeout: int = 45):
         """Create a persistent Playwright browser context that retains login state."""
         if not PLAYWRIGHT_AVAILABLE:
             raise RuntimeError("Playwright is not installed. Run: pip install playwright && playwright install chromium")
+
+        self._cleanup_stale_lock()
 
         playwright = None
         context = None
@@ -218,66 +239,85 @@ class FacebookScraper:
         """Scrape Facebook Marketplace for car listings.
 
         Returns a list of CarListing objects. Returns empty list on failure.
+        Retries up to 2 times on failure with a 3-second delay.
         """
         if not PLAYWRIGHT_AVAILABLE:
             logger.error("Playwright is not installed")
             return []
 
         url = self.config.build_url()
-        self._progress(f"Scraping: {url[:80]}...", 5)
+        max_retries = 2
+        last_error: Optional[Exception] = None
 
-        try:
-            with self._browser_context() as context:
-                page = context.pages[0] if context.pages else context.new_page()
-                page.set_default_timeout(30000)
+        for attempt in range(1 + max_retries):
+            if attempt > 0:
+                logger.info("Retry attempt %d/%d after 3s delay...", attempt, max_retries)
+                self._progress(f"Retrying ({attempt}/{max_retries})...", 2)
+                time.sleep(3)
 
-                # Navigate to marketplace
-                self._progress("Loading Facebook Marketplace...", 10)
-                response = page.goto(url, wait_until="domcontentloaded", timeout=30000)
+            self._progress(f"Scraping: {url[:80]}...", 5)
 
-                if not response:
-                    self._progress("No response from Facebook", 100)
-                    return []
+            try:
+                with self._browser_context() as context:
+                    page = context.pages[0] if context.pages else context.new_page()
+                    page.set_default_timeout(30000)
 
-                if response.status != 200:
-                    self._progress(f"HTTP {response.status} from Facebook", 100)
-                    return []
+                    # Navigate to marketplace
+                    self._progress("Loading Facebook Marketplace...", 10)
+                    response = page.goto(url, wait_until="domcontentloaded", timeout=30000)
 
-                self._progress("Page loaded, checking for login requirement...", 15)
-                time.sleep(3)  # Wait for JS rendering
+                    if not response:
+                        self._progress("No response from Facebook", 100)
+                        return []
 
-                # Check if login is required
-                if self._is_login_required(page):
-                    if has_valid_session():
-                        self._progress("Session expired. Please run --login again.", 100)
+                    if response.status != 200:
+                        self._progress(f"HTTP {response.status} from Facebook", 100)
+                        return []
+
+                    self._progress("Page loaded, checking for login requirement...", 15)
+                    time.sleep(3)  # Wait for JS rendering
+
+                    # Check if login is required
+                    if self._is_login_required(page):
+                        if has_valid_session():
+                            self._progress("Session expired. Please run --login again.", 100)
+                        else:
+                            self._progress("Facebook requires login. Run with --login first.", 100)
+                        return []
+
+                    # Scroll and collect listing hrefs
+                    self._progress("Scrolling to load listings...", 20)
+                    hrefs = self._collect_listing_hrefs(page)
+
+                    if not hrefs:
+                        self._progress("No listings found on page", 100)
+                        return []
+
+                    self._progress(f"Found {len(hrefs)} listing links, extracting data...", 60)
+
+                    # Extract data from each listing
+                    listings = self._extract_listings(page, hrefs)
+
+                    if listings:
+                        self._progress(f"Successfully extracted {len(listings)} car listings", 95)
                     else:
-                        self._progress("Facebook requires login. Run with --login first.", 100)
-                    return []
+                        self._progress("Could not extract data from listings", 100)
 
-                # Scroll and collect listing hrefs
-                self._progress("Scrolling to load listings...", 20)
-                hrefs = self._collect_listing_hrefs(page)
+                    return listings
 
-                if not hrefs:
-                    self._progress("No listings found on page", 100)
-                    return []
+            except Exception as e:
+                last_error = e
+                error_msg = str(e).lower()
+                logger.error("Scraping failed (attempt %d): %s", attempt + 1, e)
 
-                self._progress(f"Found {len(hrefs)} listing links, extracting data...", 60)
+                # If it's a lock error, clean up locks before retry
+                if "lock" in error_msg or "single" in error_msg:
+                    logger.info("Detected lock error, cleaning up stale locks...")
+                    self._cleanup_stale_lock()
 
-                # Extract data from each listing
-                listings = self._extract_listings(page, hrefs)
-
-                if listings:
-                    self._progress(f"Successfully extracted {len(listings)} car listings", 95)
-                else:
-                    self._progress("Could not extract data from listings", 100)
-
-                return listings
-
-        except Exception as e:
-            logger.error("Scraping failed: %s", e)
-            self._progress(f"Scraping error: {e}", 100)
-            return []
+        # All retries exhausted
+        self._progress(f"Scraping error after {max_retries + 1} attempts: {last_error}", 100)
+        return []
 
     def _is_login_required(self, page: Page) -> bool:
         """Check if Facebook is showing a login page."""

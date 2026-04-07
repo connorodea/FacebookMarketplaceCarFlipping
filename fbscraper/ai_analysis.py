@@ -147,6 +147,84 @@ Respond in this exact JSON format (no markdown, just raw JSON):
             logger.warning("AI batch analysis failed: %s", e)
             return self._fallback_batch_analysis(scores)
 
+    def generate_seller_message(self, score: DealScore) -> dict:
+        """Generate 3 seller message templates for reaching out about a deal."""
+        listing = score.listing
+        market = score.market_estimate
+
+        if self._client:
+            prompt = f"""You are helping a car flipper write short messages to Facebook Marketplace sellers.
+
+Generate 3 different buyer messages for this listing:
+- {listing.year} {listing.make} {listing.model}
+- Listed at ${listing.price:,}
+- {f'{listing.mileage:,} miles' if listing.mileage else 'Unknown mileage'}
+
+Message types:
+1. "Eager buyer" — friendly, shows genuine interest, asks to see the car today/soon
+2. "Value negotiator" — references market data to justify a lower offer (market value ~${market.private_party:,})
+3. "Quick cash" — emphasizes cash in hand and fast closing
+
+Each message should be 2-3 sentences max. Sound natural, not robotic.
+
+Respond in this exact JSON format (no markdown, just raw JSON):
+{{
+  "messages": [
+    {{"type": "eager", "text": "..."}},
+    {{"type": "negotiator", "text": "..."}},
+    {{"type": "cash", "text": "..."}}
+  ]
+}}"""
+
+            try:
+                response = self._client.messages.create(
+                    model="claude-sonnet-4-20250514",
+                    max_tokens=400,
+                    messages=[{"role": "user", "content": prompt}],
+                )
+                text = response.content[0].text.strip()
+                if text.startswith("```"):
+                    text = text.split("```")[1]
+                    if text.startswith("json"):
+                        text = text[4:]
+                result = json.loads(text)
+                result["ai_powered"] = True
+                return result
+            except Exception as e:
+                logger.warning("AI message generation failed: %s", e)
+
+        # Fallback: rule-based templates
+        car = f"{listing.year} {listing.make} {listing.model}"
+        offer_price = int(listing.price * 0.85)
+
+        return {
+            "messages": [
+                {
+                    "type": "eager",
+                    "text": (
+                        f"Hi! I'm really interested in your {car}. "
+                        f"Is it still available? I'd love to come see it today if possible."
+                    ),
+                },
+                {
+                    "type": "negotiator",
+                    "text": (
+                        f"Hi, I'm interested in the {car}. "
+                        f"Based on market comps I'm seeing similar vehicles around ${market.private_party:,}. "
+                        f"Would you consider ${offer_price:,}?"
+                    ),
+                },
+                {
+                    "type": "cash",
+                    "text": (
+                        f"Hi, I'm a cash buyer looking at your {car}. "
+                        f"I can bring ${offer_price:,} cash and pick it up today if the price works for you."
+                    ),
+                },
+            ],
+            "ai_powered": False,
+        }
+
     def _fallback_analysis(self, score: DealScore) -> dict:
         """Rule-based analysis when AI is unavailable."""
         listing = score.listing

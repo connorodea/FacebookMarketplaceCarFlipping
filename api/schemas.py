@@ -112,3 +112,79 @@ class StatsResponse(BaseModel):
     best_deal_ratio: float
     top_makes: list[dict]
     recent_excellent_deals: list[DealResponse]
+
+
+# ---------------------------------------------------------------------------
+# Watchlist / Deal Pipeline
+# ---------------------------------------------------------------------------
+
+class WatchlistAddRequest(BaseModel):
+    url: str = Field(description="Facebook Marketplace listing URL")
+    price: int = Field(ge=0)
+    year: int = Field(ge=1980, le=2027)
+    make: str
+    model: str
+    mileage: Optional[int] = Field(default=None, ge=0)
+    location: str = Field(default="")
+
+
+class WatchlistUpdateRequest(BaseModel):
+    stage: Optional[str] = Field(
+        default=None,
+        description="Pipeline stage: watching, contacted, inspecting, negotiating, purchased, listed, sold, passed",
+    )
+    notes: Optional[str] = Field(default=None)
+
+
+class WatchlistFinancialsRequest(BaseModel):
+    purchase_price: Optional[int] = Field(default=None, ge=0)
+    repair_cost: Optional[int] = Field(default=None, ge=0)
+    sell_price: Optional[int] = Field(default=None, ge=0)
+
+
+class WatchlistItemResponse(BaseModel):
+    id: int
+    listing_url: str
+    price: Optional[int] = None
+    year: Optional[int] = None
+    make: Optional[str] = None
+    model: Optional[str] = None
+    mileage: Optional[int] = None
+    location: Optional[str] = None
+    stage: str = "watching"
+    notes: str = ""
+    added_at: str
+    updated_at: Optional[str] = None
+    purchase_price: Optional[int] = None
+    repair_cost: Optional[int] = None
+    sell_price: Optional[int] = None
+
+
+class WatchlistStatsResponse(BaseModel):
+    total: int
+    by_stage: dict[str, int]
+    total_invested: int
+    total_revenue: int
+    total_profit: int
+
+
+# ---------------------------------------------------------------------------
+# Seller Messages
+# ---------------------------------------------------------------------------
+
+class MessageGenerateRequest(BaseModel):
+    price: int = Field(ge=1, description="Listing price")
+    year: int = Field(ge=1980, le=2027)
+    make: str
+    model: str
+    mileage: Optional[int] = Field(default=None, ge=0)
+
+
+class SellerMessage(BaseModel):
+    type: str
+    text: str
+
+
+class MessageGenerateResponse(BaseModel):
+    messages: list[SellerMessage]
+    ai_powered: bool
