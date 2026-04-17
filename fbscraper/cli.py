@@ -11,6 +11,7 @@ from .pricing import PricingEngine
 from .scorer import DealScorer
 from .scraper import FacebookScraper, has_valid_session, is_playwright_available
 from .storage import Storage, export_csv, export_json
+from .web_pricing import WebPricingEngine
 
 logger = logging.getLogger(__name__)
 
@@ -62,6 +63,12 @@ def show_welcome() -> None:
     else:
         content += "  [yellow]Facebook Session[/yellow] - Not logged in\n"
 
+    web_pricing = WebPricingEngine()
+    if web_pricing.is_available():
+        content += "  [green]Live Pricing[/green] - KBB/Edmunds via web search\n"
+    else:
+        content += "  [yellow]Live Pricing[/yellow] - Set ANTHROPIC_API_KEY for real-time values\n"
+
     content += "  [green]Rich CLI[/green] - Enhanced interface active"
 
     panel = Panel(
@@ -79,15 +86,16 @@ def show_menu() -> str:
     if not RICH_AVAILABLE:
         print("\n--- MAIN MENU ---")
         print("1. Search Cars")
-        print("2. Configure Settings")
-        print("3. Login to Facebook")
-        print("4. View History")
-        print("5. Help")
-        print("6. Exit")
-        choice = input("Select (1-6): ").strip()
+        print("2. Value a Car (KBB Lookup)")
+        print("3. Configure Settings")
+        print("4. Login to Facebook")
+        print("5. View History")
+        print("6. Help")
+        print("7. Exit")
+        choice = input("Select (1-7): ").strip()
         return {
-            "1": "search", "2": "configure", "3": "login",
-            "4": "history", "5": "help", "6": "exit",
+            "1": "search", "2": "value", "3": "configure", "4": "login",
+            "5": "history", "6": "help", "7": "exit",
         }.get(choice, "invalid")
 
     console.print(Rule("[bold blue]Main Menu[/bold blue]"))
@@ -98,18 +106,19 @@ def show_menu() -> str:
     menu.add_column(style="dim")
 
     menu.add_row("1.", "search", "Search Facebook Marketplace for car deals")
-    menu.add_row("2.", "configure", "Modify search preferences")
-    menu.add_row("3.", "login", "Log in to Facebook (save session)")
-    menu.add_row("4.", "history", "View past search results")
-    menu.add_row("5.", "help", "Show help and usage info")
-    menu.add_row("6.", "exit", "Exit the application")
+    menu.add_row("2.", "value", "Look up KBB/Edmunds value for any car")
+    menu.add_row("3.", "configure", "Modify search preferences")
+    menu.add_row("4.", "login", "Log in to Facebook (save session)")
+    menu.add_row("5.", "history", "View past search results")
+    menu.add_row("6.", "help", "Show help and usage info")
+    menu.add_row("7.", "exit", "Exit the application")
 
     console.print(menu)
     console.print()
 
     return Prompt.ask(
         "[bold cyan]Select an option[/bold cyan]",
-        choices=["search", "configure", "login", "history", "help", "exit"],
+        choices=["search", "value", "configure", "login", "history", "help", "exit"],
         default="search",
     )
 
@@ -470,36 +479,305 @@ def show_help() -> None:
         print("\n=== Help ===")
         print("1. Login: Log in to Facebook first (saves session for scraping)")
         print("2. Search: Configure filters and scrape Facebook Marketplace")
-        print("3. Results are saved to output/ as CSV and JSON")
-        print("4. Historical data stored in SQLite for trend analysis")
+        print("3. Value: Look up real-time KBB/Edmunds values for any car")
+        print("4. Results are saved to output/ as CSV and JSON")
+        print("5. Historical data stored in SQLite for trend analysis")
         print("\nCLI usage:")
-        print("  python -m fbscraper            # Interactive mode")
-        print("  python -m fbscraper --login     # Login only")
-        print("  python -m fbscraper --search    # Non-interactive search")
+        print("  python -m fbscraper                              # Interactive mode")
+        print("  python -m fbscraper value 2019 Toyota Camry      # Quick KBB lookup")
+        print("  python -m fbscraper search                       # Non-interactive search")
+        print("  python -m fbscraper login                        # Login to Facebook")
         return
 
     help_text = """[bold]How to Use:[/bold]
 
-[cyan]1. Login[/cyan] - Log in to Facebook first. A browser window opens where you
-   log in manually. Your session is saved for future headless scraping.
+[cyan]1. Value[/cyan] - Look up real-time KBB & Edmunds values for any car.
+   Uses Claude web search to fetch current market data.
 
 [cyan]2. Search[/cyan] - Configure price, year, mileage, make/model filters.
    The scraper loads Facebook Marketplace and scrolls to collect listings.
 
-[cyan]3. Analysis[/cyan] - Each listing is compared against independent market
+[cyan]3. Login[/cyan] - Log in to Facebook first. A browser window opens where you
+   log in manually. Your session is saved for future headless scraping.
+
+[cyan]4. Analysis[/cyan] - Each listing is compared against independent market
    values to calculate a deal ratio and potential profit.
 
-[cyan]4. Results[/cyan] - Deals are saved to output/ as CSV and JSON.
+[cyan]5. Results[/cyan] - Deals are saved to output/ as CSV and JSON.
    Historical data is stored in SQLite for trend analysis.
 
-[bold]CLI Arguments:[/bold]
-  python -m fbscraper              Interactive mode
-  python -m fbscraper --login      Login to Facebook only
-  python -m fbscraper --search     Non-interactive search (uses Preferences.csv)
-  python -m fbscraper --export-json  Export last results as JSON
+[bold]CLI Commands:[/bold]
+  python -m fbscraper                                Interactive mode
+  python -m fbscraper value 2019 Toyota Camry        Quick KBB lookup
+  python -m fbscraper value 2019 Toyota Camry -mi 50000  With mileage
+  python -m fbscraper search                         Search with saved prefs
+  python -m fbscraper search --location chicago      Override location
+  python -m fbscraper login                          Login to Facebook
+  python -m fbscraper history                        View past searches
+  python -m fbscraper export --format json           Export results
 """
 
     console.print(Panel(help_text, title="[bold]Help[/bold]", border_style="blue"))
+
+
+# ---------------------------------------------------------------------------
+# Value Lookup (KBB / Edmunds via Web Search)
+# ---------------------------------------------------------------------------
+
+def run_value_lookup(
+    year: Optional[int] = None,
+    make: Optional[str] = None,
+    model: Optional[str] = None,
+    mileage: Optional[int] = None,
+    trim: Optional[str] = None,
+    condition: Optional[str] = None,
+    interactive: bool = True,
+) -> None:
+    """Look up real-time KBB/Edmunds market value for a vehicle."""
+    web_pricing = WebPricingEngine()
+
+    if not web_pricing.is_available():
+        print_msg(
+            "[red]Live pricing requires ANTHROPIC_API_KEY.[/red]\n"
+            "[dim]Set it in your environment: export ANTHROPIC_API_KEY=your_key[/dim]"
+            if RICH_AVAILABLE
+            else "Live pricing requires ANTHROPIC_API_KEY.\nSet: export ANTHROPIC_API_KEY=your_key"
+        )
+        return
+
+    # Interactive prompts if values not provided
+    if interactive and year is None:
+        if RICH_AVAILABLE:
+            console.print(Rule("[bold green]Car Value Lookup[/bold green]"))
+            console.print("[dim]Look up real-time KBB & Edmunds values via web search[/dim]\n")
+            year = IntPrompt.ask("Year", default=2020)
+            make = Prompt.ask("Make (e.g. Toyota)")
+            model = Prompt.ask("Model (e.g. Camry)")
+            trim_input = Prompt.ask("Trim [dim](optional, press Enter to skip)[/dim]", default="")
+            trim = trim_input if trim_input else None
+            mileage_input = Prompt.ask("Mileage [dim](optional)[/dim]", default="")
+            mileage = int(mileage_input) if mileage_input else None
+            condition = Prompt.ask(
+                "Condition",
+                choices=["", "excellent", "good", "fair", "poor"],
+                default="good",
+            )
+            if not condition:
+                condition = None
+        else:
+            year = int(input("Year: ").strip())
+            make = input("Make: ").strip()
+            model = input("Model: ").strip()
+            trim = input("Trim (optional): ").strip() or None
+            mil = input("Mileage (optional): ").strip()
+            mileage = int(mil) if mil else None
+            cond = input("Condition (excellent/good/fair/poor): ").strip()
+            condition = cond if cond else None
+
+    if not year or not make or not model:
+        print_msg("[red]Year, make, and model are required.[/red]" if RICH_AVAILABLE else "Year, make, and model are required.")
+        return
+
+    car_desc = f"{year} {make} {model}"
+    if trim:
+        car_desc += f" {trim}"
+
+    # Show spinner while searching
+    try:
+        if RICH_AVAILABLE:
+            console.print()
+            with Progress(
+                SpinnerColumn(),
+                TextColumn("[progress.description]{task.description}"),
+                console=console,
+            ) as progress:
+                task = progress.add_task(f"[cyan]Searching KBB & Edmunds for {car_desc}...", total=None)
+                data = web_pricing.lookup_detailed(year, make, model, mileage, trim, condition)
+                progress.update(task, description="[green]Done!", completed=True)
+        else:
+            print(f"Looking up {car_desc}...")
+            data = web_pricing.lookup_detailed(year, make, model, mileage, trim, condition)
+    except RuntimeError as e:
+        print_msg(f"[red]{e}[/red]" if RICH_AVAILABLE else str(e))
+        return
+
+    if not data:
+        print_msg("[red]Could not retrieve pricing data. Try again.[/red]" if RICH_AVAILABLE else "Could not retrieve pricing data.")
+        return
+
+    _show_value_results(car_desc, mileage, condition, data)
+
+
+def _show_value_results(car_desc: str, mileage: Optional[int], condition: Optional[str], data: dict) -> None:
+    """Display the value lookup results."""
+    if not RICH_AVAILABLE:
+        _show_value_results_plain(car_desc, data)
+        return
+
+    # Header
+    header = f"[bold]{car_desc}[/bold]"
+    if mileage:
+        header += f" | {mileage:,} miles"
+    if condition:
+        header += f" | {condition.title()} condition"
+
+    console.print()
+    console.print(Panel(header, title="[bold blue]Vehicle Valuation[/bold blue]", border_style="blue"))
+
+    # Main values table
+    values_table = Table(title="Market Values", box=box.ROUNDED, show_lines=True)
+    values_table.add_column("Category", style="bold", min_width=16)
+    values_table.add_column("Value", justify="right", style="green", min_width=12)
+    values_table.add_column("Description", style="dim")
+
+    trade_in = data.get("trade_in", 0)
+    private_party = data.get("private_party", 0)
+    dealer_retail = data.get("dealer_retail", 0)
+
+    values_table.add_row(
+        "[cyan]Trade-In[/cyan]",
+        f"${trade_in:,}",
+        "What a dealer would offer you",
+    )
+    values_table.add_row(
+        "[yellow]Private Party[/yellow]",
+        f"${private_party:,}",
+        "Selling directly to a buyer",
+    )
+    values_table.add_row(
+        "[red]Dealer Retail[/red]",
+        f"${dealer_retail:,}",
+        "What a dealer would charge",
+    )
+
+    console.print(values_table)
+
+    # KBB and Edmunds ranges if available
+    kbb_range = data.get("kbb_range")
+    edmunds_range = data.get("edmunds_range")
+
+    if kbb_range or edmunds_range:
+        range_table = Table(title="Source Ranges", box=box.SIMPLE)
+        range_table.add_column("Source", style="bold")
+        range_table.add_column("Low", justify="right")
+        range_table.add_column("High", justify="right")
+
+        if kbb_range and kbb_range.get("low"):
+            range_table.add_row(
+                "KBB",
+                f"${kbb_range['low']:,}",
+                f"${kbb_range['high']:,}",
+            )
+        if edmunds_range and edmunds_range.get("low"):
+            range_table.add_row(
+                "Edmunds",
+                f"${edmunds_range['low']:,}",
+                f"${edmunds_range['high']:,}",
+            )
+
+        console.print(range_table)
+
+    # Flip analysis
+    if private_party > 0:
+        console.print()
+        flip_table = Table(title="Flip Quick Reference", box=box.SIMPLE)
+        flip_table.add_column("Buy At", justify="right", style="green")
+        flip_table.add_column("Sell At", justify="right", style="cyan")
+        flip_table.add_column("Est. Profit", justify="right")
+        flip_table.add_column("ROI", justify="right")
+
+        # Show profit at different buy prices
+        for buy_pct, label in [(0.65, "Steal"), (0.75, "Great"), (0.85, "Good")]:
+            buy_price = int(private_party * buy_pct)
+            sell_price = int(private_party * 0.95)
+            costs = 500  # est repair + detailing + fees
+            profit = sell_price - buy_price - costs
+            roi = round((profit / (buy_price + costs)) * 100, 1) if buy_price > 0 else 0
+
+            profit_color = "green" if profit > 0 else "red"
+            flip_table.add_row(
+                f"${buy_price:,} ({label})",
+                f"${sell_price:,}",
+                f"[{profit_color}]${profit:,}[/{profit_color}]",
+                f"[{profit_color}]{roi}%[/{profit_color}]",
+            )
+
+        console.print(flip_table)
+
+    # Market notes
+    notes = data.get("market_notes", "")
+    if notes:
+        console.print()
+        console.print(Panel(notes, title="[bold]Market Notes[/bold]", border_style="yellow"))
+
+    # Confidence & sources
+    confidence = data.get("confidence", "unknown")
+    sources = data.get("sources", [])
+    confidence_color = {"high": "green", "medium": "yellow", "low": "red"}.get(confidence, "dim")
+    source_str = ", ".join(sources) if sources else "web search"
+
+    console.print()
+    console.print(f"  [bold]Confidence:[/bold] [{confidence_color}]{confidence.upper()}[/{confidence_color}]")
+    console.print(f"  [bold]Sources:[/bold] [dim]{source_str}[/dim]")
+    console.print()
+
+
+def _show_value_results_plain(car_desc: str, data: dict) -> None:
+    """Plain text value results."""
+    print(f"\n=== {car_desc} ===\n")
+    print(f"  Trade-In:      ${data.get('trade_in', 0):,}")
+    print(f"  Private Party: ${data.get('private_party', 0):,}")
+    print(f"  Dealer Retail: ${data.get('dealer_retail', 0):,}")
+
+    notes = data.get("market_notes", "")
+    if notes:
+        print(f"\n  Notes: {notes}")
+
+    confidence = data.get("confidence", "unknown")
+    sources = data.get("sources", [])
+    print(f"\n  Confidence: {confidence.upper()}")
+    print(f"  Sources: {', '.join(sources) if sources else 'web search'}")
+
+
+def run_value_cli(args) -> None:
+    """Handle the `value` subcommand from argparse."""
+    # Parse "2019 Toyota Camry" style positional args
+    parts = args.car if args.car else []
+
+    year = args.year
+    make = args.make
+    model = args.model
+
+    # Try to parse from positional: "2019 Toyota Camry SE"
+    if parts and not year:
+        try:
+            year = int(parts[0])
+            if len(parts) >= 2:
+                make = parts[1]
+            if len(parts) >= 3:
+                model = parts[2]
+            if len(parts) >= 4:
+                args.trim = " ".join(parts[3:])
+        except ValueError:
+            # Not a year, treat as "Make Model" style
+            if len(parts) >= 1:
+                make = parts[0]
+            if len(parts) >= 2:
+                model = parts[1]
+            if len(parts) >= 3:
+                args.trim = " ".join(parts[2:])
+
+    interactive = not (year and make and model)
+
+    run_value_lookup(
+        year=year,
+        make=make,
+        model=model,
+        mileage=args.mileage,
+        trim=getattr(args, "trim", None),
+        condition=args.condition,
+        interactive=interactive,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -521,6 +799,9 @@ def main_loop() -> None:
                     scores = run_search(config)
                     if scores:
                         show_results(scores)
+
+            elif choice == "value":
+                run_value_lookup()
 
             elif choice == "configure":
                 config = get_search_config()
